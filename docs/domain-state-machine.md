@@ -14,6 +14,7 @@ stateDiagram-v2
   CONFIRMED --> CANCELLED: cancellation
   CANCELLED --> CONFIRMED: re-entry with a free seat
   CANCELLED --> WAITLISTED: re-entry without a free seat
+  CANCELLED --> REJECTED: re-entry, sold out, waitlist disabled
   REJECTED --> CONFIRMED: re-entry after capacity opened
   REJECTED --> WAITLISTED: re-entry after waitlist enabled
 ```
@@ -27,8 +28,19 @@ stateDiagram-v2
 | `WAITLISTED` | `CANCELLED` | `CancelRegistration` | none |
 | `CONFIRMED` | `CANCELLED` | `CancelRegistration` | `confirmed_count - 1`, then promotion |
 | `CANCELLED` / `REJECTED` | `CONFIRMED` / `WAITLISTED` | `RegisterForEvent` again | as above |
+| `CANCELLED` | `REJECTED` | `RegisterForEvent` again, sold out, waitlist disabled | none |
 
-A registration that is already `CONFIRMED` or `WAITLISTED` and receives a new registration request is **not** duplicated. The command returns the current state with transition `UNCHANGED`.
+A registration that is already `CONFIRMED` or `WAITLISTED` and receives a new registration request is **not** duplicated. The command returns the current state with transition `UNCHANGED`. A `REJECTED` registration that is rejected again is also `UNCHANGED`.
+
+The transition table is asserted verbatim by `packages/domain/test/lifecycle.test.ts`, so this document and the code cannot drift apart silently.
+
+### No idle seat while someone waits
+
+The property test in `packages/domain/test/invariants.property.test.ts` runs 500 seeded random sequences of `register`, `cancel` and `changeCapacity` and asserts after every command that:
+
+- `0 <= confirmed <= capacity` (I1),
+- the confirmed counter equals the number of `CONFIRMED` rows (I2 projection),
+- whenever the queue is not empty, the event is full (a seat is never left idle while someone waits, which is what I5 needs to be meaningful).
 
 ### Waitlist order
 
