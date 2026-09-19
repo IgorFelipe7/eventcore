@@ -1,0 +1,22 @@
+name: eventcore
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: eventcore
+      POSTGRES_PASSWORD: eventcore
+      POSTGRES_DB: eventcore
+    ports:
+      - "54329:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventcore -d eventcore"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  postgres-data:
