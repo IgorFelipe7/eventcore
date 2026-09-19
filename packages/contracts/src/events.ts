@@ -1,6 +1,13 @@
 import { EVENT_STATUSES, MAX_CAPACITY } from '@eventcore/domain'
 import { z } from 'zod'
-import { CursorQuerySchema, IdSchema, InventorySchema, SlugSchema, TimestampSchema, pageOf } from './common'
+import {
+  CursorQuerySchema,
+  IdSchema,
+  InventorySchema,
+  SlugSchema,
+  TimestampSchema,
+  pageOf,
+} from './common'
 
 export const EventStatusSchema = z.enum(EVENT_STATUSES)
 

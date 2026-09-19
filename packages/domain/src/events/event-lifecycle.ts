@@ -25,10 +25,14 @@ export const assertEventTransition = (
 ): void => {
   const roles = transitions[from][to]
   if (!roles) {
-    throw new DomainError('INVALID_EVENT_TRANSITION', `An event cannot move from ${from} to ${to}.`, {
-      from,
-      to,
-    })
+    throw new DomainError(
+      'INVALID_EVENT_TRANSITION',
+      `An event cannot move from ${from} to ${to}.`,
+      {
+        from,
+        to,
+      },
+    )
   }
   if (!roles.includes(role)) {
     throw new DomainError('INSUFFICIENT_ROLE', `Role ${role} cannot move an event to ${to}.`, {

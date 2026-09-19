@@ -11,7 +11,10 @@ export const PROBLEM_CATALOG = {
   SOLD_OUT: { status: 409, title: 'The event is sold out and has no waitlist.' },
   CAPACITY_BELOW_CONFIRMED: { status: 409, title: 'Capacity cannot go below confirmed seats.' },
   INVALID_EVENT_TRANSITION: { status: 409, title: 'The event cannot move to that status.' },
-  INVALID_REGISTRATION_TRANSITION: { status: 409, title: 'The registration cannot change that way.' },
+  INVALID_REGISTRATION_TRANSITION: {
+    status: 409,
+    title: 'The registration cannot change that way.',
+  },
   SLUG_TAKEN: { status: 409, title: 'That slug is already in use.' },
   IDEMPOTENCY_KEY_REUSED: {
     status: 422,
@@ -42,9 +45,7 @@ export const ProblemDetailsSchema = z
     code: z.enum(PROBLEM_CODES),
     requestId: z.string(),
     retryable: z.boolean(),
-    errors: z
-      .array(z.object({ path: z.string(), message: z.string() }))
-      .optional(),
+    errors: z.array(z.object({ path: z.string(), message: z.string() })).optional(),
   })
   .meta({ id: 'ProblemDetails' })
 

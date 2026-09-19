@@ -15,7 +15,11 @@ describe('problem catalog', () => {
 
   it('keeps client errors and server errors in their HTTP families', () => {
     for (const [code, { status }] of Object.entries(PROBLEM_CATALOG)) {
-      const serverSide = ['INTERNAL_ERROR', 'INVARIANT_VIOLATION', 'TEMPORARY_UNAVAILABLE'].includes(code)
+      const serverSide = [
+        'INTERNAL_ERROR',
+        'INVARIANT_VIOLATION',
+        'TEMPORARY_UNAVAILABLE',
+      ].includes(code)
       expect(status >= 500).toBe(serverSide)
     }
   })
@@ -28,7 +32,9 @@ describe('request schemas', () => {
   })
 
   it('accepts random UUIDs as idempotency keys and refuses free-form text', () => {
-    expect(IdempotencyKeySchema.safeParse('6f1c2e8a-6b3f-4b5e-9d84-6ad1f1b0e7a1').success).toBe(true)
+    expect(IdempotencyKeySchema.safeParse('6f1c2e8a-6b3f-4b5e-9d84-6ad1f1b0e7a1').success).toBe(
+      true,
+    )
     expect(IdempotencyKeySchema.safeParse('retry please').success).toBe(false)
   })
 

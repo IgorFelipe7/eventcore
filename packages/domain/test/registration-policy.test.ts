@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { DomainError, decideCancellation, decideRegistration, type RegistrationContext } from '../src'
+import {
+  DomainError,
+  decideCancellation,
+  decideRegistration,
+  type RegistrationContext,
+} from '../src'
 
 const now = new Date('2026-11-01T12:00:00Z')
 
@@ -27,7 +32,9 @@ describe('decideRegistration', () => {
   })
 
   it('waitlists when the event is sold out', () => {
-    const decision = decideRegistration(context({ inventory: { capacity: 10, confirmedCount: 10 } }))
+    const decision = decideRegistration(
+      context({ inventory: { capacity: 10, confirmedCount: 10 } }),
+    )
     expect(decision.kind).toBe('WAITLIST')
   })
 
@@ -67,9 +74,9 @@ describe('decideRegistration', () => {
 
   it('lets a cancelled participant re-enter through the same rules as everyone else', () => {
     expect(decideRegistration(context({ currentStatus: 'CANCELLED' })).kind).toBe('CONFIRM')
-    expect(
-      decideRegistration(context({ currentStatus: 'CANCELLED', queueLength: 1 })).kind,
-    ).toBe('WAITLIST')
+    expect(decideRegistration(context({ currentStatus: 'CANCELLED', queueLength: 1 })).kind).toBe(
+      'WAITLIST',
+    )
   })
 
   it.each([

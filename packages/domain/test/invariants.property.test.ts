@@ -98,8 +98,14 @@ const apply = (model: Model, command: Command): void => {
 }
 
 const commandArbitrary: fc.Arbitrary<Command> = fc.oneof(
-  { weight: 6, arbitrary: fc.record({ type: fc.constant('register' as const), participant: fc.nat(24) }) },
-  { weight: 3, arbitrary: fc.record({ type: fc.constant('cancel' as const), participant: fc.nat(24) }) },
+  {
+    weight: 6,
+    arbitrary: fc.record({ type: fc.constant('register' as const), participant: fc.nat(24) }),
+  },
+  {
+    weight: 3,
+    arbitrary: fc.record({ type: fc.constant('cancel' as const), participant: fc.nat(24) }),
+  },
   {
     weight: 1,
     arbitrary: fc.record({ type: fc.constant('changeCapacity' as const), capacity: fc.nat(12) }),
@@ -109,25 +115,32 @@ const commandArbitrary: fc.Arbitrary<Command> = fc.oneof(
 describe('domain invariants under random command sequences', () => {
   it('holds I1, I2 and I5 after every command', () => {
     fc.assert(
-      fc.property(fc.nat(10), fc.array(commandArbitrary, { maxLength: 200 }), (capacity, commands) => {
-        const model: Model = { capacity, confirmedCount: 0, clock: 0, registrations: new Map() }
+      fc.property(
+        fc.nat(10),
+        fc.array(commandArbitrary, { maxLength: 200 }),
+        (capacity, commands) => {
+          const model: Model = { capacity, confirmedCount: 0, clock: 0, registrations: new Map() }
 
-        for (const command of commands) {
-          apply(model, command)
+          for (const command of commands) {
+            apply(model, command)
 
-          assertInventoryInvariant({ capacity: model.capacity, confirmedCount: model.confirmedCount })
+            assertInventoryInvariant({
+              capacity: model.capacity,
+              confirmedCount: model.confirmedCount,
+            })
 
-          const confirmedRows = [...model.registrations.values()].filter(
-            (registration) => registration.status === 'CONFIRMED',
-          ).length
-          expect(confirmedRows).toBe(model.confirmedCount)
+            const confirmedRows = [...model.registrations.values()].filter(
+              (registration) => registration.status === 'CONFIRMED',
+            ).length
+            expect(confirmedRows).toBe(model.confirmedCount)
 
-          const queue = queueOf(model)
-          if (queue.length > 0) {
-            expect(model.confirmedCount).toBe(model.capacity)
+            const queue = queueOf(model)
+            if (queue.length > 0) {
+              expect(model.confirmedCount).toBe(model.capacity)
+            }
           }
-        }
-      }),
+        },
+      ),
       { seed: 20261017, numRuns: 500 },
     )
   })

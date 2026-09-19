@@ -1,6 +1,13 @@
 import { REGISTRATION_STATUSES } from '@eventcore/domain'
 import { z } from 'zod'
-import { CursorQuerySchema, IdSchema, InventorySchema, SlugSchema, TimestampSchema, pageOf } from './common'
+import {
+  CursorQuerySchema,
+  IdSchema,
+  InventorySchema,
+  SlugSchema,
+  TimestampSchema,
+  pageOf,
+} from './common'
 
 export const RegistrationStatusSchema = z.enum(REGISTRATION_STATUSES)
 
