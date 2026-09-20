@@ -22,3 +22,4 @@ export {
   isUniqueViolation,
   pgErrorCode,
 } from './errors'
+export { seedDemo, type SeedSummary } from './seed'
