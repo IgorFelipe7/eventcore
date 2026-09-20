@@ -1,0 +1,16 @@
+{
+  "name": "@eventcore/tests",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@eventcore/contracts": "workspace:*",
+    "@eventcore/db": "workspace:*",
+    "@eventcore/domain": "workspace:*",
+    "drizzle-orm": "^0.45.4"
+  }
+}
