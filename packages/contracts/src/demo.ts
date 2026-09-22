@@ -50,5 +50,3 @@ export const DEMO_PERSONAS = [
 ] as const satisfies readonly DemoPersona[]
 
 export type DemoPersonaId = (typeof DEMO_PERSONAS)[number]['externalAuthId']
-
-export const DEMO_SUBJECT_PREFIX = 'demo|'
