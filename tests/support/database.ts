@@ -24,11 +24,11 @@ const unique = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(sequ
 
 export const createUser = async (handle: DatabaseHandle, name = unique('user')) => {
   const { rows } = await handle.db.execute<{ id: string }>(sql`
-    INSERT INTO users (external_auth_id, display_name) VALUES (${`test|${name}`}, ${name}) RETURNING id
+    INSERT INTO users (external_auth_id, display_name) VALUES (${`demo|test-${name}`}, ${name}) RETURNING id
   `)
   const [row] = rows
   if (!row) throw new Error('User fixture insert failed.')
-  return { id: row.id, subject: `test|${name}`, displayName: name }
+  return { id: row.id, subject: `demo|test-${name}`, displayName: name }
 }
 
 export const createUsers = (handle: DatabaseHandle, count: number) =>

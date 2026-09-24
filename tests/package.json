@@ -8,6 +8,8 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@eventcore/api": "workspace:*",
+    "@eventcore/auth": "workspace:*",
     "@eventcore/contracts": "workspace:*",
     "@eventcore/db": "workspace:*",
     "@eventcore/domain": "workspace:*",
