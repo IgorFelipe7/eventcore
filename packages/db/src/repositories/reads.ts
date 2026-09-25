@@ -1,6 +1,7 @@
 import { type RegistrationOrigin, type RegistrationStatus } from '@eventcore/domain'
 import { sql } from 'drizzle-orm'
 import { type Executor } from '../client'
+import { type PgTimestamp, asDate } from '../values'
 
 export interface ParticipantRegistration {
   readonly registrationId: string
@@ -40,11 +41,11 @@ export const listParticipantRegistrations = async (
     id: string
     status: RegistrationStatus
     position: number | null
-    updated_at: Date
+    updated_at: PgTimestamp
     event_id: string
     event_slug: string
     event_name: string
-    starts_at: Date
+    starts_at: PgTimestamp
     venue: string
     organization_slug: string
     organization_name: string
@@ -75,17 +76,17 @@ export const listParticipantRegistrations = async (
     registrationId: row.id,
     status: row.status,
     waitlistPosition: row.position,
-    updatedAt: row.updated_at,
+    updatedAt: asDate(row.updated_at),
     event: {
       id: row.event_id,
       slug: row.event_slug,
       name: row.event_name,
-      startsAt: row.starts_at,
+      startsAt: asDate(row.starts_at),
       venue: row.venue,
       organizationSlug: row.organization_slug,
       organizationName: row.organization_name,
     },
-    history: row.history.map((entry) => ({ ...entry, occurredAt: new Date(entry.occurredAt) })),
+    history: row.history.map((entry) => ({ ...entry, occurredAt: asDate(entry.occurredAt) })),
   }))
 }
 
@@ -118,8 +119,8 @@ export const listEventRegistrations = async (
     display_name: string
     status: RegistrationStatus
     position: number | null
-    created_at: Date
-    updated_at: Date
+    created_at: PgTimestamp
+    updated_at: PgTimestamp
   }>(sql`
     SELECT r.id, r.user_id, u.display_name, r.status, ${POSITION} AS position, r.created_at, r.updated_at
     FROM registrations r
@@ -134,8 +135,8 @@ export const listEventRegistrations = async (
     participantName: row.display_name,
     status: row.status,
     waitlistPosition: row.position,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    createdAt: asDate(row.created_at),
+    updatedAt: asDate(row.updated_at),
   }))
 }
 

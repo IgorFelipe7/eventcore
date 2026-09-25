@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { type Executor } from '../client'
+import { type PgTimestamp, asDate } from '../values'
 
 export interface AuditInput {
   readonly organizationId: string
@@ -61,7 +62,7 @@ export const listAudit = async (
     safe_before: Record<string, unknown> | null
     safe_after: Record<string, unknown> | null
     request_id: string
-    created_at: Date
+    created_at: PgTimestamp
   }>(sql`
     SELECT id, action, resource_type, resource_id, actor_id, safe_before, safe_after, request_id, created_at
     FROM audit_log
@@ -79,6 +80,6 @@ export const listAudit = async (
     safeBefore: row.safe_before,
     safeAfter: row.safe_after,
     requestId: row.request_id,
-    createdAt: row.created_at,
+    createdAt: asDate(row.created_at),
   }))
 }

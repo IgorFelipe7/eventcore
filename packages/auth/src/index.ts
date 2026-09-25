@@ -34,14 +34,18 @@ export type TokenVerifier = (token: string) => Promise<VerifiedIdentity>
 
 const encodeSecret = (secret: string): Uint8Array => {
   if (secret.length < MIN_DEMO_SECRET_LENGTH) {
-    throw new Error(`The demo signing secret must have at least ${MIN_DEMO_SECRET_LENGTH} characters.`)
+    throw new Error(
+      `The demo signing secret must have at least ${MIN_DEMO_SECRET_LENGTH} characters.`,
+    )
   }
   return new TextEncoder().encode(secret)
 }
 
 const displayNameOf = (payload: JWTPayload): string => {
   const name = payload['name']
-  return typeof name === 'string' && name.trim().length > 0 ? name.trim().slice(0, 80) : 'Participant'
+  return typeof name === 'string' && name.trim().length > 0
+    ? name.trim().slice(0, 80)
+    : 'Participant'
 }
 
 export const createTokenVerifier = (config: TokenVerifierConfig): TokenVerifier => {

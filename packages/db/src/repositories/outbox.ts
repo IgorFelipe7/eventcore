@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import { type Executor } from '../client'
+import { type PgTimestamp, asDate } from '../values'
 
 export interface OutboxInput {
   readonly aggregateType: string
@@ -45,7 +46,7 @@ export const claimPendingOutbox = async (
     schema_version: number
     payload: Record<string, unknown>
     attempts: number
-    created_at: Date
+    created_at: PgTimestamp
   }>(sql`
     SELECT id, aggregate_type, aggregate_id, event_type, schema_version, payload, attempts, created_at
     FROM outbox_events
@@ -64,7 +65,7 @@ export const claimPendingOutbox = async (
     schemaVersion: row.schema_version,
     payload: row.payload,
     attempts: row.attempts,
-    createdAt: row.created_at,
+    createdAt: asDate(row.created_at),
   }))
 }
 

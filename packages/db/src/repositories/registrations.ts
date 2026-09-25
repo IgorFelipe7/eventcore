@@ -1,6 +1,7 @@
 import { type RegistrationOrigin, type RegistrationStatus } from '@eventcore/domain'
 import { sql } from 'drizzle-orm'
 import { type Executor } from '../client'
+import { type PgTimestamp, asNullableDate } from '../values'
 
 export interface RegistrationRecord {
   readonly id: string
@@ -17,7 +18,7 @@ interface RegistrationRow extends Record<string, unknown> {
   user_id: string
   organization_id: string
   status: RegistrationStatus
-  queued_at: Date | null
+  queued_at: PgTimestamp | null
 }
 
 const toRecord = (row: RegistrationRow): RegistrationRecord => ({
@@ -26,7 +27,7 @@ const toRecord = (row: RegistrationRow): RegistrationRecord => ({
   userId: row.user_id,
   organizationId: row.organization_id,
   status: row.status,
-  queuedAt: row.queued_at,
+  queuedAt: asNullableDate(row.queued_at),
 })
 
 export const findRegistrationForUpdate = async (

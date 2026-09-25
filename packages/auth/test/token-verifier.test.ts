@@ -47,7 +47,9 @@ describe('token verifier', () => {
       .setIssuedAt()
       .setExpirationTime('5m')
       .sign(new TextEncoder().encode(config.demoSecret))
-    await expect(verify(forged)).rejects.toThrowError('Demo tokens may only represent demo personas.')
+    await expect(verify(forged)).rejects.toThrowError(
+      'Demo tokens may only represent demo personas.',
+    )
   })
 
   it('rejects HS256 tokens entirely when no demo secret is configured', async () => {

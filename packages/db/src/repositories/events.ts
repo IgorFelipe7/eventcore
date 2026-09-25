@@ -1,6 +1,7 @@
 import { type EventStatus } from '@eventcore/domain'
 import { type SQL, sql } from 'drizzle-orm'
 import { type Executor } from '../client'
+import { type PgTimestamp, asDate } from '../values'
 
 export interface EventView {
   readonly id: string
@@ -28,18 +29,18 @@ interface EventViewRow extends Record<string, unknown> {
   description: string
   venue: string
   status: EventStatus
-  starts_at: Date
-  enrollment_opens_at: Date
-  enrollment_closes_at: Date
+  starts_at: PgTimestamp
+  enrollment_opens_at: PgTimestamp
+  enrollment_closes_at: PgTimestamp
   waitlist_enabled: boolean
-  created_at: Date
+  created_at: PgTimestamp
   organization_id: string
   organization_slug: string
   organization_name: string
   capacity: number
   confirmed_count: number
   waitlisted: number
-  observed_at: Date
+  observed_at: PgTimestamp
 }
 
 const toView = (row: EventViewRow): EventView => ({
@@ -49,11 +50,11 @@ const toView = (row: EventViewRow): EventView => ({
   description: row.description,
   venue: row.venue,
   status: row.status,
-  startsAt: row.starts_at,
-  enrollmentOpensAt: row.enrollment_opens_at,
-  enrollmentClosesAt: row.enrollment_closes_at,
+  startsAt: asDate(row.starts_at),
+  enrollmentOpensAt: asDate(row.enrollment_opens_at),
+  enrollmentClosesAt: asDate(row.enrollment_closes_at),
   waitlistEnabled: row.waitlist_enabled,
-  createdAt: row.created_at,
+  createdAt: asDate(row.created_at),
   organization: {
     id: row.organization_id,
     slug: row.organization_slug,
@@ -62,7 +63,7 @@ const toView = (row: EventViewRow): EventView => ({
   capacity: row.capacity,
   confirmedCount: row.confirmed_count,
   waitlisted: row.waitlisted,
-  observedAt: row.observed_at,
+  observedAt: asDate(row.observed_at),
 })
 
 const selectEventViews = (where: SQL, tail: SQL = sql``) => sql`
@@ -167,9 +168,9 @@ export const readEventRules = async (
     id: string
     organization_id: string
     status: EventStatus
-    starts_at: Date
-    enrollment_opens_at: Date
-    enrollment_closes_at: Date
+    starts_at: PgTimestamp
+    enrollment_opens_at: PgTimestamp
+    enrollment_closes_at: PgTimestamp
     waitlist_enabled: boolean
   }>(sql`
     SELECT id, organization_id, status, starts_at, enrollment_opens_at, enrollment_closes_at, waitlist_enabled
@@ -182,9 +183,9 @@ export const readEventRules = async (
         id: row.id,
         organizationId: row.organization_id,
         status: row.status,
-        startsAt: row.starts_at,
-        enrollmentOpensAt: row.enrollment_opens_at,
-        enrollmentClosesAt: row.enrollment_closes_at,
+        startsAt: asDate(row.starts_at),
+        enrollmentOpensAt: asDate(row.enrollment_opens_at),
+        enrollmentClosesAt: asDate(row.enrollment_closes_at),
         waitlistEnabled: row.waitlist_enabled,
       }
     : null
