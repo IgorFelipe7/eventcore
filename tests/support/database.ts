@@ -17,6 +17,7 @@ export interface EventFixture {
   readonly organizationSlug: string
   readonly eventId: string
   readonly adminId: string
+  readonly admin: TestUser
 }
 
 let sequence = 0
@@ -77,7 +78,7 @@ export const createEventFixture = async (
   await handle.db.execute(sql`
     INSERT INTO event_inventory (event_id, capacity) VALUES (${eventId}, ${options.capacity})
   `)
-  return { organizationId, organizationSlug, eventId, adminId: admin.id }
+  return { organizationId, organizationSlug, eventId, adminId: admin.id, admin }
 }
 
 export const integrityOf = async (handle: DatabaseHandle, eventId: string) => {
