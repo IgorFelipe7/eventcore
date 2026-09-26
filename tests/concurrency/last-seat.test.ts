@@ -28,7 +28,6 @@ describe('registration under concurrent pressure', () => {
     for (let round = 0; round < 30; round += 1) {
       const fixture = await createEventFixture(database, { capacity: 1 })
       const [first, second] = await createUsers(database, 2)
-      if (!first || !second) throw new Error('fixture users missing')
 
       const results = await Promise.all([
         register(api, first, fixture.eventId),
@@ -95,7 +94,6 @@ describe('registration under concurrent pressure', () => {
   it('never creates a second registration for the same participant, even when requests overlap', async () => {
     const fixture = await createEventFixture(database, { capacity: 3 })
     const [participant] = await createUsers(database, 1)
-    if (!participant) throw new Error('fixture user missing')
 
     const results = await Promise.all(
       Array.from({ length: 8 }, () => register(api, participant, fixture.eventId)),
@@ -113,7 +111,6 @@ describe('registration under concurrent pressure', () => {
 
   it('hides draft events and refuses closed ones', async () => {
     const [participant] = await createUsers(database, 1)
-    if (!participant) throw new Error('fixture user missing')
     const draft = await createEventFixture(database, { capacity: 3, status: 'DRAFT' })
     const closed = await createEventFixture(database, { capacity: 3, status: 'CLOSED' })
 

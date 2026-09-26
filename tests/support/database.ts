@@ -22,7 +22,10 @@ export interface EventFixture {
 let sequence = 0
 const unique = (prefix: string) => `${prefix}-${Date.now().toString(36)}-${(sequence += 1)}`
 
-export const createUser = async (handle: DatabaseHandle, name = unique('user')) => {
+export const createUser = async (
+  handle: DatabaseHandle,
+  name = unique('user'),
+): Promise<TestUser> => {
   const { rows } = await handle.db.execute<{ id: string }>(sql`
     INSERT INTO users (external_auth_id, display_name) VALUES (${`demo|test-${name}`}, ${name}) RETURNING id
   `)
@@ -31,8 +34,23 @@ export const createUser = async (handle: DatabaseHandle, name = unique('user')) 
   return { id: row.id, subject: `demo|test-${name}`, displayName: name }
 }
 
-export const createUsers = (handle: DatabaseHandle, count: number) =>
-  Promise.all(Array.from({ length: count }, (_, index) => createUser(handle, unique(`p${index}`))))
+export interface TestUser {
+  readonly id: string
+  readonly subject: string
+  readonly displayName: string
+}
+
+type Tuple<T, N extends number, R extends T[] = []> = R['length'] extends N
+  ? R
+  : Tuple<T, N, [T, ...R]>
+
+export const createUsers = async <N extends number>(
+  handle: DatabaseHandle,
+  count: N,
+): Promise<Tuple<TestUser, N>> =>
+  (await Promise.all(
+    Array.from({ length: count }, (_, index) => createUser(handle, unique(`p${index}`))),
+  )) as Tuple<TestUser, N>
 
 export const createEventFixture = async (
   handle: DatabaseHandle,
