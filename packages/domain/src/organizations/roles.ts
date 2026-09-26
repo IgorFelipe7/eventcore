@@ -4,6 +4,7 @@ export const ORGANIZATION_ROLES = ['ADMIN', 'ORGANIZER'] as const
 export type OrganizationRole = (typeof ORGANIZATION_ROLES)[number]
 
 const grants = {
+  'event:read': ['ADMIN', 'ORGANIZER'],
   'event:create': ['ADMIN', 'ORGANIZER'],
   'event:update': ['ADMIN', 'ORGANIZER'],
   'event:change-capacity': ['ADMIN'],

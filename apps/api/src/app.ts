@@ -16,6 +16,7 @@ import { generateRequestId } from './http/request-id'
 import { publicEventRoutes } from './modules/events/public-routes'
 import { healthRoutes } from './modules/health/routes'
 import { identityRoutes } from './modules/identity/routes'
+import { organizationRoutes } from './modules/organizations/routes'
 import { registrationRoutes } from './modules/registrations/routes'
 
 export interface AppDependencies {
@@ -68,6 +69,7 @@ export const buildApp = async (dependencies: AppDependencies) => {
   await app.register(healthRoutes, { db })
   await app.register(identityRoutes, { db })
   await app.register(publicEventRoutes, { db })
+  await app.register(organizationRoutes, { db })
   await app.register(registrationRoutes, {
     db,
     clock,

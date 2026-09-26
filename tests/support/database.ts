@@ -85,3 +85,14 @@ export const integrityOf = async (handle: DatabaseHandle, eventId: string) => {
   if (!row) throw new Error(`No inventory for ${eventId}.`)
   return row
 }
+
+export const addMember = async (
+  handle: DatabaseHandle,
+  organizationId: string,
+  userId: string,
+  role: 'ADMIN' | 'ORGANIZER',
+) => {
+  await handle.db.execute(sql`
+    INSERT INTO organization_members (organization_id, user_id, role) VALUES (${organizationId}, ${userId}, ${role})
+  `)
+}
