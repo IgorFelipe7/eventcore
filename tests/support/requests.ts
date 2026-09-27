@@ -38,3 +38,20 @@ export const cancel = async (
   })
   return { status: response.statusCode, body: response.json(), headers: response.headers }
 }
+
+export const changeCapacity = async (
+  api: App,
+  actor: Participant,
+  organizationId: string,
+  eventId: string,
+  capacity: number,
+  options: { key?: string } = {},
+) => {
+  const response = await api.inject({
+    method: 'POST',
+    url: `/v1/organizations/${organizationId}/events/${eventId}/capacity`,
+    headers: { ...(await bearer(actor)), 'idempotency-key': options.key ?? randomUUID() },
+    payload: { capacity },
+  })
+  return { status: response.statusCode, body: response.json(), headers: response.headers }
+}

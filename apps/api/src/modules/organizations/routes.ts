@@ -1,4 +1,6 @@
 import {
+  ChangeCapacityBodySchema,
+  ChangeCapacityResponseSchema,
   CreateEventBodySchema,
   CreateOrganizationBodySchema,
   EventRegistrationListSchema,
@@ -23,10 +25,17 @@ import { type Permission } from '@eventcore/domain'
 import { type FastifyRequest } from 'fastify'
 import { type FastifyPluginAsyncZod } from 'fastify-type-provider-zod'
 import { z } from 'zod'
+import {
+  executeIdempotent,
+  fingerprintRequest,
+  requireIdempotencyKey,
+  sendCommandResponse,
+} from '../../application/idempotency'
 import { requireMembership } from '../../application/tenancy'
 import { requireActor } from '../../auth/authenticate'
 import { TimeIdCursorSchema, decodeCursor, encodeCursor, pageWindow } from '../../http/cursor'
-import { ProblemError } from '../../http/problem'
+import { ProblemError, problemContext } from '../../http/problem'
+import { CHANGE_CAPACITY_ACTION, changeCapacity } from '../events/change-capacity'
 import {
   type OrganizerContext,
   createEvent,
@@ -41,7 +50,11 @@ const OrganizationEventParams = OrganizationParams.extend({ eventId: IdSchema })
 const security = [{ bearer: [] }]
 const problems = { '4xx': ProblemDetailsSchema }
 
-export const organizationRoutes: FastifyPluginAsyncZod<{ db: Database }> = async (app, { db }) => {
+export const organizationRoutes: FastifyPluginAsyncZod<{
+  db: Database
+  clock: () => Date
+  idempotencyTtlSeconds: number
+}> = async (app, { db, clock, idempotencyTtlSeconds }) => {
   const organizerContext = async (
     request: FastifyRequest,
     organizationId: string,
@@ -172,6 +185,39 @@ export const organizationRoutes: FastifyPluginAsyncZod<{ db: Database }> = async
       const { organizationId, eventId } = request.params
       const context = await organizerContext(request, organizationId, 'event:update')
       return transitionEvent(db, context, eventId, request.body.status)
+    },
+  )
+
+  app.post(
+    '/v1/organizations/:organizationId/events/:eventId/capacity',
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        tags: ['organizations'],
+        summary: 'Change capacity under the inventory lock, promoting from the waitlist',
+        description:
+          'Idempotent. Refuses to go below confirmed seats. Increasing capacity promotes the head of the queue in the same transaction, in batches of up to 500.',
+        security,
+        headers: z.object({ 'idempotency-key': z.string().optional() }),
+        params: OrganizationEventParams,
+        body: ChangeCapacityBodySchema,
+        response: { 200: ChangeCapacityResponseSchema, ...problems },
+      },
+    },
+    async (request, reply) => {
+      const { organizationId, eventId } = request.params
+      const { actor } = await organizerContext(request, organizationId, 'event:change-capacity')
+      const key = requireIdempotencyKey(request)
+      const context = { actor, organizationId, ...problemContext(request), now: clock() }
+
+      const response = await executeIdempotent(
+        db,
+        { actorId: actor.userId, action: CHANGE_CAPACITY_ACTION, scopeId: eventId, key },
+        fingerprintRequest({ action: CHANGE_CAPACITY_ACTION, scopeId: eventId, body: request.body }),
+        idempotencyTtlSeconds,
+        (tx) => changeCapacity(tx, context, eventId, request.body.capacity),
+      )
+      return sendCommandResponse(reply, response)
     },
   )
 

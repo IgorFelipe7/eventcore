@@ -69,7 +69,11 @@ export const buildApp = async (dependencies: AppDependencies) => {
   await app.register(healthRoutes, { db })
   await app.register(identityRoutes, { db })
   await app.register(publicEventRoutes, { db })
-  await app.register(organizationRoutes, { db })
+  await app.register(organizationRoutes, {
+    db,
+    clock,
+    idempotencyTtlSeconds: config.idempotencyTtlSeconds,
+  })
   await app.register(registrationRoutes, {
     db,
     clock,
