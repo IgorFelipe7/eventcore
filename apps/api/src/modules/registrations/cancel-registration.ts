@@ -11,6 +11,7 @@ import {
 } from '@eventcore/db'
 import { decideCancellation, hasPermission } from '@eventcore/domain'
 import { type CommandContext, type CommandResponse, ok } from '../../application/command'
+import { recordRegistrationChange } from '../../application/trail'
 import { ProblemError } from '../../http/problem'
 import { presentInventory } from '../events/presenters'
 import { promoteFromWaitlist } from './promote-waitlist'
@@ -44,17 +45,27 @@ export const cancelRegistration = async (
   let promotedRegistrationId: string | null = null
 
   if (decision.kind !== 'UNCHANGED') {
+    const reason =
+      registration.userId === context.actor.userId ? 'participant.cancelled' : 'organizer.cancelled'
     await updateRegistrationStatus(tx, registration.id, 'CANCELLED')
     await appendRegistrationEvent(tx, {
       registrationId: registration.id,
       from: registration.status,
       to: 'CANCELLED',
       actorId: context.actor.userId,
-      reason:
-        registration.userId === context.actor.userId
-          ? 'participant.cancelled'
-          : 'organizer.cancelled',
+      reason,
       correlationId: context.requestId,
+    })
+    await recordRegistrationChange(tx, {
+      organizationId: registration.organizationId,
+      eventId: registration.eventId,
+      registrationId: registration.id,
+      participantId: registration.userId,
+      actorId: context.actor.userId,
+      from: registration.status,
+      to: 'CANCELLED',
+      reason,
+      requestId: context.requestId,
     })
   }
 
@@ -63,7 +74,12 @@ export const cancelRegistration = async (
   if (decision.kind === 'RELEASE_SEAT') {
     confirmedCount = (await adjustConfirmedCount(tx, registration.eventId, -1)).confirmedCount
     if (decision.promoteHeadOfQueue) {
-      const promoted = await promoteFromWaitlist(tx, registration.eventId, 1, context.requestId)
+      const promoted = await promoteFromWaitlist(
+        tx,
+        { organizationId: registration.organizationId, eventId: registration.eventId },
+        1,
+        context.requestId,
+      )
       promotedRegistrationId = promoted.promotions[0]?.registrationId ?? null
       confirmedCount = promoted.confirmedCount ?? confirmedCount
       waitlisted -= promoted.promotions.length

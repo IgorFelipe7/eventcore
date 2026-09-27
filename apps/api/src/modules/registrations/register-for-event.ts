@@ -13,6 +13,7 @@ import {
 } from '@eventcore/db'
 import { decideRegistration } from '@eventcore/domain'
 import { type CommandContext, type CommandResponse, ok, rejected } from '../../application/command'
+import { recordRegistrationChange } from '../../application/trail'
 import { ProblemError } from '../../http/problem'
 import { presentInventory } from '../events/presenters'
 
@@ -42,6 +43,7 @@ export const registerForEvent = async (
 
   let registrationId = existing?.id
   let confirmedCount = inventory.confirmedCount
+  let position: number | null = null
 
   if (decision.kind !== 'UNCHANGED') {
     if (existing) {
@@ -59,14 +61,30 @@ export const registerForEvent = async (
       confirmedCount = (await adjustConfirmedCount(tx, eventId, 1)).confirmedCount
     }
 
+    const reason = decision.from ? 'participant.reentered' : 'participant.registered'
     await appendRegistrationEvent(tx, {
       registrationId,
       from: decision.from,
       to: decision.status,
       actorId: context.actor.userId,
-      reason: decision.from ? 'participant.reentered' : 'participant.registered',
+      reason,
       correlationId: context.requestId,
     })
+    position = decision.kind === 'WAITLIST' ? await waitlistPosition(tx, registrationId) : null
+    await recordRegistrationChange(tx, {
+      organizationId: event.organizationId,
+      eventId,
+      registrationId,
+      participantId: context.actor.userId,
+      actorId: context.actor.userId,
+      from: decision.from,
+      to: decision.status,
+      reason,
+      requestId: context.requestId,
+      waitlistPosition: position,
+    })
+  } else if (decision.status === 'WAITLISTED' && registrationId) {
+    position = await waitlistPosition(tx, registrationId)
   }
 
   if (!registrationId) throw new Error('Registration id missing after decision.')
@@ -89,8 +107,7 @@ export const registerForEvent = async (
     status: decision.status,
     transition:
       decision.kind === 'UNCHANGED' ? 'UNCHANGED' : decision.from ? 'REENTERED' : 'CREATED',
-    waitlistPosition:
-      decision.status === 'WAITLISTED' ? await waitlistPosition(tx, registrationId) : null,
+    waitlistPosition: position,
     inventory: presentInventory({ capacity: inventory.capacity, confirmedCount, waitlisted }),
     requestId: context.requestId,
   }

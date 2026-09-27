@@ -18,6 +18,7 @@ import {
   assertEventTransition,
   assertValidCapacity,
 } from '@eventcore/domain'
+import { recordEventChange } from '../../application/trail'
 import { type Actor } from '../../auth/authenticate'
 import { ProblemError } from '../../http/problem'
 import { presentOrganizerEvent } from './presenters'
@@ -35,7 +36,11 @@ const readOrganizerEvent = async (db: Database, organizationId: string, eventId:
   return presentOrganizerEvent(event)
 }
 
-export const createEvent = async (db: Database, context: OrganizerContext, body: CreateEventBody) => {
+export const createEvent = async (
+  db: Database,
+  context: OrganizerContext,
+  body: CreateEventBody,
+) => {
   const schedule = {
     startsAt: new Date(body.startsAt),
     enrollmentOpensAt: new Date(body.enrollmentOpensAt),
@@ -56,17 +61,22 @@ export const createEvent = async (db: Database, context: OrganizerContext, body:
     })
     if (!id) throw new ProblemError('SLUG_TAKEN', `The slug "${body.slug}" is already used here.`)
     await insertInventory(tx, id, body.capacity)
+    await recordEventChange(tx, {
+      organizationId: context.organizationId,
+      eventId: id,
+      actorId: context.actor.userId,
+      action: 'event.created',
+      before: null,
+      after: { slug: body.slug, capacity: body.capacity, waitlistEnabled: body.waitlistEnabled },
+      requestId: context.requestId,
+    })
     return id
   })
 
   return readOrganizerEvent(db, context.organizationId, eventId)
 }
 
-const lockOrganizationEvent = async (
-  tx: Transaction,
-  organizationId: string,
-  eventId: string,
-) => {
+const lockOrganizationEvent = async (tx: Transaction, organizationId: string, eventId: string) => {
   const inventory = await lockInventory(tx, eventId)
   const rules = inventory ? await readEventRules(tx, eventId) : null
   if (!inventory || !rules || rules.organizationId !== organizationId) {
@@ -98,6 +108,24 @@ export const updateEvent = async (
       enrollmentClosesAt: patch.enrollmentClosesAt ?? rules.enrollmentClosesAt,
     })
     await updateEventFields(tx, eventId, patch)
+    await recordEventChange(tx, {
+      organizationId: context.organizationId,
+      eventId,
+      actorId: context.actor.userId,
+      action: 'event.updated',
+      before: {
+        startsAt: rules.startsAt.toISOString(),
+        enrollmentOpensAt: rules.enrollmentOpensAt.toISOString(),
+        enrollmentClosesAt: rules.enrollmentClosesAt.toISOString(),
+        waitlistEnabled: rules.waitlistEnabled,
+      },
+      after: Object.fromEntries(
+        Object.entries(patch)
+          .filter(([, value]) => value !== undefined)
+          .map(([field, value]) => [field, value instanceof Date ? value.toISOString() : value]),
+      ),
+      requestId: context.requestId,
+    })
   })
   return readOrganizerEvent(db, context.organizationId, eventId)
 }
@@ -112,6 +140,15 @@ export const transitionEvent = async (
     const { rules } = await lockOrganizationEvent(tx, context.organizationId, eventId)
     assertEventTransition(rules.status, target, context.role)
     await setEventStatus(tx, eventId, target)
+    await recordEventChange(tx, {
+      organizationId: context.organizationId,
+      eventId,
+      actorId: context.actor.userId,
+      action: 'event.status-changed',
+      before: { status: rules.status },
+      after: { status: target },
+      requestId: context.requestId,
+    })
   })
   return readOrganizerEvent(db, context.organizationId, eventId)
 }

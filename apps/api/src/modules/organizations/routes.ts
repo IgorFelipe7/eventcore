@@ -1,4 +1,6 @@
 import {
+  AuditPageSchema,
+  AuditQuerySchema,
   ChangeCapacityBodySchema,
   ChangeCapacityResponseSchema,
   CreateEventBodySchema,
@@ -16,7 +18,9 @@ import {
 } from '@eventcore/contracts'
 import {
   type Database,
+  appendAudit,
   createOrganization,
+  listAudit,
   listEventRegistrations,
   listOrganizationEvents,
   readIntegrity,
@@ -79,9 +83,25 @@ export const organizationRoutes: FastifyPluginAsyncZod<{
     },
     async (request, reply) => {
       const actor = requireActor(request)
-      const created = await db.transaction((tx) =>
-        createOrganization(tx, { ...request.body, adminUserId: actor.userId }),
-      )
+      const created = await db.transaction(async (tx) => {
+        const organization = await createOrganization(tx, {
+          ...request.body,
+          adminUserId: actor.userId,
+        })
+        if (organization) {
+          await appendAudit(tx, {
+            organizationId: organization.id,
+            actorId: actor.userId,
+            action: 'organization.created',
+            resourceType: 'organization',
+            resourceId: organization.id,
+            safeBefore: null,
+            safeAfter: { slug: request.body.slug },
+            requestId: request.id,
+          })
+        }
+        return organization
+      })
       if (!created) throw new ProblemError('SLUG_TAKEN', `"${request.body.slug}" is already taken.`)
       return reply.code(201).send({
         organization: { id: created.id, slug: request.body.slug, name: request.body.name },
@@ -213,7 +233,11 @@ export const organizationRoutes: FastifyPluginAsyncZod<{
       const response = await executeIdempotent(
         db,
         { actorId: actor.userId, action: CHANGE_CAPACITY_ACTION, scopeId: eventId, key },
-        fingerprintRequest({ action: CHANGE_CAPACITY_ACTION, scopeId: eventId, body: request.body }),
+        fingerprintRequest({
+          action: CHANGE_CAPACITY_ACTION,
+          scopeId: eventId,
+          body: request.body,
+        }),
         idempotencyTtlSeconds,
         (tx) => changeCapacity(tx, context, eventId, request.body.capacity),
       )
@@ -266,6 +290,40 @@ export const organizationRoutes: FastifyPluginAsyncZod<{
   )
 
   app.get(
+    '/v1/organizations/:organizationId/audit',
+    {
+      onRequest: [app.authenticate],
+      schema: {
+        tags: ['organizations'],
+        summary: 'Audit trail of the organization, newest first',
+        description:
+          'Entries carry ids and states only. Names and contact data never enter the trail.',
+        security,
+        params: OrganizationParams,
+        querystring: AuditQuerySchema,
+        response: { 200: AuditPageSchema, ...problems },
+      },
+    },
+    async (request) => {
+      const { organizationId } = request.params
+      await organizerContext(request, organizationId, 'audit:read')
+      const { limit, cursor } = request.query
+      const after = decodeCursor(cursor, TimeIdCursorSchema)
+      const rows = await listAudit(db, organizationId, {
+        limit: limit + 1,
+        after: after && { createdAt: after.at, id: after.id },
+      })
+      const { items, hasMore } = pageWindow(rows, limit)
+      const last = items.at(-1)
+      return {
+        items: items.map((entry) => ({ ...entry, createdAt: entry.createdAt.toISOString() })),
+        nextCursor:
+          hasMore && last ? encodeCursor({ t: last.createdAt.toISOString(), i: last.id }) : null,
+      }
+    },
+  )
+
+  app.get(
     '/v1/organizations/:organizationId/integrity',
     {
       onRequest: [app.authenticate],
@@ -291,7 +349,8 @@ export const organizationRoutes: FastifyPluginAsyncZod<{
         checkedAt: new Date().toISOString(),
         events,
         violations: events.filter(
-          (event) => !event.withinCapacity || !event.projectionMatches || !event.noIdleSeatWhileQueued,
+          (event) =>
+            !event.withinCapacity || !event.projectionMatches || !event.noIdleSeatWhileQueued,
         ).length,
       }
     },

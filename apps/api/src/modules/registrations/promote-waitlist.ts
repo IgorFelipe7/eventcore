@@ -6,6 +6,7 @@ import {
   updateRegistrationStatus,
 } from '@eventcore/db'
 import { assertRegistrationTransition } from '@eventcore/domain'
+import { recordRegistrationChange } from '../../application/trail'
 
 export interface Promotion {
   readonly registrationId: string
@@ -14,10 +15,11 @@ export interface Promotion {
 
 export const promoteFromWaitlist = async (
   tx: Transaction,
-  eventId: string,
+  scope: { readonly organizationId: string; readonly eventId: string },
   seats: number,
   correlationId: string,
 ): Promise<{ promotions: Promotion[]; confirmedCount: number | null }> => {
+  const { eventId, organizationId } = scope
   const head = await lockHeadOfQueue(tx, eventId, seats)
   if (head.length === 0) return { promotions: [], confirmedCount: null }
 
@@ -31,6 +33,17 @@ export const promoteFromWaitlist = async (
       actorId: null,
       reason: 'waitlist.promoted',
       correlationId,
+    })
+    await recordRegistrationChange(tx, {
+      organizationId,
+      eventId,
+      registrationId: entry.id,
+      participantId: entry.userId,
+      actorId: null,
+      from: 'WAITLISTED',
+      to: 'CONFIRMED',
+      reason: 'waitlist.promoted',
+      requestId: correlationId,
     })
   }
 

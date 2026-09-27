@@ -8,6 +8,7 @@ import {
 } from '@eventcore/db'
 import { planCapacityChange } from '@eventcore/domain'
 import { type CommandContext, type CommandResponse, ok } from '../../application/command'
+import { recordEventChange } from '../../application/trail'
 import { ProblemError } from '../../http/problem'
 import { promoteFromWaitlist } from '../registrations/promote-waitlist'
 import { presentInventory } from './presenters'
@@ -38,10 +39,19 @@ export const changeCapacity = async (
   const updated = await setCapacity(tx, eventId, plan.capacity)
   const { promotions, confirmedCount } = await promoteFromWaitlist(
     tx,
-    eventId,
+    { organizationId: context.organizationId, eventId },
     plan.promotions,
     context.requestId,
   )
+  await recordEventChange(tx, {
+    organizationId: context.organizationId,
+    eventId,
+    actorId: context.actor.userId,
+    action: 'event.capacity-changed',
+    before: { capacity: inventory.capacity },
+    after: { capacity: plan.capacity, promotions: promotions.length },
+    requestId: context.requestId,
+  })
 
   const body: ChangeCapacityResponse = {
     eventId,
