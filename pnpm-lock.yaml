@@ -249,6 +249,28 @@ importers:
         specifier: ^4.23.15
         version: 4.23.15
 
+  apps/worker:
+    dependencies:
+      '@eventcore/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      drizzle-orm:
+        specifier: ^0.45.4
+        version: 0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)
+      pino:
+        specifier: ^10.4.0
+        version: 10.4.0
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      tsup:
+        specifier: ^9.0.0
+        version: 9.0.0(postcss@8.5.30)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1)
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+
   packages/auth:
     dependencies:
       jose:
@@ -315,6 +337,9 @@ importers:
       '@eventcore/domain':
         specifier: workspace:*
         version: link:../packages/domain
+      '@eventcore/worker':
+        specifier: workspace:*
+        version: link:../apps/worker
       drizzle-orm:
         specifier: ^0.45.4
         version: 0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(pg@8.23.1)

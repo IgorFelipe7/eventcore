@@ -13,6 +13,7 @@
     "@eventcore/contracts": "workspace:*",
     "@eventcore/db": "workspace:*",
     "@eventcore/domain": "workspace:*",
+    "@eventcore/worker": "workspace:*",
     "drizzle-orm": "^0.45.4"
   }
 }
