@@ -31,6 +31,7 @@ export const registrationRoutes: FastifyPluginAsyncZod<{
     '/v1/events/:eventId/registrations',
     {
       onRequest: [app.authenticate],
+      config: { rateLimit: { max: 30, timeWindow: '1 minute' } },
       schema: {
         tags: ['registrations'],
         summary: 'Register the authenticated participant for an event',
@@ -60,6 +61,10 @@ export const registrationRoutes: FastifyPluginAsyncZod<{
         idempotencyTtlSeconds,
         (tx) => registerForEvent(tx, context, eventId),
       )
+      if (response.replayed) app.metrics.idempotentReplays.inc({ action: REGISTER_ACTION })
+      else if (response.status === 201) {
+        app.metrics.registrations.inc({ status: (response.body as { status: string }).status })
+      } else if (response.status === 409) app.metrics.registrations.inc({ status: 'REJECTED' })
       return sendCommandResponse(reply, response)
     },
   )
@@ -93,6 +98,14 @@ export const registrationRoutes: FastifyPluginAsyncZod<{
         idempotencyTtlSeconds,
         (tx) => cancelRegistration(tx, context, registrationId),
       )
+      const result = response.body as {
+        transition?: string
+        promotedRegistrationId?: string | null
+      }
+      if (response.replayed) app.metrics.idempotentReplays.inc({ action: CANCEL_ACTION })
+      else if (result.transition === 'CANCELLED') {
+        app.metrics.cancellations.inc({ promoted: String(Boolean(result.promotedRegistrationId)) })
+      }
       return sendCommandResponse(reply, response)
     },
   )
