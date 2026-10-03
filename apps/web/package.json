@@ -4,16 +4,15 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev --port 3000",
-    "build": "next build",
-    "start": "next start --port 3000",
+    "dev": "node scripts/next-with-root-env.mjs dev --port 3000",
+    "build": "node scripts/next-with-root-env.mjs build",
+    "start": "node scripts/next-with-root-env.mjs start --port 3000",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@eventcore/auth": "workspace:*",
     "@eventcore/contracts": "workspace:*",
     "@eventcore/domain": "workspace:*",
-    "@next/env": "16.4.2",
     "next": "16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

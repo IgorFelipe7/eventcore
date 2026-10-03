@@ -1,9 +1,7 @@
 import { fileURLToPath } from 'node:url'
-import { loadEnvConfig } from '@next/env'
 import { type NextConfig } from 'next'
 
 const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url))
-loadEnvConfig(repositoryRoot)
 
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },

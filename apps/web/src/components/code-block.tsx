@@ -7,33 +7,33 @@ const SQL_KEYWORDS = new Set(
 
 const LOCK_PHRASES = ['FOR UPDATE SKIP LOCKED', 'FOR UPDATE']
 
-const highlightSql = (line: string): ReactNode[] => {
+const highlightSql = (line: string, prefix = 's'): ReactNode[] => {
   const lock = LOCK_PHRASES.find((phrase) => line.includes(phrase))
   if (lock) {
     const [before = '', after = ''] = line.split(lock)
     return [
-      ...highlightSql(before),
-      <mark key="lock" className="bg-signal px-0.5 text-white">
+      ...highlightSql(before, `${prefix}b`),
+      <mark key={`${prefix}-lock`} className="bg-signal px-0.5 text-white">
         {lock}
       </mark>,
-      ...highlightSql(after),
+      ...highlightSql(after, `${prefix}a`),
     ]
   }
   return line.split(/(\s+|[(),;=<>+*])/).map((token, index) =>
     SQL_KEYWORDS.has(token.toUpperCase()) && token === token.toUpperCase() ? (
-      <span key={index} className="font-medium text-ink">
+      <span key={`${prefix}${index}`} className="font-medium text-ink">
         {token}
       </span>
     ) : token.startsWith('$') || /^\d+$/.test(token) ? (
-      <span key={index} className="text-signal">
+      <span key={`${prefix}${index}`} className="text-signal">
         {token}
       </span>
     ) : token.startsWith("'") ? (
-      <span key={index} className="text-confirmed">
+      <span key={`${prefix}${index}`} className="text-confirmed">
         {token}
       </span>
     ) : (
-      <Fragment key={index}>{token}</Fragment>
+      <Fragment key={`${prefix}${index}`}>{token}</Fragment>
     ),
   )
 }
@@ -43,11 +43,13 @@ export function CodeBlock({
   language,
   title,
   highlight = [],
+  wrap = false,
 }: {
   readonly code: string
   readonly language: 'sql' | 'shell' | 'http' | 'json'
   readonly title?: string
   readonly highlight?: readonly number[]
+  readonly wrap?: boolean
 }) {
   const lines = code.replace(/\n$/, '').split('\n')
   return (
@@ -58,7 +60,9 @@ export function CodeBlock({
           <span className="label text-ink-3">{language}</span>
         </div>
       ) : null}
-      <pre className="overflow-x-auto py-3 font-mono text-[0.8125rem] leading-6 text-ink-2">
+      <pre
+        className={`py-3 font-mono text-[0.8125rem] leading-6 text-ink-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'}`}
+      >
         <code>
           {lines.map((line, index) => (
             <span
