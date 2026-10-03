@@ -1,0 +1,11 @@
+import { type NextRequest, NextResponse } from 'next/server'
+
+export function proxy(request: NextRequest) {
+  const headers = new Headers(request.headers)
+  headers.set('x-eventcore-path', `${request.nextUrl.pathname}${request.nextUrl.search}`)
+  return NextResponse.next({ request: { headers } })
+}
+
+export const config = {
+  matcher: ['/((?!_next/|favicon|icon|.*\\.).*)'],
+}

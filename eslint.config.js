@@ -1,4 +1,5 @@
 import js from '@eslint/js'
+import nextVitals from 'eslint-config-next/core-web-vitals'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -37,6 +38,12 @@ export default tseslint.config(
       ],
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
     },
+  },
+  ...nextVitals.map((config) => ({ ...config, files: ['apps/web/**/*.{ts,tsx}'] })),
+  {
+    files: ['apps/web/**/*.{ts,tsx}'],
+    settings: { next: { rootDir: 'apps/web' }, react: { version: '19' } },
+    languageOptions: { globals: { ...globals.browser } },
   },
   {
     files: ['packages/domain/**/*.ts'],

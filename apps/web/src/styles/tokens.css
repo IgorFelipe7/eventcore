@@ -1,0 +1,50 @@
+@theme {
+  --color-paper: #eceeea;
+  --color-sheet: #f7f8f5;
+  --color-ink: #0f1412;
+  --color-ink-2: #444c47;
+  --color-ink-3: #5f6762;
+  --color-rule: #c9cec7;
+  --color-rule-soft: #dde1dc;
+  --color-signal: #2536e0;
+  --color-signal-wash: #e4e7fb;
+  --color-confirmed: #0b6a47;
+  --color-confirmed-wash: #dcefe5;
+  --color-waitlisted: #8a5800;
+  --color-waitlisted-wash: #f6ead4;
+  --color-rejected: #a42a1d;
+  --color-rejected-wash: #f6dedb;
+  --color-cancelled: #5a615c;
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-plex-condensed), var(--font-plex-sans), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  --text-label: 0.6875rem;
+  --text-label--letter-spacing: 0.08em;
+  --text-display: clamp(2.5rem, 1.6rem + 4.6vw, 5.5rem);
+  --text-display--line-height: 0.95;
+  --text-heading: clamp(1.5rem, 1.15rem + 1.5vw, 2.25rem);
+  --text-heading--line-height: 1.05;
+
+  --breakpoint-xs: 26rem;
+
+  --ease-sheet: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --animate-draw: draw 500ms var(--ease-sheet) both;
+  --animate-flash: flash 900ms ease-out;
+
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes flash {
+    from {
+      background-color: var(--color-signal-wash);
+    }
+  }
+}
