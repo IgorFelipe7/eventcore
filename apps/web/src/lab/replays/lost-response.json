@@ -1,0 +1,112 @@
+{
+  "id": "lost-response",
+  "order": 4,
+  "title": "The answer that never arrived",
+  "question": "If the server commits but the client never hears back, what does the retry get?",
+  "setup": "Capacity 1. A registers and the client pretends it lost the response; B takes the queue spot; A retries with the same key.",
+  "testFile": "tests/http/idempotency.test.ts",
+  "environment": {
+    "recordedAt": "2026-10-07T01:08:14.891Z",
+    "commit": "8763bdd",
+    "node": "v24.12.0",
+    "postgres": "PostgreSQL 18.6",
+    "platform": "win32 10.0.19045",
+    "cpu": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz × 12",
+    "transport": "In-process HTTP injection into the real Fastify app (no network hop)",
+    "poolSize": 40
+  },
+  "variants": [
+    {
+      "id": "locked",
+      "label": "EventCore",
+      "summary": "The retry is answered from the stored response: the original confirmation, not a new decision.",
+      "safe": true,
+      "attempts": [
+        {
+          "actor": "A · response lost",
+          "kind": "register",
+          "startMs": 0.01,
+          "endMs": 11.67,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "B",
+          "kind": "register",
+          "startMs": 11.68,
+          "endMs": 26.1,
+          "httpStatus": 201,
+          "result": "WAITLISTED #1",
+          "replayed": false,
+          "decisionIndex": 2,
+          "position": 1
+        },
+        {
+          "actor": "A · retry, same key",
+          "kind": "retry",
+          "startMs": 26.1,
+          "endMs": 30.09,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        }
+      ],
+      "outcome": {
+        "CONFIRMED": 2,
+        "WAITLISTED": 1
+      },
+      "checks": [
+        {
+          "id": "I1",
+          "label": "Confirmed seats within capacity",
+          "passed": true,
+          "detail": "1 confirmed for 1 seats"
+        },
+        {
+          "id": "I1·P",
+          "label": "Counter equals confirmed rows",
+          "passed": true,
+          "detail": "counter 1, rows 1"
+        },
+        {
+          "id": "I2",
+          "label": "One registration per participant",
+          "passed": true,
+          "detail": "0 participants with more than one row"
+        },
+        {
+          "id": "I5·Q",
+          "label": "No idle seat while someone waits",
+          "passed": true,
+          "detail": "1 waiting, 0 seats idle"
+        },
+        {
+          "id": "I3·R",
+          "label": "Retry replays the original",
+          "passed": true,
+          "detail": "Byte-identical body, Idempotent-Replayed: true"
+        }
+      ],
+      "latency": {
+        "samples": 3,
+        "p50": 11.7,
+        "p95": 14.4,
+        "p99": 14.4,
+        "max": 14.4
+      },
+      "final": {
+        "capacity": 1,
+        "confirmedRows": 1,
+        "waitlistedRows": 1
+      }
+    }
+  ],
+  "limits": [
+    "The lost response is simulated by ignoring it; no network failure is injected."
+  ]
+}

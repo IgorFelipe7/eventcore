@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "lab:record": "tsx lab/record.ts"
   },
   "dependencies": {
     "@eventcore/api": "workspace:*",
@@ -15,5 +16,8 @@
     "@eventcore/domain": "workspace:*",
     "@eventcore/worker": "workspace:*",
     "drizzle-orm": "^0.45.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15"
   }
 }

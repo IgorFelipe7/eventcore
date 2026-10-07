@@ -1,6 +1,7 @@
 export * from './common'
 export * from './demo'
 export * from './events'
+export * from './lab'
 export * from './organizations'
 export * from './problems'
 export * from './registrations'

@@ -1,6 +1,6 @@
 import { type ApiConfig, type App, buildApp } from '@eventcore/api'
 import { signDemoToken } from '@eventcore/auth'
-import { type TestDatabase } from './database'
+import { type Database } from '@eventcore/db'
 
 export const TEST_AUTH = {
   issuer: 'https://auth.eventcore.test',
@@ -30,7 +30,7 @@ export const testConfig = (databaseUrl: string): ApiConfig => ({
 })
 
 export const createTestApi = async (
-  database: TestDatabase,
+  database: { readonly db: Database; readonly url: string },
   overrides: { clock?: () => Date } = {},
 ): Promise<App> => {
   const app = await buildApp({

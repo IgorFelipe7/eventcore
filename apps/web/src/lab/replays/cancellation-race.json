@@ -1,0 +1,415 @@
+{
+  "id": "cancellation-race",
+  "order": 5,
+  "title": "Ten leave, twenty arrive",
+  "question": "When seats are released while newcomers keep arriving, who gets them?",
+  "setup": "Capacity 10, all taken, 15 already queued in a known order. Ten holders cancel while 20 newcomers register, all concurrently.",
+  "testFile": "tests/concurrency/waitlist.test.ts",
+  "environment": {
+    "recordedAt": "2026-10-07T01:08:14.891Z",
+    "commit": "8763bdd",
+    "node": "v24.12.0",
+    "postgres": "PostgreSQL 18.6",
+    "platform": "win32 10.0.19045",
+    "cpu": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz × 12",
+    "transport": "In-process HTTP injection into the real Fastify app (no network hop)",
+    "poolSize": 40
+  },
+  "variants": [
+    {
+      "id": "locked",
+      "label": "EventCore",
+      "summary": "The first 10 in line were promoted; 0 newcomers overtook the queue.",
+      "safe": true,
+      "attempts": [
+        {
+          "actor": "H001",
+          "kind": "cancel",
+          "startMs": 0.07,
+          "endMs": 49.83,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 27,
+          "position": null
+        },
+        {
+          "actor": "H002",
+          "kind": "cancel",
+          "startMs": 0.24,
+          "endMs": 93.44,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 33,
+          "position": null
+        },
+        {
+          "actor": "H003",
+          "kind": "cancel",
+          "startMs": 0.28,
+          "endMs": 39.86,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 26,
+          "position": null
+        },
+        {
+          "actor": "H004",
+          "kind": "cancel",
+          "startMs": 0.31,
+          "endMs": 234.38,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 53,
+          "position": null
+        },
+        {
+          "actor": "H005",
+          "kind": "cancel",
+          "startMs": 0.33,
+          "endMs": 109.67,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 35,
+          "position": null
+        },
+        {
+          "actor": "H006",
+          "kind": "cancel",
+          "startMs": 0.36,
+          "endMs": 119.53,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 36,
+          "position": null
+        },
+        {
+          "actor": "H007",
+          "kind": "cancel",
+          "startMs": 0.38,
+          "endMs": 129.44,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 37,
+          "position": null
+        },
+        {
+          "actor": "H008",
+          "kind": "cancel",
+          "startMs": 0.41,
+          "endMs": 181.39,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 45,
+          "position": null
+        },
+        {
+          "actor": "H009",
+          "kind": "cancel",
+          "startMs": 0.44,
+          "endMs": 244.41,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 54,
+          "position": null
+        },
+        {
+          "actor": "H010",
+          "kind": "cancel",
+          "startMs": 0.47,
+          "endMs": 254.4,
+          "httpStatus": 200,
+          "result": "CANCELLED",
+          "replayed": false,
+          "decisionIndex": 55,
+          "position": null
+        },
+        {
+          "actor": "N001",
+          "kind": "register",
+          "startMs": 0.52,
+          "endMs": 165.43,
+          "httpStatus": 201,
+          "result": "WAITLISTED #21",
+          "replayed": false,
+          "decisionIndex": 43,
+          "position": 21
+        },
+        {
+          "actor": "N002",
+          "kind": "register",
+          "startMs": 0.57,
+          "endMs": 83.54,
+          "httpStatus": 201,
+          "result": "WAITLISTED #18",
+          "replayed": false,
+          "decisionIndex": 32,
+          "position": 18
+        },
+        {
+          "actor": "N003",
+          "kind": "register",
+          "startMs": 0.59,
+          "endMs": 56.41,
+          "httpStatus": 201,
+          "result": "WAITLISTED #14",
+          "replayed": false,
+          "decisionIndex": 28,
+          "position": 14
+        },
+        {
+          "actor": "N004",
+          "kind": "register",
+          "startMs": 0.61,
+          "endMs": 99.44,
+          "httpStatus": 201,
+          "result": "WAITLISTED #18",
+          "replayed": false,
+          "decisionIndex": 34,
+          "position": 18
+        },
+        {
+          "actor": "N005",
+          "kind": "register",
+          "startMs": 0.63,
+          "endMs": 77.51,
+          "httpStatus": 201,
+          "result": "WAITLISTED #17",
+          "replayed": false,
+          "decisionIndex": 31,
+          "position": 17
+        },
+        {
+          "actor": "N006",
+          "kind": "register",
+          "startMs": 0.66,
+          "endMs": 70.15,
+          "httpStatus": 201,
+          "result": "WAITLISTED #16",
+          "replayed": false,
+          "decisionIndex": 30,
+          "position": 16
+        },
+        {
+          "actor": "N007",
+          "kind": "register",
+          "startMs": 0.68,
+          "endMs": 135.56,
+          "httpStatus": 201,
+          "result": "WAITLISTED #16",
+          "replayed": false,
+          "decisionIndex": 38,
+          "position": 16
+        },
+        {
+          "actor": "N008",
+          "kind": "register",
+          "startMs": 0.7,
+          "endMs": 63.77,
+          "httpStatus": 201,
+          "result": "WAITLISTED #15",
+          "replayed": false,
+          "decisionIndex": 29,
+          "position": 15
+        },
+        {
+          "actor": "N009",
+          "kind": "register",
+          "startMs": 0.72,
+          "endMs": 153.87,
+          "httpStatus": 201,
+          "result": "WAITLISTED #19",
+          "replayed": false,
+          "decisionIndex": 41,
+          "position": 19
+        },
+        {
+          "actor": "N010",
+          "kind": "register",
+          "startMs": 0.75,
+          "endMs": 141.52,
+          "httpStatus": 201,
+          "result": "WAITLISTED #17",
+          "replayed": false,
+          "decisionIndex": 39,
+          "position": 17
+        },
+        {
+          "actor": "N011",
+          "kind": "register",
+          "startMs": 0.77,
+          "endMs": 159.67,
+          "httpStatus": 201,
+          "result": "WAITLISTED #20",
+          "replayed": false,
+          "decisionIndex": 42,
+          "position": 20
+        },
+        {
+          "actor": "N012",
+          "kind": "register",
+          "startMs": 0.8,
+          "endMs": 147.59,
+          "httpStatus": 201,
+          "result": "WAITLISTED #18",
+          "replayed": false,
+          "decisionIndex": 40,
+          "position": 18
+        },
+        {
+          "actor": "N013",
+          "kind": "register",
+          "startMs": 0.82,
+          "endMs": 171.58,
+          "httpStatus": 201,
+          "result": "WAITLISTED #22",
+          "replayed": false,
+          "decisionIndex": 44,
+          "position": 22
+        },
+        {
+          "actor": "N014",
+          "kind": "register",
+          "startMs": 0.84,
+          "endMs": 187.36,
+          "httpStatus": 201,
+          "result": "WAITLISTED #22",
+          "replayed": false,
+          "decisionIndex": 46,
+          "position": 22
+        },
+        {
+          "actor": "N015",
+          "kind": "register",
+          "startMs": 0.87,
+          "endMs": 193.13,
+          "httpStatus": 201,
+          "result": "WAITLISTED #23",
+          "replayed": false,
+          "decisionIndex": 47,
+          "position": 23
+        },
+        {
+          "actor": "N016",
+          "kind": "register",
+          "startMs": 0.93,
+          "endMs": 219.05,
+          "httpStatus": 201,
+          "result": "WAITLISTED #27",
+          "replayed": false,
+          "decisionIndex": 51,
+          "position": 27
+        },
+        {
+          "actor": "N017",
+          "kind": "register",
+          "startMs": 0.95,
+          "endMs": 207.06,
+          "httpStatus": 201,
+          "result": "WAITLISTED #25",
+          "replayed": false,
+          "decisionIndex": 49,
+          "position": 25
+        },
+        {
+          "actor": "N018",
+          "kind": "register",
+          "startMs": 0.97,
+          "endMs": 213.11,
+          "httpStatus": 201,
+          "result": "WAITLISTED #26",
+          "replayed": false,
+          "decisionIndex": 50,
+          "position": 26
+        },
+        {
+          "actor": "N019",
+          "kind": "register",
+          "startMs": 1,
+          "endMs": 200.81,
+          "httpStatus": 201,
+          "result": "WAITLISTED #24",
+          "replayed": false,
+          "decisionIndex": 48,
+          "position": 24
+        },
+        {
+          "actor": "N020",
+          "kind": "register",
+          "startMs": 1.02,
+          "endMs": 224.8,
+          "httpStatus": 201,
+          "result": "WAITLISTED #28",
+          "replayed": false,
+          "decisionIndex": 52,
+          "position": 28
+        }
+      ],
+      "outcome": {
+        "CANCELLED": 10,
+        "WAITLISTED": 20
+      },
+      "checks": [
+        {
+          "id": "I1",
+          "label": "Confirmed seats within capacity",
+          "passed": true,
+          "detail": "10 confirmed for 10 seats"
+        },
+        {
+          "id": "I1·P",
+          "label": "Counter equals confirmed rows",
+          "passed": true,
+          "detail": "counter 10, rows 10"
+        },
+        {
+          "id": "I2",
+          "label": "One registration per participant",
+          "passed": true,
+          "detail": "0 participants with more than one row"
+        },
+        {
+          "id": "I5·Q",
+          "label": "No idle seat while someone waits",
+          "passed": true,
+          "detail": "25 waiting, 0 seats idle"
+        },
+        {
+          "id": "I5",
+          "label": "Promotion is first in, first out",
+          "passed": true,
+          "detail": "10 of the first 10 queued were promoted"
+        },
+        {
+          "id": "I5·N",
+          "label": "Newcomers wait behind the queue",
+          "passed": true,
+          "detail": "0 newcomers confirmed directly"
+        }
+      ],
+      "latency": {
+        "samples": 30,
+        "p50": 146.8,
+        "p95": 244,
+        "p99": 253.9,
+        "max": 253.9
+      },
+      "final": {
+        "capacity": 10,
+        "confirmedRows": 10,
+        "waitlistedRows": 25
+      }
+    }
+  ],
+  "limits": [
+    "The queue was built sequentially before the race so that its order is known in advance."
+  ]
+}

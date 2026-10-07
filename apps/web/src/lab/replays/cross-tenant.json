@@ -1,0 +1,127 @@
+{
+  "id": "cross-tenant",
+  "order": 7,
+  "title": "An admin of the wrong organization",
+  "question": "Can an admin of one organization read or change another organization’s event?",
+  "setup": "Two organizations. Their admin is authenticated and valid — just for the other organization. Six probes, read and write.",
+  "testFile": "tests/security/tenant-isolation.test.ts",
+  "environment": {
+    "recordedAt": "2026-10-07T01:08:14.891Z",
+    "commit": "8763bdd",
+    "node": "v24.12.0",
+    "postgres": "PostgreSQL 18.6",
+    "platform": "win32 10.0.19045",
+    "cpu": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz × 12",
+    "transport": "In-process HTTP injection into the real Fastify app (no network hop)",
+    "poolSize": 40
+  },
+  "variants": [
+    {
+      "id": "locked",
+      "label": "EventCore",
+      "summary": "Every probe was refused: 403 on their routes, 404 when their event was reached through our path.",
+      "safe": true,
+      "attempts": [
+        {
+          "actor": "List their events",
+          "kind": "probe",
+          "startMs": 0.01,
+          "endMs": 3.09,
+          "httpStatus": 403,
+          "result": "403 FORBIDDEN_TENANT",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "Read their audit trail",
+          "kind": "probe",
+          "startMs": 3.11,
+          "endMs": 4.67,
+          "httpStatus": 403,
+          "result": "403 FORBIDDEN_TENANT",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "Their event through our path",
+          "kind": "probe",
+          "startMs": 4.68,
+          "endMs": 6.83,
+          "httpStatus": 404,
+          "result": "404 NOT_FOUND",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "Rename their venue",
+          "kind": "probe",
+          "startMs": 6.85,
+          "endMs": 11.05,
+          "httpStatus": 404,
+          "result": "404 NOT_FOUND",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "Cancel their event",
+          "kind": "probe",
+          "startMs": 11.06,
+          "endMs": 15.68,
+          "httpStatus": 404,
+          "result": "404 NOT_FOUND",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "List their attendees",
+          "kind": "probe",
+          "startMs": 15.7,
+          "endMs": 19.04,
+          "httpStatus": 404,
+          "result": "404 NOT_FOUND",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        }
+      ],
+      "outcome": {
+        "403 FORBIDDEN_TENANT": 2,
+        "404 NOT_FOUND": 4
+      },
+      "checks": [
+        {
+          "id": "I4",
+          "label": "Every probe refused",
+          "passed": true,
+          "detail": "6 of 6 refused"
+        },
+        {
+          "id": "I4·W",
+          "label": "Their data unchanged",
+          "passed": true,
+          "detail": "Venue and status exactly as before"
+        },
+        {
+          "id": "I1",
+          "label": "Confirmed seats within capacity",
+          "passed": true,
+          "detail": "0 confirmed for 5 seats"
+        }
+      ],
+      "latency": null,
+      "final": {
+        "capacity": 5,
+        "confirmedRows": 0,
+        "waitlistedRows": 0
+      }
+    }
+  ],
+  "limits": [
+    "Probes are sequential; tenancy is a property of each request, not of concurrency."
+  ]
+}

@@ -23,7 +23,8 @@
     "db:down": "docker compose -f infra/docker-compose.yml down",
     "db:generate": "pnpm --filter @eventcore/db generate",
     "db:migrate": "pnpm --filter @eventcore/db migrate",
-    "db:seed": "pnpm --filter @eventcore/db seed"
+    "db:seed": "pnpm --filter @eventcore/db seed",
+    "lab:record": "pnpm --filter @eventcore/tests lab:record"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

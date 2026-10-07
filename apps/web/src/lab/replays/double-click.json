@@ -1,0 +1,188 @@
+{
+  "id": "double-click",
+  "order": 3,
+  "title": "Ten clicks, one intent",
+  "question": "If the same request is sent ten times at once with one idempotency key, how many effects happen?",
+  "setup": "Capacity 5. One participant fires ten identical requests concurrently with the same Idempotency-Key.",
+  "testFile": "tests/http/idempotency.test.ts",
+  "environment": {
+    "recordedAt": "2026-10-07T01:08:14.891Z",
+    "commit": "8763bdd",
+    "node": "v24.12.0",
+    "postgres": "PostgreSQL 18.6",
+    "platform": "win32 10.0.19045",
+    "cpu": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz × 12",
+    "transport": "In-process HTTP injection into the real Fastify app (no network hop)",
+    "poolSize": 40
+  },
+  "variants": [
+    {
+      "id": "locked",
+      "label": "EventCore",
+      "summary": "One decision, 9 replays of it, 1 distinct answer.",
+      "safe": true,
+      "attempts": [
+        {
+          "actor": "click 1",
+          "kind": "register",
+          "startMs": 0.07,
+          "endMs": 19.35,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 2",
+          "kind": "register",
+          "startMs": 0.2,
+          "endMs": 23.92,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 3",
+          "kind": "register",
+          "startMs": 0.24,
+          "endMs": 23.23,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 4",
+          "kind": "register",
+          "startMs": 0.27,
+          "endMs": 23.45,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 5",
+          "kind": "register",
+          "startMs": 0.3,
+          "endMs": 23.76,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 6",
+          "kind": "register",
+          "startMs": 0.32,
+          "endMs": 24.42,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 7",
+          "kind": "register",
+          "startMs": 0.35,
+          "endMs": 24.1,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 8",
+          "kind": "register",
+          "startMs": 0.39,
+          "endMs": 22.98,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 9",
+          "kind": "register",
+          "startMs": 0.42,
+          "endMs": 25,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "click 10",
+          "kind": "register",
+          "startMs": 0.45,
+          "endMs": 23.62,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": true,
+          "decisionIndex": 1,
+          "position": null
+        }
+      ],
+      "outcome": {
+        "CONFIRMED": 10
+      },
+      "checks": [
+        {
+          "id": "I1",
+          "label": "Confirmed seats within capacity",
+          "passed": true,
+          "detail": "1 confirmed for 5 seats"
+        },
+        {
+          "id": "I1·P",
+          "label": "Counter equals confirmed rows",
+          "passed": true,
+          "detail": "counter 1, rows 1"
+        },
+        {
+          "id": "I2",
+          "label": "One registration per participant",
+          "passed": true,
+          "detail": "0 participants with more than one row"
+        },
+        {
+          "id": "I5·Q",
+          "label": "No idle seat while someone waits",
+          "passed": true,
+          "detail": "0 waiting, 4 seats idle"
+        },
+        {
+          "id": "I3",
+          "label": "Identical answers",
+          "passed": true,
+          "detail": "1 distinct response bodies across 10 requests"
+        }
+      ],
+      "latency": {
+        "samples": 10,
+        "p50": 23.2,
+        "p95": 24.6,
+        "p99": 24.6,
+        "max": 24.6
+      },
+      "final": {
+        "capacity": 5,
+        "confirmedRows": 1,
+        "waitlistedRows": 0
+      }
+    }
+  ],
+  "limits": [
+    "The replays wait on the unique index until the first transaction commits; that wait is part of their latency."
+  ]
+}

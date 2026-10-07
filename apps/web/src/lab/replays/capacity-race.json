@@ -1,0 +1,792 @@
+{
+  "id": "capacity-race",
+  "order": 6,
+  "title": "Moving the walls during the rush",
+  "question": "If an admin changes capacity five times while 60 people register, does anything break?",
+  "setup": "Capacity starts at 5. Sixty registrations and five capacity changes (8, 12, 10, 20, 15) run concurrently.",
+  "testFile": "tests/concurrency/capacity.test.ts",
+  "environment": {
+    "recordedAt": "2026-10-07T01:08:14.891Z",
+    "commit": "8763bdd",
+    "node": "v24.12.0",
+    "postgres": "PostgreSQL 18.6",
+    "platform": "win32 10.0.19045",
+    "cpu": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz × 12",
+    "transport": "In-process HTTP injection into the real Fastify app (no network hop)",
+    "poolSize": 40
+  },
+  "variants": [
+    {
+      "id": "locked",
+      "label": "EventCore",
+      "summary": "Final capacity 20: 20 confirmed, 40 waiting. Changes that would cut below confirmed seats were refused.",
+      "safe": true,
+      "attempts": [
+        {
+          "actor": "P001",
+          "kind": "register",
+          "startMs": 0.07,
+          "endMs": 58.71,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "P002",
+          "kind": "register",
+          "startMs": 0.19,
+          "endMs": 71.54,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 3,
+          "position": null
+        },
+        {
+          "actor": "P003",
+          "kind": "register",
+          "startMs": 0.23,
+          "endMs": 65.46,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 2,
+          "position": null
+        },
+        {
+          "actor": "P004",
+          "kind": "register",
+          "startMs": 0.26,
+          "endMs": 78.48,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 4,
+          "position": null
+        },
+        {
+          "actor": "P005",
+          "kind": "register",
+          "startMs": 0.28,
+          "endMs": 84.84,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 5,
+          "position": null
+        },
+        {
+          "actor": "P006",
+          "kind": "register",
+          "startMs": 0.31,
+          "endMs": 90.67,
+          "httpStatus": 201,
+          "result": "WAITLISTED #1",
+          "replayed": false,
+          "decisionIndex": 6,
+          "position": 1
+        },
+        {
+          "actor": "P007",
+          "kind": "register",
+          "startMs": 0.33,
+          "endMs": 96.93,
+          "httpStatus": 201,
+          "result": "WAITLISTED #2",
+          "replayed": false,
+          "decisionIndex": 7,
+          "position": 2
+        },
+        {
+          "actor": "P008",
+          "kind": "register",
+          "startMs": 0.36,
+          "endMs": 110.92,
+          "httpStatus": 201,
+          "result": "WAITLISTED #4",
+          "replayed": false,
+          "decisionIndex": 9,
+          "position": 4
+        },
+        {
+          "actor": "P009",
+          "kind": "register",
+          "startMs": 0.39,
+          "endMs": 104.5,
+          "httpStatus": 201,
+          "result": "WAITLISTED #3",
+          "replayed": false,
+          "decisionIndex": 8,
+          "position": 3
+        },
+        {
+          "actor": "P010",
+          "kind": "register",
+          "startMs": 0.42,
+          "endMs": 117,
+          "httpStatus": 201,
+          "result": "WAITLISTED #5",
+          "replayed": false,
+          "decisionIndex": 10,
+          "position": 5
+        },
+        {
+          "actor": "P011",
+          "kind": "register",
+          "startMs": 0.45,
+          "endMs": 122.97,
+          "httpStatus": 201,
+          "result": "WAITLISTED #6",
+          "replayed": false,
+          "decisionIndex": 11,
+          "position": 6
+        },
+        {
+          "actor": "P012",
+          "kind": "register",
+          "startMs": 0.48,
+          "endMs": 135.47,
+          "httpStatus": 201,
+          "result": "WAITLISTED #8",
+          "replayed": false,
+          "decisionIndex": 13,
+          "position": 8
+        },
+        {
+          "actor": "P013",
+          "kind": "register",
+          "startMs": 0.52,
+          "endMs": 129.44,
+          "httpStatus": 201,
+          "result": "WAITLISTED #7",
+          "replayed": false,
+          "decisionIndex": 12,
+          "position": 7
+        },
+        {
+          "actor": "P014",
+          "kind": "register",
+          "startMs": 0.55,
+          "endMs": 141.9,
+          "httpStatus": 201,
+          "result": "WAITLISTED #9",
+          "replayed": false,
+          "decisionIndex": 14,
+          "position": 9
+        },
+        {
+          "actor": "P015",
+          "kind": "register",
+          "startMs": 0.57,
+          "endMs": 147.98,
+          "httpStatus": 201,
+          "result": "WAITLISTED #10",
+          "replayed": false,
+          "decisionIndex": 15,
+          "position": 10
+        },
+        {
+          "actor": "P016",
+          "kind": "register",
+          "startMs": 0.6,
+          "endMs": 154.04,
+          "httpStatus": 201,
+          "result": "WAITLISTED #11",
+          "replayed": false,
+          "decisionIndex": 16,
+          "position": 11
+        },
+        {
+          "actor": "P017",
+          "kind": "register",
+          "startMs": 0.62,
+          "endMs": 161.27,
+          "httpStatus": 201,
+          "result": "WAITLISTED #12",
+          "replayed": false,
+          "decisionIndex": 17,
+          "position": 12
+        },
+        {
+          "actor": "P018",
+          "kind": "register",
+          "startMs": 0.65,
+          "endMs": 168.07,
+          "httpStatus": 201,
+          "result": "WAITLISTED #13",
+          "replayed": false,
+          "decisionIndex": 18,
+          "position": 13
+        },
+        {
+          "actor": "P019",
+          "kind": "register",
+          "startMs": 0.67,
+          "endMs": 174.85,
+          "httpStatus": 201,
+          "result": "WAITLISTED #14",
+          "replayed": false,
+          "decisionIndex": 19,
+          "position": 14
+        },
+        {
+          "actor": "P020",
+          "kind": "register",
+          "startMs": 0.69,
+          "endMs": 181.55,
+          "httpStatus": 201,
+          "result": "WAITLISTED #15",
+          "replayed": false,
+          "decisionIndex": 20,
+          "position": 15
+        },
+        {
+          "actor": "P021",
+          "kind": "register",
+          "startMs": 0.74,
+          "endMs": 188.83,
+          "httpStatus": 201,
+          "result": "WAITLISTED #16",
+          "replayed": false,
+          "decisionIndex": 21,
+          "position": 16
+        },
+        {
+          "actor": "P022",
+          "kind": "register",
+          "startMs": 0.84,
+          "endMs": 202.7,
+          "httpStatus": 201,
+          "result": "WAITLISTED #18",
+          "replayed": false,
+          "decisionIndex": 23,
+          "position": 18
+        },
+        {
+          "actor": "P023",
+          "kind": "register",
+          "startMs": 0.89,
+          "endMs": 195.86,
+          "httpStatus": 201,
+          "result": "WAITLISTED #17",
+          "replayed": false,
+          "decisionIndex": 22,
+          "position": 17
+        },
+        {
+          "actor": "P024",
+          "kind": "register",
+          "startMs": 0.93,
+          "endMs": 209.42,
+          "httpStatus": 201,
+          "result": "WAITLISTED #19",
+          "replayed": false,
+          "decisionIndex": 24,
+          "position": 19
+        },
+        {
+          "actor": "P025",
+          "kind": "register",
+          "startMs": 0.96,
+          "endMs": 215.55,
+          "httpStatus": 201,
+          "result": "WAITLISTED #20",
+          "replayed": false,
+          "decisionIndex": 25,
+          "position": 20
+        },
+        {
+          "actor": "P026",
+          "kind": "register",
+          "startMs": 0.99,
+          "endMs": 221.75,
+          "httpStatus": 201,
+          "result": "WAITLISTED #21",
+          "replayed": false,
+          "decisionIndex": 26,
+          "position": 21
+        },
+        {
+          "actor": "P027",
+          "kind": "register",
+          "startMs": 1.05,
+          "endMs": 227.98,
+          "httpStatus": 201,
+          "result": "WAITLISTED #22",
+          "replayed": false,
+          "decisionIndex": 27,
+          "position": 22
+        },
+        {
+          "actor": "P028",
+          "kind": "register",
+          "startMs": 1.1,
+          "endMs": 234.21,
+          "httpStatus": 201,
+          "result": "WAITLISTED #23",
+          "replayed": false,
+          "decisionIndex": 28,
+          "position": 23
+        },
+        {
+          "actor": "P029",
+          "kind": "register",
+          "startMs": 1.14,
+          "endMs": 241.14,
+          "httpStatus": 201,
+          "result": "WAITLISTED #24",
+          "replayed": false,
+          "decisionIndex": 29,
+          "position": 24
+        },
+        {
+          "actor": "P030",
+          "kind": "register",
+          "startMs": 1.19,
+          "endMs": 255.32,
+          "httpStatus": 201,
+          "result": "WAITLISTED #26",
+          "replayed": false,
+          "decisionIndex": 31,
+          "position": 26
+        },
+        {
+          "actor": "P031",
+          "kind": "register",
+          "startMs": 1.23,
+          "endMs": 247.27,
+          "httpStatus": 201,
+          "result": "WAITLISTED #25",
+          "replayed": false,
+          "decisionIndex": 30,
+          "position": 25
+        },
+        {
+          "actor": "P032",
+          "kind": "register",
+          "startMs": 1.28,
+          "endMs": 261.57,
+          "httpStatus": 201,
+          "result": "WAITLISTED #27",
+          "replayed": false,
+          "decisionIndex": 32,
+          "position": 27
+        },
+        {
+          "actor": "P033",
+          "kind": "register",
+          "startMs": 1.31,
+          "endMs": 267.82,
+          "httpStatus": 201,
+          "result": "WAITLISTED #28",
+          "replayed": false,
+          "decisionIndex": 33,
+          "position": 28
+        },
+        {
+          "actor": "P034",
+          "kind": "register",
+          "startMs": 1.34,
+          "endMs": 274.79,
+          "httpStatus": 201,
+          "result": "WAITLISTED #29",
+          "replayed": false,
+          "decisionIndex": 34,
+          "position": 29
+        },
+        {
+          "actor": "P035",
+          "kind": "register",
+          "startMs": 1.37,
+          "endMs": 282.79,
+          "httpStatus": 201,
+          "result": "WAITLISTED #30",
+          "replayed": false,
+          "decisionIndex": 35,
+          "position": 30
+        },
+        {
+          "actor": "P036",
+          "kind": "register",
+          "startMs": 1.41,
+          "endMs": 318.65,
+          "httpStatus": 201,
+          "result": "WAITLISTED #35",
+          "replayed": false,
+          "decisionIndex": 40,
+          "position": 35
+        },
+        {
+          "actor": "P037",
+          "kind": "register",
+          "startMs": 1.45,
+          "endMs": 290.78,
+          "httpStatus": 201,
+          "result": "WAITLISTED #31",
+          "replayed": false,
+          "decisionIndex": 36,
+          "position": 31
+        },
+        {
+          "actor": "P038",
+          "kind": "register",
+          "startMs": 1.47,
+          "endMs": 297.84,
+          "httpStatus": 201,
+          "result": "WAITLISTED #32",
+          "replayed": false,
+          "decisionIndex": 37,
+          "position": 32
+        },
+        {
+          "actor": "P039",
+          "kind": "register",
+          "startMs": 1.49,
+          "endMs": 304.73,
+          "httpStatus": 201,
+          "result": "WAITLISTED #33",
+          "replayed": false,
+          "decisionIndex": 38,
+          "position": 33
+        },
+        {
+          "actor": "P040",
+          "kind": "register",
+          "startMs": 1.51,
+          "endMs": 311.62,
+          "httpStatus": 201,
+          "result": "WAITLISTED #34",
+          "replayed": false,
+          "decisionIndex": 39,
+          "position": 34
+        },
+        {
+          "actor": "P041",
+          "kind": "register",
+          "startMs": 1.54,
+          "endMs": 325.23,
+          "httpStatus": 201,
+          "result": "WAITLISTED #36",
+          "replayed": false,
+          "decisionIndex": 41,
+          "position": 36
+        },
+        {
+          "actor": "P042",
+          "kind": "register",
+          "startMs": 1.56,
+          "endMs": 332.81,
+          "httpStatus": 201,
+          "result": "WAITLISTED #37",
+          "replayed": false,
+          "decisionIndex": 42,
+          "position": 37
+        },
+        {
+          "actor": "P043",
+          "kind": "register",
+          "startMs": 1.59,
+          "endMs": 339.23,
+          "httpStatus": 201,
+          "result": "WAITLISTED #38",
+          "replayed": false,
+          "decisionIndex": 43,
+          "position": 38
+        },
+        {
+          "actor": "P044",
+          "kind": "register",
+          "startMs": 1.62,
+          "endMs": 346,
+          "httpStatus": 201,
+          "result": "WAITLISTED #39",
+          "replayed": false,
+          "decisionIndex": 44,
+          "position": 39
+        },
+        {
+          "actor": "P045",
+          "kind": "register",
+          "startMs": 1.66,
+          "endMs": 352.61,
+          "httpStatus": 201,
+          "result": "WAITLISTED #40",
+          "replayed": false,
+          "decisionIndex": 45,
+          "position": 40
+        },
+        {
+          "actor": "P046",
+          "kind": "register",
+          "startMs": 1.68,
+          "endMs": 360.9,
+          "httpStatus": 201,
+          "result": "WAITLISTED #41",
+          "replayed": false,
+          "decisionIndex": 46,
+          "position": 41
+        },
+        {
+          "actor": "P047",
+          "kind": "register",
+          "startMs": 1.71,
+          "endMs": 368.7,
+          "httpStatus": 201,
+          "result": "WAITLISTED #42",
+          "replayed": false,
+          "decisionIndex": 47,
+          "position": 42
+        },
+        {
+          "actor": "P048",
+          "kind": "register",
+          "startMs": 1.74,
+          "endMs": 375.85,
+          "httpStatus": 201,
+          "result": "WAITLISTED #43",
+          "replayed": false,
+          "decisionIndex": 48,
+          "position": 43
+        },
+        {
+          "actor": "P049",
+          "kind": "register",
+          "startMs": 1.77,
+          "endMs": 388.49,
+          "httpStatus": 201,
+          "result": "WAITLISTED #45",
+          "replayed": false,
+          "decisionIndex": 50,
+          "position": 45
+        },
+        {
+          "actor": "P050",
+          "kind": "register",
+          "startMs": 1.79,
+          "endMs": 382.23,
+          "httpStatus": 201,
+          "result": "WAITLISTED #44",
+          "replayed": false,
+          "decisionIndex": 49,
+          "position": 44
+        },
+        {
+          "actor": "P051",
+          "kind": "register",
+          "startMs": 1.82,
+          "endMs": 396.7,
+          "httpStatus": 201,
+          "result": "WAITLISTED #46",
+          "replayed": false,
+          "decisionIndex": 51,
+          "position": 46
+        },
+        {
+          "actor": "P052",
+          "kind": "register",
+          "startMs": 1.89,
+          "endMs": 405.51,
+          "httpStatus": 201,
+          "result": "WAITLISTED #47",
+          "replayed": false,
+          "decisionIndex": 52,
+          "position": 47
+        },
+        {
+          "actor": "P053",
+          "kind": "register",
+          "startMs": 1.92,
+          "endMs": 413.51,
+          "httpStatus": 201,
+          "result": "WAITLISTED #48",
+          "replayed": false,
+          "decisionIndex": 53,
+          "position": 48
+        },
+        {
+          "actor": "P054",
+          "kind": "register",
+          "startMs": 1.94,
+          "endMs": 422.34,
+          "httpStatus": 201,
+          "result": "WAITLISTED #49",
+          "replayed": false,
+          "decisionIndex": 54,
+          "position": 49
+        },
+        {
+          "actor": "P055",
+          "kind": "register",
+          "startMs": 1.96,
+          "endMs": 429.39,
+          "httpStatus": 201,
+          "result": "WAITLISTED #50",
+          "replayed": false,
+          "decisionIndex": 55,
+          "position": 50
+        },
+        {
+          "actor": "P056",
+          "kind": "register",
+          "startMs": 2.01,
+          "endMs": 435.55,
+          "httpStatus": 201,
+          "result": "WAITLISTED #51",
+          "replayed": false,
+          "decisionIndex": 56,
+          "position": 51
+        },
+        {
+          "actor": "P057",
+          "kind": "register",
+          "startMs": 2.04,
+          "endMs": 441.41,
+          "httpStatus": 201,
+          "result": "WAITLISTED #52",
+          "replayed": false,
+          "decisionIndex": 57,
+          "position": 52
+        },
+        {
+          "actor": "P058",
+          "kind": "register",
+          "startMs": 2.07,
+          "endMs": 447.17,
+          "httpStatus": 201,
+          "result": "WAITLISTED #53",
+          "replayed": false,
+          "decisionIndex": 58,
+          "position": 53
+        },
+        {
+          "actor": "P059",
+          "kind": "register",
+          "startMs": 2.09,
+          "endMs": 453.29,
+          "httpStatus": 201,
+          "result": "WAITLISTED #54",
+          "replayed": false,
+          "decisionIndex": 59,
+          "position": 54
+        },
+        {
+          "actor": "P060",
+          "kind": "register",
+          "startMs": 2.11,
+          "endMs": 459.03,
+          "httpStatus": 201,
+          "result": "WAITLISTED #55",
+          "replayed": false,
+          "decisionIndex": 60,
+          "position": 55
+        },
+        {
+          "actor": "admin → 8",
+          "kind": "capacity",
+          "startMs": 2.19,
+          "endMs": 472.4,
+          "httpStatus": 200,
+          "result": "CAPACITY 8",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "admin → 12",
+          "kind": "capacity",
+          "startMs": 2.31,
+          "endMs": 487.25,
+          "httpStatus": 200,
+          "result": "CAPACITY 12",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "admin → 10",
+          "kind": "capacity",
+          "startMs": 2.34,
+          "endMs": 490.66,
+          "httpStatus": 409,
+          "result": "CAPACITY_BELOW_CONFIRMED",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "admin → 20",
+          "kind": "capacity",
+          "startMs": 2.36,
+          "endMs": 511.57,
+          "httpStatus": 200,
+          "result": "CAPACITY 20",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "admin → 15",
+          "kind": "capacity",
+          "startMs": 2.38,
+          "endMs": 513.69,
+          "httpStatus": 409,
+          "result": "CAPACITY_BELOW_CONFIRMED",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        }
+      ],
+      "outcome": {
+        "CONFIRMED": 5,
+        "WAITLISTED": 55,
+        "CAPACITY 8": 1,
+        "CAPACITY 12": 1,
+        "CAPACITY_BELOW_CONFIRMED": 2,
+        "CAPACITY 20": 1
+      },
+      "checks": [
+        {
+          "id": "I1",
+          "label": "Confirmed seats within capacity",
+          "passed": true,
+          "detail": "20 confirmed for 20 seats"
+        },
+        {
+          "id": "I1·P",
+          "label": "Counter equals confirmed rows",
+          "passed": true,
+          "detail": "counter 20, rows 20"
+        },
+        {
+          "id": "I2",
+          "label": "One registration per participant",
+          "passed": true,
+          "detail": "0 participants with more than one row"
+        },
+        {
+          "id": "I5·Q",
+          "label": "No idle seat while someone waits",
+          "passed": true,
+          "detail": "40 waiting, 0 seats idle"
+        }
+      ],
+      "latency": {
+        "samples": 60,
+        "p50": 246,
+        "p95": 439.4,
+        "p99": 456.9,
+        "max": 456.9
+      },
+      "final": {
+        "capacity": 20,
+        "confirmedRows": 20,
+        "waitlistedRows": 40
+      }
+    }
+  ],
+  "limits": [
+    "Which capacity wins depends on lock order, which is not deterministic; the invariants hold either way."
+  ]
+}

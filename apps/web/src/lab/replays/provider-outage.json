@@ -1,0 +1,152 @@
+{
+  "id": "provider-outage",
+  "order": 8,
+  "title": "The email provider is down",
+  "question": "If notifications can’t be delivered, are registrations lost, delayed or duplicated?",
+  "setup": "Four registrations commit while the notification provider refuses connections. The relay retries, the provider comes back, and the relay runs once more.",
+  "testFile": "tests/resilience/outbox.test.ts",
+  "environment": {
+    "recordedAt": "2026-10-07T01:08:14.891Z",
+    "commit": "8763bdd",
+    "node": "v24.12.0",
+    "postgres": "PostgreSQL 18.6",
+    "platform": "win32 10.0.19045",
+    "cpu": "Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz × 12",
+    "transport": "In-process HTTP injection into the real Fastify app (no network hop)",
+    "poolSize": 40
+  },
+  "variants": [
+    {
+      "id": "locked",
+      "label": "EventCore",
+      "summary": "All 4 registrations committed during the outage; 4 notifications delivered after recovery, none twice.",
+      "safe": true,
+      "attempts": [
+        {
+          "actor": "P001",
+          "kind": "register",
+          "startMs": 0.07,
+          "endMs": 25.06,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 3,
+          "position": null
+        },
+        {
+          "actor": "P002",
+          "kind": "register",
+          "startMs": 0.19,
+          "endMs": 18.73,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 2,
+          "position": null
+        },
+        {
+          "actor": "P003",
+          "kind": "register",
+          "startMs": 0.22,
+          "endMs": 11.07,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 1,
+          "position": null
+        },
+        {
+          "actor": "P004",
+          "kind": "register",
+          "startMs": 0.25,
+          "endMs": 31.03,
+          "httpStatus": 201,
+          "result": "CONFIRMED",
+          "replayed": false,
+          "decisionIndex": 4,
+          "position": null
+        },
+        {
+          "actor": "relay · provider down",
+          "kind": "relay",
+          "startMs": 31.03,
+          "endMs": 38.53,
+          "httpStatus": null,
+          "result": "RETRY 4",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "relay · provider back",
+          "kind": "relay",
+          "startMs": 39.05,
+          "endMs": 51.2,
+          "httpStatus": null,
+          "result": "DELIVERED 4",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        },
+        {
+          "actor": "relay · run again",
+          "kind": "relay",
+          "startMs": 51.21,
+          "endMs": 52.53,
+          "httpStatus": null,
+          "result": "CLAIMED 0",
+          "replayed": false,
+          "decisionIndex": null,
+          "position": null
+        }
+      ],
+      "outcome": {
+        "CONFIRMED": 4,
+        "RETRY 4": 1,
+        "DELIVERED 4": 1,
+        "CLAIMED 0": 1
+      },
+      "checks": [
+        {
+          "id": "I1",
+          "label": "Confirmed seats within capacity",
+          "passed": true,
+          "detail": "4 confirmed for 4 seats"
+        },
+        {
+          "id": "I1·P",
+          "label": "Counter equals confirmed rows",
+          "passed": true,
+          "detail": "counter 4, rows 4"
+        },
+        {
+          "id": "I7",
+          "label": "Exactly one notification per change",
+          "passed": true,
+          "detail": "4 deliveries for 4 committed changes; the extra relay run claimed 0"
+        },
+        {
+          "id": "I7·D",
+          "label": "Nothing lost during the outage",
+          "passed": true,
+          "detail": "4 events scheduled for retry, 0 dead-lettered"
+        }
+      ],
+      "latency": {
+        "samples": 4,
+        "p50": 18.5,
+        "p95": 30.8,
+        "p99": 30.8,
+        "max": 30.8
+      },
+      "final": {
+        "capacity": 4,
+        "confirmedRows": 4,
+        "waitlistedRows": 0
+      }
+    }
+  ],
+  "limits": [
+    "The outage is a sink that refuses every delivery; the backoff is set to zero so the run takes seconds, not minutes."
+  ]
+}
