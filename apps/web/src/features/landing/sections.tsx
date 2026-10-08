@@ -1,10 +1,11 @@
+import { type ReactNode } from 'react'
 import { Arrow, ButtonLink } from '@/components/button'
 import { CodeBlock } from '@/components/code-block'
 import { SectionHeading } from '@/components/sheet'
 import { EvidenceLink } from './evidence-link'
 import { FAILURES, INVARIANTS, KNOWN_LIMITS, TRANSACTION_STEPS } from './evidence'
 
-export function FailureSection({ baseline }: { readonly baseline?: React.ReactNode }) {
+export function FailureSection({ baseline }: { readonly baseline?: ReactNode }) {
   return (
     <section aria-labelledby="failures" className="sheet-frame mt-32">
       <SectionHeading

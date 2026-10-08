@@ -2,6 +2,7 @@ import { Arrow, ButtonLink } from '@/components/button'
 import { SheetBar, TitleBlock, ZoneRuler } from '@/components/sheet'
 import { LastSeatFigure } from '@/features/landing/last-seat-figure'
 import { LAST_SEAT_SEQUENCE } from '@/features/landing/last-seat-sequence'
+import { BaselineCallout, ProofSection } from '@/features/landing/proof'
 import {
   AnatomySection,
   FailureSection,
@@ -87,9 +88,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <FailureSection />
+      <FailureSection baseline={<BaselineCallout />} />
       <InvariantSection />
       <AnatomySection />
+      <ProofSection />
       <LimitsSection />
       <VerifySection />
       <TitleBlock sheet={sheet} />
