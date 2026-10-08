@@ -6,8 +6,8 @@
   "setup": "Capacity 1, waitlist on. Two participants send their registration concurrently, then the same race is repeated on 30 fresh events.",
   "testFile": "tests/concurrency/last-seat.test.ts",
   "environment": {
-    "recordedAt": "2026-10-07T01:08:14.891Z",
-    "commit": "8763bdd",
+    "recordedAt": "2026-10-07T23:41:52.873Z",
+    "commit": "321bed4",
     "node": "v24.12.0",
     "postgres": "PostgreSQL 18.6",
     "platform": "win32 10.0.19045",
@@ -26,7 +26,7 @@
           "actor": "A",
           "kind": "register",
           "startMs": 0.08,
-          "endMs": 76.71,
+          "endMs": 62.33,
           "httpStatus": 201,
           "result": "WAITLISTED #1",
           "replayed": false,
@@ -36,8 +36,8 @@
         {
           "actor": "B",
           "kind": "register",
-          "startMs": 1.48,
-          "endMs": 62.5,
+          "startMs": 1.58,
+          "endMs": 47.91,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -54,7 +54,7 @@
           "id": "I1",
           "label": "Confirmed seats within capacity",
           "passed": true,
-          "detail": "1 confirmed for 1 seats"
+          "detail": "1 confirmed for 1 seat"
         },
         {
           "id": "I1·P",
@@ -83,10 +83,10 @@
       ],
       "latency": {
         "samples": 2,
-        "p50": 61,
-        "p95": 76.6,
-        "p99": 76.6,
-        "max": 76.6
+        "p50": 46.3,
+        "p95": 62.3,
+        "p99": 62.3,
+        "max": 62.3
       },
       "final": {
         "capacity": 1,

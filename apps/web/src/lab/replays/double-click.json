@@ -6,8 +6,8 @@
   "setup": "Capacity 5. One participant fires ten identical requests concurrently with the same Idempotency-Key.",
   "testFile": "tests/http/idempotency.test.ts",
   "environment": {
-    "recordedAt": "2026-10-07T01:08:14.891Z",
-    "commit": "8763bdd",
+    "recordedAt": "2026-10-07T23:41:52.873Z",
+    "commit": "321bed4",
     "node": "v24.12.0",
     "postgres": "PostgreSQL 18.6",
     "platform": "win32 10.0.19045",
@@ -25,8 +25,8 @@
         {
           "actor": "click 1",
           "kind": "register",
-          "startMs": 0.07,
-          "endMs": 19.35,
+          "startMs": 0.06,
+          "endMs": 18.71,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -36,8 +36,8 @@
         {
           "actor": "click 2",
           "kind": "register",
-          "startMs": 0.2,
-          "endMs": 23.92,
+          "startMs": 0.18,
+          "endMs": 22.53,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -47,8 +47,8 @@
         {
           "actor": "click 3",
           "kind": "register",
-          "startMs": 0.24,
-          "endMs": 23.23,
+          "startMs": 0.21,
+          "endMs": 23.3,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -58,8 +58,8 @@
         {
           "actor": "click 4",
           "kind": "register",
-          "startMs": 0.27,
-          "endMs": 23.45,
+          "startMs": 0.24,
+          "endMs": 23.6,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -69,8 +69,8 @@
         {
           "actor": "click 5",
           "kind": "register",
-          "startMs": 0.3,
-          "endMs": 23.76,
+          "startMs": 0.27,
+          "endMs": 23.08,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -80,8 +80,8 @@
         {
           "actor": "click 6",
           "kind": "register",
-          "startMs": 0.32,
-          "endMs": 24.42,
+          "startMs": 0.29,
+          "endMs": 24.28,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -91,8 +91,8 @@
         {
           "actor": "click 7",
           "kind": "register",
-          "startMs": 0.35,
-          "endMs": 24.1,
+          "startMs": 0.32,
+          "endMs": 24.07,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -102,8 +102,8 @@
         {
           "actor": "click 8",
           "kind": "register",
-          "startMs": 0.39,
-          "endMs": 22.98,
+          "startMs": 0.35,
+          "endMs": 22.76,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -113,8 +113,8 @@
         {
           "actor": "click 9",
           "kind": "register",
-          "startMs": 0.42,
-          "endMs": 25,
+          "startMs": 0.37,
+          "endMs": 22.31,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -124,8 +124,8 @@
         {
           "actor": "click 10",
           "kind": "register",
-          "startMs": 0.45,
-          "endMs": 23.62,
+          "startMs": 0.4,
+          "endMs": 23.81,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -170,10 +170,10 @@
       ],
       "latency": {
         "samples": 10,
-        "p50": 23.2,
-        "p95": 24.6,
-        "p99": 24.6,
-        "max": 24.6
+        "p50": 22.8,
+        "p95": 24,
+        "p99": 24,
+        "max": 24
       },
       "final": {
         "capacity": 5,

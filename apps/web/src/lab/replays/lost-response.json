@@ -6,8 +6,8 @@
   "setup": "Capacity 1. A registers and the client pretends it lost the response; B takes the queue spot; A retries with the same key.",
   "testFile": "tests/http/idempotency.test.ts",
   "environment": {
-    "recordedAt": "2026-10-07T01:08:14.891Z",
-    "commit": "8763bdd",
+    "recordedAt": "2026-10-07T23:41:52.873Z",
+    "commit": "321bed4",
     "node": "v24.12.0",
     "postgres": "PostgreSQL 18.6",
     "platform": "win32 10.0.19045",
@@ -25,8 +25,8 @@
         {
           "actor": "A · response lost",
           "kind": "register",
-          "startMs": 0.01,
-          "endMs": 11.67,
+          "startMs": 0.02,
+          "endMs": 12.69,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -36,8 +36,8 @@
         {
           "actor": "B",
           "kind": "register",
-          "startMs": 11.68,
-          "endMs": 26.1,
+          "startMs": 12.69,
+          "endMs": 26.01,
           "httpStatus": 201,
           "result": "WAITLISTED #1",
           "replayed": false,
@@ -47,8 +47,8 @@
         {
           "actor": "A · retry, same key",
           "kind": "retry",
-          "startMs": 26.1,
-          "endMs": 30.09,
+          "startMs": 26.02,
+          "endMs": 30.35,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": true,
@@ -65,7 +65,7 @@
           "id": "I1",
           "label": "Confirmed seats within capacity",
           "passed": true,
-          "detail": "1 confirmed for 1 seats"
+          "detail": "1 confirmed for 1 seat"
         },
         {
           "id": "I1·P",
@@ -94,10 +94,10 @@
       ],
       "latency": {
         "samples": 3,
-        "p50": 11.7,
-        "p95": 14.4,
-        "p99": 14.4,
-        "max": 14.4
+        "p50": 12.7,
+        "p95": 13.3,
+        "p99": 13.3,
+        "max": 13.3
       },
       "final": {
         "capacity": 1,

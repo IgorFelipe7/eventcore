@@ -6,8 +6,8 @@
   "setup": "Four registrations commit while the notification provider refuses connections. The relay retries, the provider comes back, and the relay runs once more.",
   "testFile": "tests/resilience/outbox.test.ts",
   "environment": {
-    "recordedAt": "2026-10-07T01:08:14.891Z",
-    "commit": "8763bdd",
+    "recordedAt": "2026-10-07T23:41:52.873Z",
+    "commit": "321bed4",
     "node": "v24.12.0",
     "postgres": "PostgreSQL 18.6",
     "platform": "win32 10.0.19045",
@@ -25,8 +25,8 @@
         {
           "actor": "P001",
           "kind": "register",
-          "startMs": 0.07,
-          "endMs": 25.06,
+          "startMs": 0.1,
+          "endMs": 26.48,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -36,8 +36,8 @@
         {
           "actor": "P002",
           "kind": "register",
-          "startMs": 0.19,
-          "endMs": 18.73,
+          "startMs": 0.26,
+          "endMs": 18.5,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -47,8 +47,8 @@
         {
           "actor": "P003",
           "kind": "register",
-          "startMs": 0.22,
-          "endMs": 11.07,
+          "startMs": 0.31,
+          "endMs": 12.46,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -58,8 +58,8 @@
         {
           "actor": "P004",
           "kind": "register",
-          "startMs": 0.25,
-          "endMs": 31.03,
+          "startMs": 0.35,
+          "endMs": 32.9,
           "httpStatus": 201,
           "result": "CONFIRMED",
           "replayed": false,
@@ -69,8 +69,8 @@
         {
           "actor": "relay · provider down",
           "kind": "relay",
-          "startMs": 31.03,
-          "endMs": 38.53,
+          "startMs": 32.91,
+          "endMs": 41.22,
           "httpStatus": null,
           "result": "RETRY 4",
           "replayed": false,
@@ -80,8 +80,8 @@
         {
           "actor": "relay · provider back",
           "kind": "relay",
-          "startMs": 39.05,
-          "endMs": 51.2,
+          "startMs": 41.78,
+          "endMs": 54.32,
           "httpStatus": null,
           "result": "DELIVERED 4",
           "replayed": false,
@@ -91,8 +91,8 @@
         {
           "actor": "relay · run again",
           "kind": "relay",
-          "startMs": 51.21,
-          "endMs": 52.53,
+          "startMs": 54.33,
+          "endMs": 55.73,
           "httpStatus": null,
           "result": "CLAIMED 0",
           "replayed": false,
@@ -134,10 +134,10 @@
       ],
       "latency": {
         "samples": 4,
-        "p50": 18.5,
-        "p95": 30.8,
-        "p99": 30.8,
-        "max": 30.8
+        "p50": 18.2,
+        "p95": 32.6,
+        "p99": 32.6,
+        "max": 32.6
       },
       "final": {
         "capacity": 4,

@@ -135,7 +135,7 @@ export const capacityChecks = async (
         id: 'I1',
         label: 'Confirmed seats within capacity',
         passed: integrity.confirmedRows <= integrity.capacity,
-        detail: `${integrity.confirmedRows} confirmed for ${integrity.capacity} seats`,
+        detail: `${integrity.confirmedRows} confirmed for ${integrity.capacity} seat${integrity.capacity === 1 ? '' : 's'}`,
       },
       {
         id: 'I1·P',
@@ -153,7 +153,10 @@ export const capacityChecks = async (
         id: 'I5·Q',
         label: 'No idle seat while someone waits',
         passed: integrity.waitlistedRows === 0 || integrity.confirmedRows === integrity.capacity,
-        detail: `${integrity.waitlistedRows} waiting, ${integrity.capacity - integrity.confirmedRows} seats idle`,
+        detail:
+          integrity.confirmedRows > integrity.capacity
+            ? `${integrity.waitlistedRows} waiting, no idle seat (overbooked by ${integrity.confirmedRows - integrity.capacity})`
+            : `${integrity.waitlistedRows} waiting, ${integrity.capacity - integrity.confirmedRows} seats idle`,
       },
     ],
   }
