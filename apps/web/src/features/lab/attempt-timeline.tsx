@@ -184,31 +184,37 @@ export function AttemptTimeline({
           </div>
         </div>
 
-        <dl
+        <div
           aria-live="polite"
           className="grid content-start gap-1.5 border-l border-rule pl-4 font-mono text-xs"
         >
-          <dt className="label mb-1 text-ink-3">Answered so far</dt>
-          {Object.entries(tally).length === 0 ? (
-            <dd className="text-ink-3">—</dd>
-          ) : (
-            Object.entries(tally).map(([result, count]) => (
-              <div key={result} className="flex justify-between gap-3">
-                <dt className={TONE_TEXT[tone(result, result === 'REPLAYED')]}>{result}</dt>
-                <dd className="tabular text-ink">{count}</dd>
+          <p className="label mb-1 text-ink-3">Answered so far</p>
+          <dl className="grid gap-1.5">
+            {Object.entries(tally).length === 0 ? (
+              <div className="flex justify-between gap-3">
+                <dt className="text-ink-3">Nothing yet</dt>
+                <dd className="text-ink-3">—</dd>
               </div>
-            ))
-          )}
-          <div className="mt-2 flex justify-between gap-3 border-t border-rule pt-2">
-            <dt className="text-ink-3">In flight</dt>
-            <dd className="tabular text-ink">
-              {
-                sorted.filter((attempt) => attempt.startMs <= playhead && attempt.endMs > playhead)
-                  .length
-              }
-            </dd>
-          </div>
-        </dl>
+            ) : (
+              Object.entries(tally).map(([result, count]) => (
+                <div key={result} className="flex justify-between gap-3">
+                  <dt className={TONE_TEXT[tone(result, result === 'REPLAYED')]}>{result}</dt>
+                  <dd className="tabular text-ink">{count}</dd>
+                </div>
+              ))
+            )}
+            <div className="mt-2 flex justify-between gap-3 border-t border-rule pt-2">
+              <dt className="text-ink-3">In flight</dt>
+              <dd className="tabular text-ink">
+                {
+                  sorted.filter(
+                    (attempt) => attempt.startMs <= playhead && attempt.endMs > playhead,
+                  ).length
+                }
+              </dd>
+            </div>
+          </dl>
+        </div>
       </div>
     </div>
   )

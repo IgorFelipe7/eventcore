@@ -113,12 +113,13 @@ export default async function MyRegistrationsPage() {
                     ))}
                   </ol>
                   <div className="col-span-12 md:col-span-3 md:justify-self-end">
-                    {registration.status === 'CONFIRMED' || registration.status === 'WAITLISTED' ? (
-                      <CancelForm
-                        registrationId={registration.registrationId}
-                        idempotencyKey={randomUUID()}
-                      />
-                    ) : null}
+                    <CancelForm
+                      registrationId={registration.registrationId}
+                      idempotencyKey={randomUUID()}
+                      cancellable={
+                        registration.status === 'CONFIRMED' || registration.status === 'WAITLISTED'
+                      }
+                    />
                   </div>
                 </li>
               ))}

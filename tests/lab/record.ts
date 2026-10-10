@@ -32,6 +32,10 @@ try {
       )
       .join(' · ')
     log(`  ${replay.order}. ${replay.title} — ${verdict}`)
+    const broken = replay.variants.some(
+      (variant) => variant.safe && variant.checks.some((check) => !check.passed),
+    )
+    if (broken) process.exitCode = 1
   }
 } finally {
   await api.close()

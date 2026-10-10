@@ -61,6 +61,8 @@ export function CodeBlock({
         </div>
       ) : null}
       <pre
+        tabIndex={wrap ? undefined : 0}
+        aria-label={wrap ? undefined : `${title ?? language} code, scrollable`}
         className={`py-3 font-mono text-[0.8125rem] leading-6 text-ink-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'}`}
       >
         <code>
@@ -69,7 +71,7 @@ export function CodeBlock({
               key={index}
               className={`grid grid-cols-[2.5rem_1fr] pr-4 ${highlight.includes(index + 1) ? 'bg-signal-wash' : ''}`}
             >
-              <span aria-hidden className="select-none pr-3 text-right text-ink-3/70 tabular">
+              <span aria-hidden className="select-none pr-3 text-right text-ink-3 tabular">
                 {index + 1}
               </span>
               <span>

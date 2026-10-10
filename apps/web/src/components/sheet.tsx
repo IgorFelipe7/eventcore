@@ -26,7 +26,7 @@ export function ZoneRuler({ className = '' }: { readonly className?: string }) {
   return (
     <div aria-hidden className={`grid grid-cols-12 gap-x-4 md:gap-x-6 ${className}`}>
       {Array.from({ length: 12 }, (_, index) => (
-        <span key={index} className="label border-l border-rule pl-1.5 pt-1 text-ink-3/70">
+        <span key={index} className="label border-l border-rule pl-1.5 pt-1 text-ink-3">
           {index + 1}
         </span>
       ))}

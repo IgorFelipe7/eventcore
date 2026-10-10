@@ -21,9 +21,11 @@ function CancelButton() {
 export function CancelForm({
   registrationId,
   idempotencyKey,
+  cancellable,
 }: {
   readonly registrationId: string
   readonly idempotencyKey: string
+  readonly cancellable: boolean
 }) {
   const [state, formAction] = useActionState(cancelRegistrationAction, IDLE)
   const key = state.kind === 'problem' || state.kind === 'unavailable' ? state.key : idempotencyKey
@@ -32,7 +34,7 @@ export function CancelForm({
     <form action={formAction} className="flex flex-wrap items-center gap-3">
       <input type="hidden" name="registrationId" value={registrationId} />
       <input type="hidden" name="idempotencyKey" value={key} />
-      <CancelButton />
+      {cancellable ? <CancelButton /> : null}
       <p role="status" className="text-sm text-ink-2">
         {state.kind === 'cancelled'
           ? state.promoted

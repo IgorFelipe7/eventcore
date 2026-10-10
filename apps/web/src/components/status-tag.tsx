@@ -32,7 +32,7 @@ export function RegistrationStatusTag({
     <span className={`${base} ${style.tone}`}>
       <span aria-hidden>{style.glyph}</span>
       {style.label}
-      {status === 'WAITLISTED' && position ? <span>#{position}</span> : null}
+      {status === 'WAITLISTED' && position ? <span> #{position}</span> : null}
     </span>
   )
 }
