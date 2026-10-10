@@ -13,6 +13,7 @@
     "@eventcore/auth": "workspace:*",
     "@eventcore/contracts": "workspace:*",
     "@eventcore/domain": "workspace:*",
+    "marked": "^18.1.1",
     "next": "16.4.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

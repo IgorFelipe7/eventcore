@@ -109,3 +109,90 @@
 @utility measure {
   max-width: 68ch;
 }
+
+@utility sheet-prose {
+  color: var(--color-ink-2);
+  line-height: 1.6;
+
+  & h2 {
+    margin-top: 2rem;
+    font-size: 1.375rem;
+    color: var(--color-ink);
+  }
+
+  & h3 {
+    margin-top: 1.5rem;
+    font-size: 1.125rem;
+    color: var(--color-ink);
+  }
+
+  & p,
+  & ul,
+  & ol,
+  & table,
+  & pre {
+    margin-top: 0.875rem;
+  }
+
+  & ul {
+    list-style: square;
+    padding-left: 1.25rem;
+  }
+
+  & ol {
+    list-style: decimal;
+    padding-left: 1.25rem;
+  }
+
+  & li + li {
+    margin-top: 0.25rem;
+  }
+
+  & strong {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  & code {
+    background: var(--color-rule-soft);
+    padding: 0.05rem 0.3rem;
+    border-radius: 2px;
+    font-size: 0.85em;
+  }
+
+  & pre {
+    overflow-x: auto;
+    border: 1px solid var(--color-ink);
+    background: var(--color-sheet);
+    padding: 0.875rem 1rem;
+    font-size: 0.8125rem;
+  }
+
+  & pre code {
+    background: transparent;
+    padding: 0;
+  }
+
+  & table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+  }
+
+  & th {
+    border-bottom: 1px solid var(--color-ink);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label--letter-spacing);
+    text-transform: uppercase;
+    color: var(--color-ink-3);
+  }
+
+  & td {
+    border-bottom: 1px solid var(--color-rule);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    vertical-align: top;
+  }
+}
