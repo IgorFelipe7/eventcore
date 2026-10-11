@@ -7,7 +7,7 @@ test('Fig. 1 can be stepped through with the keyboard alone', async ({ page }) =
   await figure.getByRole('button', { name: 'Next step' }).focus()
   for (let step = 0; step < 5; step += 1) await page.keyboard.press('Enter')
   await expect(figure).toContainText('201 · WAITLISTED #1')
-  await expect(figure.getByRole('button', { name: /Go to t₅/ })).toHaveAttribute(
+  await expect(figure.getByRole('button', { name: /^t₅, step 5/ })).toHaveAttribute(
     'aria-current',
     'step',
   )

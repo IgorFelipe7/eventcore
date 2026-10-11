@@ -289,7 +289,7 @@ export function LastSeatFigure() {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'go', step: index })}
-                  aria-label={`Go to ${entry.tick}: ${entry.caption}`}
+                  aria-label={`${entry.tick}, step ${index}: ${entry.caption}`}
                   aria-current={index === state.step ? 'step' : undefined}
                   className={`grid size-8 place-items-center rounded-full border font-mono text-[0.7rem] transition-colors ${
                     index === state.step
@@ -299,7 +299,7 @@ export function LastSeatFigure() {
                         : 'border-ink-3/60 text-ink-3'
                   }`}
                 >
-                  {index}
+                  {entry.tick}
                 </button>
               </li>
             ))}
