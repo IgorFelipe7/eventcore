@@ -74,3 +74,27 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm audit --prod --audit-level=high
+
+  e2e:
+    name: End-to-end and accessibility
+    runs-on: ubuntu-latest
+    needs: quality
+    env:
+      AUTH_DEMO_SECRET: ci-only-demo-secret-that-is-long-enough-0123
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env && sed -i "s/^AUTH_DEMO_SECRET=.*/AUTH_DEMO_SECRET=$AUTH_DEMO_SECRET/" .env
+      - run: pnpm db:up && pnpm db:migrate
+      - run: pnpm --filter @eventcore/tests exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
