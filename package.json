@@ -24,7 +24,8 @@
     "db:generate": "pnpm --filter @eventcore/db generate",
     "db:migrate": "pnpm --filter @eventcore/db migrate",
     "db:seed": "pnpm --filter @eventcore/db seed",
-    "lab:record": "pnpm --filter @eventcore/tests lab:record"
+    "lab:record": "pnpm --filter @eventcore/tests lab:record",
+    "test:e2e": "pnpm --filter @eventcore/tests exec playwright test -c e2e/playwright.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
