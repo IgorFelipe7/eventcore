@@ -54,7 +54,7 @@ These are targets the code must satisfy, not achieved metrics.
 
 **In:** authentication through a token verifier, organizations and membership, events with capacity, registrations, waitlist, cancellation and promotion, capacity changes, audit trail, outbox with a demo mail sink, documented API, integration and concurrency tests against real PostgreSQL, and the Reliability Lab in replay mode.
 
-**Out:** payments, invoicing, ticket tiers, QR codes, resale, chat, generative AI, Kubernetes, distributed queues, microservices. Each of these needs its own requirements and none of them helps prove the hypothesis.
+**Out:** payments, invoicing, ticket tiers, QR codes, resale, chat, Kubernetes, distributed queues, microservices. Each of these needs its own requirements and none of them helps prove the hypothesis.
 
 ## Definition of done for the vision
 
