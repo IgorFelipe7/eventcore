@@ -1,38 +1,51 @@
 # 03 · Concept
 
-## Routes considered
+## Revision B · Lights on the last seat
 
-| Route | Central idea | Why it could work | Why it was not chosen |
+> **Every claim has a figure number — and the first figure is a room.**
+
+Revision A presented the product as an engineering drawing set. Revision B keeps that set and adds the moment before it: the reader arrives at night inside a small hall, every seat taken but one, and watches two requests race for it. When the race resolves, the lights come on and the page becomes the drawing set that explains what they just saw.
+
+### The sequence
+
+| Beat | Scroll | What the reader sees | What it proves |
 |---|---|---|---|
-| **A · Proof Sheet** | The product is presented as an engineering drawing set. Every page is a sheet; every claim has a figure number and a reference to its evidence. | Matches the thesis exactly: credibility comes from annotated, checkable artefacts. Distinctive without being theatrical. Works in print, at 360 px and without motion. | **Chosen.** |
-| B · Departure Board | A live operations board: dark, split-flap counters, constant motion. | Instantly communicates "real time". | Theatrical; dark dashboards are the default look of developer tools; motion would compete with the explanation and fail the reduced-motion test. |
-| C · Lab Notebook | Handwritten annotations over graph paper. | Warm, personal, explanatory. | Reads as playful to a business owner; hand-drawn type undermines the precision the product sells. |
+| Arrival | 0 % | A dark hall, 24 seats in curved rows, 23 lit dimly, one glowing ultramarine seat. HUD callouts name it: row, seat, `capacity 24 · confirmed 23`. | Scarcity is real and specific. |
+| Contention | 0–35 % | Two request beams, A and B, enter from opposite aisles toward the seat. | Concurrency, made visible. |
+| The lock | 35–55 % | A ring clamps the seat in A's colour; B stops short, its trail hatched: `waiting for lock`. | Serialization on one row. |
+| Decision | 55–75 % | The seat fills — `A · 201 CONFIRMED`. The counter ticks to 24 / 24. | The decision is taken under the lock. |
+| Queue | 75–100 % | B re-reads under the lock and drops into a queue lane: `B · 201 WAITLISTED #1`. | Fairness without a second seat. |
+| Lights on | exit | The background turns from night to drafting film; the sheet bar and title block appear. | The explanation begins. |
 
-## The chosen idea
+Under `prefers-reduced-motion`, or without WebGL, the hall is drawn once in its final state with the same callouts, and the beats are listed as text.
 
-> **Every claim has a figure number.**
+### Rules that follow
 
-The page never says "robust" or "scalable". It shows a figure, labels it, points at the part that matters and links the test that proves it.
+- Night is reserved for the claim (hero) and for instruments (the Lab timeline). Everything meant to be read sits on paper.
+- The signal colour still means only "the contested seat, the lock, focus". In the dark it may glow; it never decorates.
+- Every 3D element has a job in the race. Nothing orbits for its own sake.
+- Recorded data may move on the page; it is always labelled as a replay of a run, with the run's id.
+- Tickets are the domain's object: receipts, board rows and the hero's outcome labels share their form.
 
-### Where the idea is visible
+### Persuasion, revisited
 
-1. **Fig. 1 on the first sheet.** A seat plan with one free seat — the only coloured cell — and two requests approaching it. The reader runs the sequence; numbered callouts and the SQL panel advance together until one request is confirmed and the other is first in line.
-2. **The Reliability Lab** as a test report sheet: a conditions block (machine, PostgreSQL version, commit, date), the result, the invariant checks and a "what this does not prove" note.
-3. **The invariants table**, where each rule is paired with the layer that enforces it and the file that verifies it.
-4. **The title block** at the end of every sheet: author, revision, sheet number. It is how the page ends, and it is a quiet signature.
+The principles from revision A (listed at the end of this document) stay. Revision B adds three, with the same limits:
 
-### Rules that follow from the idea
+| Principle | Use | Limit |
+|---|---|---|
+| Narrative transport | The hero is a scene with a beginning, a conflict and a resolution the reader drives by scrolling. | It completes in about one and a half screen heights and never traps the reader. |
+| Contrast of light (figure–ground) | The dark-to-light transition marks the turn from "watch" to "understand". | Text contrast meets WCAG AA in both lights. |
+| Social proof, honestly | The replayed ledger shows real recorded decisions instead of logos or user counts. | Labelled as a replay of run 02, with its commit. |
 
-- One signal colour (ultramarine) for the contested seat, the lock, focus and the primary action. Nothing else competes with it.
-- Status is always text plus glyph; colour is redundant, never the only carrier.
-- Numbers on the page come from the database or from recorded runs, and say which.
-- Motion only explains: a request moving, a lock being held, a row changing state.
+## Revision A routes, kept for the record
 
-### Discarded, so it does not come back
+| Route | Status |
+|---|---|
+| A · Proof Sheet | Kept as the reading system of revision B. |
+| B · Departure Board | Rejected again: the board stays a component, not the identity. |
+| C · Lab Notebook | Rejected again. |
 
-Particle backgrounds, gradient meshes, glass panels, floating 3D devices, logo walls, testimonial carousels, "trusted by" strips, animated counters that count up to invented numbers.
-
-## Persuasion, with limits
+## Persuasion principles from revision A (still in force)
 
 The page uses well-documented principles of attention and judgement, and refuses the ones that manipulate.
 

@@ -1,96 +1,100 @@
-# DESIGN.md — EventCore web
+# DESIGN.md — EventCore web · revision B
 
-The executable design system for `apps/web`. It translates the concept in [`docs/experience/03-concept.md`](docs/experience/03-concept.md) ("every claim has a figure number") into rules that can be implemented and checked. Tokens live in `apps/web/src/styles/tokens.css`; this file explains them.
+The executable design system for `apps/web`. It implements the concept in [`docs/experience/03-concept.md`](docs/experience/03-concept.md) — *every claim has a figure number, and the first figure is a room* — on top of the benchmark in [`02-references.md`](docs/experience/02-references.md). Tokens live in `apps/web/src/styles/tokens.css`.
 
-## 1. Concept in two applications
+## 1. Two lights
 
-- **Fig. 1** on the landing sheet: a dimensioned seat plan with one free seat in the signal colour, numbered callouts and a synchronized SQL panel.
-- **The Lab** as a test report sheet: conditions block, result, invariant checks, limits.
+| Scene | Used for | Ground | Why |
+|---|---|---|---|
+| **Night** | The hero hall, the Lab's measured timeline, the footer | `--night #07090C`, raised `--night-2 #0E1218` | The claim and the instruments. Glow carries meaning only in the dark (P3). |
+| **Paper** | Everything meant to be read: sections, tables, forms, dashboards | `--paper #ECEEEA`, raised `--sheet #F7F8F5` | Revision A's drafting film: highest reading comfort, calm, fast. |
+
+The hero ends by changing light: the page background interpolates from night to paper over the last 20 % of the pinned scene. Without JavaScript the hero is simply night and the next section paper.
 
 ## 2. Typography
 
-| Role | Family | Weights | Size (mobile → desktop) | Notes |
-|---|---|---|---|---|
-| Display | IBM Plex Sans Condensed | 600 | 40 → 88 px, line-height 0.95, tracking −0.02em | Headlines and sheet titles only. Long headlines wrap; type is never squeezed to fit. |
-| Heading | IBM Plex Sans Condensed | 600 | 24 → 36 px | Section titles. |
-| Body | IBM Plex Sans | 400, 500 | 16 → 18 px, line-height 1.55 | Reading width capped at 68ch. |
-| Data | IBM Plex Mono | 400, 500 | 12 → 14 px | Counters, ids, SQL, timestamps. `font-variant-numeric: tabular-nums slashed-zero`. |
-| Label | IBM Plex Mono | 500 | 11 → 12 px, uppercase, tracking 0.08em | Kickers, figure numbers, table headers, title block. |
+| Role | Family | Setting | Source of the decision |
+|---|---|---|---|
+| Hero display | IBM Plex Sans Condensed 600 | `clamp(3rem, 1.6rem + 6vw, 8.5rem)`, line height 0.88, tracking **−0.035em** | P4: tension from tracking (Linear −2.2 %, Vercel −6 %) |
+| Section display | IBM Plex Sans Condensed 600 | `clamp(1.75rem, 1.2rem + 2.2vw, 3.25rem)`, line height 0.98, tracking −0.025em | — |
+| **Accent** | **Instrument Serif italic 400** | One keyword per headline, optically +6 %, never a whole line | P4: Lando's serif keywords |
+| Two-tone lead | Same as display | Lead clause in ink, continuation in `--ink-3` / `--night-muted` | P4: Stripe |
+| Body | IBM Plex Sans 400/500 | 16 → 18 px, line height 1.55, measure 68ch | — |
+| HUD and data | IBM Plex Mono 500 | 11 px caps, tracking 0.12em on night; tabular, slashed zero | P2: Igloo's instrument labels; Lusion uses the same mono |
 
-Plex was chosen over the blueprint's suggested Inter/Geist because its engineering heritage carries the drawing-sheet concept and because the condensed cut gives large headlines without losing reading width at 360 px. All three are open-licensed (SIL OFL) and self-hosted by `next/font` at build time.
+All four families are SIL OFL and self-hosted through `next/font`.
 
 ## 3. Colour by function
 
-Contrast ratios measured against `--paper` and `--sheet` (WCAG 2.2, 4.5:1 minimum for text).
+| Token | Value | Function | Contrast |
+|---|---|---|---|
+| `--paper` / `--sheet` | `#ECEEEA` / `#F7F8F5` | Paper grounds | — |
+| `--ink`, `--ink-2`, `--ink-3` | `#0F1412`, `#444C47`, `#5F6762` | Text on paper | 15.9 / 7.6 / 5.0 on paper |
+| `--night`, `--night-2` | `#07090C`, `#0E1218` | Night grounds | — |
+| `--night-ink` | `#E9EDF3` | Text on night | 17.0 on night |
+| `--night-muted` | `#8C95A3` | Secondary text on night | 6.6 on night |
+| `--night-line` | `rgba(233,237,243,.10)` | Hairlines on night | non-text |
+| `--signal` | `#2536E0` | Contested seat, lock, focus, primary hover on paper | 6.7 on paper |
+| `--signal-glow` | `#6B7BFF` | The same meaning on night; text and emissive light | 5.6 on night |
+| `--confirmed` / `--confirmed-glow` | `#0B6A47` / `#3DD68C` | Confirmed, on paper / on night | 5.7 / 10.6 |
+| `--waitlisted` / `--waitlisted-glow` | `#8A5800` / `#F2B84B` | Waitlisted | 5.2 / 11.1 |
+| `--rejected` / `--rejected-glow` | `#A42A1D` / `#FF6B5E` | Rejected, errors | 6.1 / 7.1 |
 
-| Token | Value | Function | On paper | On sheet |
-|---|---|---|---|---|
-| `--paper` | `#ECEEEA` | Page background, a cool drafting-film grey. | — | — |
-| `--sheet` | `#F7F8F5` | Raised sheets, tables, inputs. | — | — |
-| `--ink` | `#0F1412` | Text, strong rules, primary button fill. | 15.9 | 17.5 |
-| `--ink-2` | `#444C47` | Secondary text. | 7.6 | 8.3 |
-| `--ink-3` | `#5F6762` | Tertiary text, input borders, captions. | 5.0 | 5.5 |
-| `--rule` | `#C9CEC7` | Hairlines and grid only, never text. | 1.4 | 1.5 |
-| `--signal` | `#2536E0` | The contested seat, the lock, focus rings, the primary action hover. Nothing else. | 6.7 | 7.3 |
-| `--confirmed` | `#0B6A47` | Status: confirmed. | 5.7 | 6.2 |
-| `--waitlisted` | `#8A5800` | Status: waitlisted. | 5.2 | 5.7 |
-| `--rejected` | `#A42A1D` | Status: rejected, errors. | 6.1 | 6.7 |
-| `--cancelled` | `#5A615C` | Status: cancelled, disabled. | 5.5 | 6.0 |
+Status is never colour alone: glyph + word everywhere, including HUD callouts.
 
-Status is never colour alone. Every status renders as glyph + word: `● Confirmed`, `◐ Waitlisted #3`, `× Rejected`, `○ Cancelled`.
+## 4. Grid, frame and marks
 
-## 4. Grid and space
+- Sheet: max 1320 px, 12 columns, gutters 24 px (16 px below 640 px), margins 16 / 32 / 48 px.
+- **Column guides** (P7): on paper sections, 1 px `--rule-soft` verticals on the 12-column edges, behind content, `aria-hidden`.
+- **Registration crosses**: `+` at the four corners of every section frame and along the hero's bottom edge.
+- Zone ruler on Sheet 01 continues from revision A.
 
-- **Sheet:** max width 1320 px, 12 columns, gutters 24 px (16 px under 640 px), outer margins 16 / 32 / 48 px.
-- **Spacing scale:** 4, 8, 12, 16, 24, 32, 48, 64, 96, 128 px. Sections are separated by 96–128 px on desktop, 64 px on mobile.
-- **Zone ruler:** the first sheet carries column numbers 1–12 along its top edge, like the zone markers of a drawing. Decorative, `aria-hidden`.
-- **Registration marks:** sheets have corner crop marks drawn in `--rule`.
+## 5. The hall (hero scene)
 
-## 5. Imagery
-
-There are no photographs or illustrations of people or venues. Figures are drawn from data: seat grids, timelines, latency strips, tables. Every figure has a number and a caption that says whether it is illustrative or measured.
+| Element | Specification |
+|---|---|
+| Seats | 24 instanced rounded boxes in four curved rows of six, on a raked floor; 23 at `--night-2` with a faint rim light, one emissive `--signal-glow`. |
+| Requests | Two light beams with short trails, A from the left aisle, B from the right. A uses `--signal-glow`, B `--waitlisted-glow` while waiting. |
+| Lock | A torus that closes around the seat while held. |
+| Queue lane | A thin line leading out of the hall where B parks as `#1`. |
+| Camera | Slight perspective from the balcony; pointer parallax ±1.5°; never moves on its own. |
+| HUD | HTML callouts positioned from projected 3D coordinates every frame, with leader lines to their anchors (P2). |
+| Budget | `three` loaded only by the hero, after first paint; device pixel ratio capped at 2; one draw call for the seats; paused when off-screen. |
+| Fallback | A static SVG of the hall in its final state, rendered on the server, with the same callouts. Used for no-JS, no-WebGL and reduced motion. |
 
 ## 6. Components and states
 
+Revision A's components remain. New ones:
+
 | Component | States | Rules |
 |---|---|---|
-| Button / primary | default, hover, focus-visible, pressed, pending, disabled | Ink fill, paper text; hover shifts to signal. Pending keeps the label and adds an inline progress mark; the button never changes width. |
-| Button / secondary | same | 1 px ink outline. |
-| Link | default, hover, focus-visible, visited | Underline offset 3 px; arrow glyph for navigation. |
-| Status tag | confirmed, waitlisted, rejected, cancelled | Glyph + word + optional position. |
-| Seat meter | n of capacity | Cells for capacity ≤ 60, a proportional bar above that; always with the numbers in text. |
-| Receipt | success, replayed, failure | Lists the server-side steps and the request id. |
-| Form field | default, focus, invalid, disabled | Persistent label above, hint below, error replaces hint with `aria-describedby`; focus moves to the first invalid field. |
-| Table | default, empty, loading | Hairline rows, mono headers, right-aligned numbers. |
-| Notice | info, warning, offline | Left rule in the status colour, title + one sentence + next action. |
-
-Focus: 2 px `--signal` outline with 2 px offset on every interactive element. Hit areas are at least 44 × 44 px on touch.
+| **Ticket** | confirmed, waitlisted, rejected, replayed | Main body + stub separated by a perforated rule with semicircle notches; seat or position on the stub; the idempotency key printed like a serial number. Used by the registration receipt, board rows and hero outcomes (P6). |
+| **Ledger tape** | running, paused, static | A horizontal tape of recorded decisions (`P042 · 201 · WAITLISTED #37 · 512 ms`). Pauses on hover and focus; static under reduced motion; always labelled "replay of run 02 · commit …" (P5). |
+| **Callout** | default, active | Mono label, 1 px leader line, 5 px anchor dot; active callout in `--signal-glow`. |
+| **Reveal heading** | hidden-before-hydration never | Server renders the final text. After hydration, lines rise 0.6em with a 60 ms stagger once, when entering the viewport. |
 
 ## 7. Motion
 
-| Motion | Function | Trigger | Duration | Reduced motion |
+| Motion | Function | Trigger | Timing | Reduced motion |
 |---|---|---|---|---|
-| Fig. 1 sequence | Explain lock serialization. | *Run* or step buttons. Never autoplays. | 900 ms per step, `cubic-bezier(.2,.7,.2,1)` | Final state shown, steps as an ordered list; controls still step through text. |
-| Lab timeline scrub | Relate attempts to decisions over time. | Pointer, keyboard or play. | Driven by the recorded timeline, scaled to 4 s. | Static full timeline. |
-| Hairline draw-in | Signal a new section. | Section enters viewport (once). | 500 ms | None. |
-| Status change | Confirm that a value changed. | Data update. | 180 ms background flash. | None. |
+| Hall scene | Show contention, lock, decision, queue | Scroll position through a pinned 220 vh section | Scrubbed, eased with a 0.6 s catch-up | Static final frame; beats as text |
+| Light change | Mark the turn from watching to reading | Last 20 % of the hall | Scrubbed | None; hard edge |
+| Ledger tape | Show recorded proof moving | Always, while visible | 60 s per loop | Static |
+| Reveal heading | Pace section entries | Enter viewport, once | 700 ms, `cubic-bezier(.2,.7,.2,1)` | None |
+| Fig. 1, Lab timeline, status flash | As revision A | — | — | As revision A |
 
-No scroll-jacking, no parallax, no smooth-scroll library. Content is never hidden waiting for an animation.
+Scroll is native: no scroll-jacking library. Pinning uses GSAP ScrollTrigger; scrubbed values never hide content that has no static equivalent.
 
-## 8. Restrictions and why
+## 8. Restrictions
 
 | Avoid | Reason |
 |---|---|
-| Gradients, glass, glow, noise textures | They signal "template" and add nothing to a mechanism explanation. |
-| More than one accent colour | The signal colour must keep meaning "the contested thing". |
-| Count-up number animations | They imply live data and invite invented numbers. |
-| Icons as the only label | Status and navigation must be readable as words. |
-| Cards with drop shadows as the default container | Sheets and hairline tables already structure the page. |
+| Preloaders, intro gates, sound | The thesis must be readable in the first second. |
+| Smooth-scroll hijacking | Native scroll keeps anchors, keyboard and assistive tech predictable. |
+| Glow outside the night scene | On paper the signal is ink-flat; glow would mean nothing. |
+| Gradient text, rotating words, logo walls | Consumer-marketing tells; no customers to show. |
+| Animated count-ups | They imply live data. |
 
 ## 9. Validation targets
 
-- Widths: 360, 390, 768, 1280, 1440 px; 200 % zoom at 1280 px.
-- Keyboard: every action reachable, visible focus, logical order, skip link.
-- `prefers-reduced-motion: reduce`: all information available.
-- No horizontal scroll at any target width.
-- Lighthouse accessibility audit with no failing audits on `/`, `/explore` and `/lab` (recorded in `docs/experience/09-validation.md` with the conditions of the run).
+Revision A's targets stand (360–1440 px, 200 % zoom, keyboard, reduced motion, no horizontal scroll, Lighthouse accessibility without failing audits). Added: the hero must reach first contentful paint before `three` is requested, and the scene must hold 60 fps on the test machine while scrubbing.
