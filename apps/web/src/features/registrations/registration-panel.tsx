@@ -5,6 +5,7 @@ import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { Notice } from '@/components/notice'
 import { RegistrationStatusTag } from '@/components/status-tag'
+import { Ticket, type TicketTone } from '@/components/ticket'
 import { registerForEventAction } from '@/lib/actions/registration-actions'
 import { type CommandState, IDLE } from './action-state'
 
@@ -42,8 +43,19 @@ function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'reg
     REJECTED: 'Every seat is taken and this event doesn’t keep a waitlist.',
     CANCELLED: 'This registration is cancelled.',
   }
+  const stub: Record<RegistrationStatus, { label: string; value: string; tone: TicketTone }> = {
+    CONFIRMED: { label: 'Admit one', value: '✓', tone: 'confirmed' },
+    WAITLISTED: {
+      label: 'In line',
+      value: `#${state.waitlistPosition ?? '?'}`,
+      tone: 'waitlisted',
+    },
+    REJECTED: { label: 'Sold out', value: '×', tone: 'rejected' },
+    CANCELLED: { label: 'Cancelled', value: '○', tone: 'neutral' },
+  }
+  const { label, value, tone } = stub[state.status]
   return (
-    <div role="status" className="border border-ink bg-sheet">
+    <Ticket tone={tone} stubLabel={label} stubValue={value} serial={state.key.slice(0, 8)} live>
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink px-4 py-3">
         <RegistrationStatusTag status={state.status} position={state.waitlistPosition} />
         <span className="label text-ink-3">
@@ -92,7 +104,7 @@ function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'reg
           </dd>
         </dl>
       </div>
-    </div>
+    </Ticket>
   )
 }
 
