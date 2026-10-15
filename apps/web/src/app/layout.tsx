@@ -1,5 +1,10 @@
 import { type Metadata, type Viewport } from 'next'
-import { IBM_Plex_Mono, IBM_Plex_Sans, IBM_Plex_Sans_Condensed } from 'next/font/google'
+import {
+  IBM_Plex_Mono,
+  IBM_Plex_Sans,
+  IBM_Plex_Sans_Condensed,
+  Instrument_Serif,
+} from 'next/font/google'
 import { type ReactNode } from 'react'
 import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
@@ -16,6 +21,14 @@ const plexCondensed = IBM_Plex_Sans_Condensed({
   subsets: ['latin'],
   weight: ['500', '600'],
   variable: '--font-plex-condensed',
+  display: 'swap',
+})
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: 'italic',
+  variable: '--font-instrument-serif',
   display: 'swap',
 })
 
@@ -48,7 +61,7 @@ export default function RootLayout({ children }: { readonly children: ReactNode 
   return (
     <html
       lang="en"
-      className={`${plexSans.variable} ${plexCondensed.variable} ${plexMono.variable}`}
+      className={`${plexSans.variable} ${plexCondensed.variable} ${plexMono.variable} ${instrumentSerif.variable}`}
     >
       <body className="flex min-h-dvh flex-col">
         <SiteHeader />

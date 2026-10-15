@@ -22,7 +22,10 @@ export async function SiteHeader() {
         : null
 
   return (
-    <header className="sticky top-0 z-20 border-b border-ink bg-paper/95 backdrop-blur-[2px]">
+    <header
+      data-site-header
+      className="sticky top-0 z-20 border-b border-ink bg-paper/95 backdrop-blur-md"
+    >
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:text-paper"

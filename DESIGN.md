@@ -77,13 +77,13 @@ Revision A's components remain. New ones:
 
 | Motion | Function | Trigger | Timing | Reduced motion |
 |---|---|---|---|---|
-| Hall scene | Show contention, lock, decision, queue | Scroll position through a pinned 220 vh section | Scrubbed, eased with a 0.6 s catch-up | Static final frame; beats as text |
-| Light change | Mark the turn from watching to reading | Last 20 % of the hall | Scrubbed | None; hard edge |
+| Hall scene | Show contention, lock, decision, queue | Scroll position through a sticky 240 vh section | Scrubbed, eased with a 0.6 s catch-up | Static final frame; beats as text |
+| Light change | Mark the turn from watching to reading; the render dissolves into a line drawing of the same hall, projected with the same camera | Last 10 % of the hall | Scrubbed | None; hard edge |
 | Ledger tape | Show recorded proof moving | Always, while visible | 60 s per loop | Static |
 | Reveal heading | Pace section entries | Enter viewport, once | 700 ms, `cubic-bezier(.2,.7,.2,1)` | None |
 | Fig. 1, Lab timeline, status flash | As revision A | — | — | As revision A |
 
-Scroll is native: no scroll-jacking library. Pinning uses GSAP ScrollTrigger; scrubbed values never hide content that has no static equivalent.
+Scroll is native: no scroll-jacking library and no animation library. The hall pins with `position: sticky`; its progress is read from the section's bounding box on scroll and eased toward the target every frame, which gives the scrubbed feel without taking scroll away from the reader. Scrubbed values never hide content that has no static equivalent.
 
 ## 8. Restrictions
 

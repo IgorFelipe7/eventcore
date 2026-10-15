@@ -196,3 +196,29 @@
     vertical-align: top;
   }
 }
+
+html:not([data-scene='paper']) body:has(.hall) [data-site-header] {
+  background-color: rgb(7 9 12 / 0.55);
+  border-color: var(--color-night-line);
+  color: var(--color-night-ink);
+}
+
+html:not([data-scene='paper']) body:has(.hall) [data-site-header] :is(.label, .text-ink-3) {
+  color: var(--color-night-muted);
+}
+
+html:not([data-scene='paper']) body:has(.hall) [data-site-header] :is(summary, nav) {
+  border-color: var(--color-night-line);
+}
+
+html:not([data-scene='paper']) body:has(.hall) [data-site-header] :is(a, summary):hover {
+  background-color: var(--color-night-ink);
+  color: var(--color-night);
+}
+
+[data-site-header] {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease;
+}

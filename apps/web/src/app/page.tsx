@@ -1,7 +1,8 @@
-import { Arrow, ButtonLink } from '@/components/button'
-import { SheetBar, TitleBlock, ZoneRuler } from '@/components/sheet'
+import { SectionHeading, SheetBar, TitleBlock, ZoneRuler } from '@/components/sheet'
+import { HallHero } from '@/features/landing/hall/hall-hero'
 import { LastSeatFigure } from '@/features/landing/last-seat-figure'
 import { LAST_SEAT_SEQUENCE } from '@/features/landing/last-seat-sequence'
+import { LedgerTape } from '@/features/landing/ledger-tape'
 import { BaselineCallout, ProofSection } from '@/features/landing/proof'
 import {
   AnatomySection,
@@ -22,32 +23,26 @@ const FACTS = [
 export default function LandingPage() {
   return (
     <main id="main">
+      <HallHero />
+      <LedgerTape />
       <SheetBar sheet={sheet} />
 
-      <section aria-labelledby="hero" className="sheet-frame pt-6">
+      <section aria-labelledby="statements" className="sheet-frame pt-6">
         <ZoneRuler className="hidden md:grid" />
-        <div className="mt-8 grid grid-cols-12 gap-x-4 gap-y-12 md:gap-x-6 lg:mt-14">
+        <div className="mt-12 grid grid-cols-12 gap-x-4 gap-y-12 md:gap-x-6 lg:mt-16">
           <div className="col-span-12 lg:col-span-5">
-            <p className="label text-ink-3">Reservations under contention</p>
-            <h1
-              id="hero"
-              className="mt-5 text-[clamp(2.5rem,1.4rem+3.6vw,4.75rem)] leading-[0.95] tracking-[-0.02em]"
-            >
-              Two requests. One seat. <span className="text-signal">Exactly one</span> confirmation.
-            </h1>
-            <p className="measure mt-7 text-lg text-ink-2">
-              EventCore is a reservation engine for events with limited seats. Every decision is
-              serialized on a single database row, so capacity holds under concurrent load, retries
-              never book twice and the waitlist keeps its order.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <ButtonLink href="/lab">
-                Open the Reliability Lab <Arrow />
-              </ButtonLink>
-              <ButtonLink href="#fig-1" variant="secondary">
-                Run Fig. 1
-              </ButtonLink>
-            </div>
+            <SectionHeading
+              id="statements"
+              mark="Fig. 1 · Lights on"
+              title="The race you just watched, statement by statement."
+              lead={
+                <p>
+                  Same two requests, same seat — now as the SQL that decides it. Step through it at
+                  your own pace; every statement shown is one the code really runs.
+                </p>
+              }
+              stacked
+            />
             <dl className="mt-12 grid grid-cols-3 border-t border-ink">
               {FACTS.map((fact) => (
                 <div
@@ -56,7 +51,7 @@ export default function LandingPage() {
                 >
                   <dt className="label text-ink-3">{fact.unit}</dt>
                   <dd className="mt-1">
-                    <span className="font-display text-4xl font-semibold tabular">
+                    <span className="font-display text-5xl font-semibold tracking-[-0.03em] tabular">
                       {fact.value}
                     </span>
                     <span className="mt-1 block text-xs text-ink-2">{fact.detail}</span>

@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { Reveal } from './reveal'
 
 export const SHEET_REVISION = { letter: 'A', date: '2026-10-18' } as const
 export const SHEET_COUNT = 6
@@ -91,25 +92,37 @@ export function SectionHeading({
   title,
   lead,
   id,
+  stacked = false,
 }: {
   readonly mark: string
-  readonly title: string
+  readonly title: ReactNode
   readonly lead?: ReactNode
   readonly id?: string
+  readonly stacked?: boolean
 }) {
   return (
     <header className="grid grid-cols-12 gap-x-4 gap-y-4 md:gap-x-6">
-      <div className="col-span-12 md:col-span-3">
+      <div className={stacked ? 'col-span-12' : 'col-span-12 md:col-span-3'}>
         <div className="h-px origin-left animate-draw bg-ink" />
         <p className="label mt-3 text-ink-3">{mark}</p>
       </div>
-      <div className="col-span-12 md:col-span-9">
-        <h2 id={id} className="text-heading text-ink">
-          {title}
-        </h2>
-        {lead ? <div className="measure mt-4 text-lg text-ink-2">{lead}</div> : null}
+      <div className={stacked ? 'col-span-12' : 'col-span-12 md:col-span-9'}>
+        <Reveal>
+          <h2 id={id} className="text-heading text-ink">
+            {title}
+          </h2>
+        </Reveal>
+        {lead ? <div className="measure mt-5 text-lg text-ink-2">{lead}</div> : null}
       </div>
     </header>
+  )
+}
+
+export function Accent({ children }: { readonly children: ReactNode }) {
+  return (
+    <span className="font-accent text-[1.06em] font-normal italic tracking-[-0.01em] text-signal">
+      {children}
+    </span>
   )
 }
 
