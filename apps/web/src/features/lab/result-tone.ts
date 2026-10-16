@@ -32,3 +32,21 @@ export const TONE_TEXT: Record<ResultTone, string> = {
   neutral: 'text-ink-2',
   signal: 'text-signal',
 }
+
+export const NIGHT_FILL: Record<ResultTone, string> = {
+  confirmed: 'var(--color-confirmed-glow)',
+  waitlisted: 'var(--color-waitlisted-glow)',
+  rejected: 'var(--color-rejected-glow)',
+  cancelled: 'var(--color-night-muted)',
+  neutral: 'var(--color-night-muted)',
+  signal: 'var(--color-signal-glow)',
+}
+
+export const NIGHT_TEXT: Record<ResultTone, string> = {
+  confirmed: 'text-confirmed-glow',
+  waitlisted: 'text-waitlisted-glow',
+  rejected: 'text-rejected-glow',
+  cancelled: 'text-night-muted',
+  neutral: 'text-night-muted',
+  signal: 'text-signal-glow',
+}

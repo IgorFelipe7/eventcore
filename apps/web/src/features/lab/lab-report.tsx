@@ -5,7 +5,7 @@ import { CropMarks } from '@/components/sheet'
 import { EvidenceLink } from '@/features/landing/evidence-link'
 import { formatDateTime } from '@/lib/format'
 import { AttemptTimeline } from './attempt-timeline'
-import { TONE_TEXT, toneOf } from './result-tone'
+import { NIGHT_TEXT, toneOf } from './result-tone'
 import { SeatOutcome } from './seat-outcome'
 
 const pad = (value: number) => String(value).padStart(2, '0')
@@ -134,16 +134,19 @@ export function LabReport({
         </div>
       </section>
 
-      <section aria-labelledby="timeline" className="border-b border-ink p-5 sm:p-7">
+      <section
+        aria-labelledby="timeline"
+        className="border-b border-ink bg-night p-5 text-night-ink sm:p-7"
+      >
         <div className="flex flex-wrap items-baseline justify-between gap-3">
-          <h3 id="timeline" className="label text-ink">
+          <h3 id="timeline" className="label text-night-ink">
             Fig. 4.{replay.order} · every attempt, as the caller saw it
           </h3>
-          <span className="label rounded-[2px] border border-ink-3/50 px-1.5 py-0.5 text-ink-3">
+          <span className="label rounded-[2px] border border-night-line px-1.5 py-0.5 text-night-muted">
             measured
           </span>
         </div>
-        <p className="mt-2 max-w-3xl text-sm text-ink-2">
+        <p className="mt-2 max-w-3xl text-sm text-night-muted">
           Each bar runs from the moment a request was sent to the moment its answer arrived,
           including time spent waiting for a pooled connection and for the inventory lock. Colour is
           the answer.
@@ -159,20 +162,20 @@ export function LabReport({
           <div className="mt-6 overflow-x-auto">
             <table className="w-full min-w-[34rem] text-left text-sm">
               <thead>
-                <tr className="border-b border-ink">
-                  <th scope="col" className="label py-2 pr-3 text-ink-3">
+                <tr className="border-b border-night-line">
+                  <th scope="col" className="label py-2 pr-3 text-night-muted">
                     Actor
                   </th>
-                  <th scope="col" className="label py-2 pr-3 text-right text-ink-3">
+                  <th scope="col" className="label py-2 pr-3 text-right text-night-muted">
                     Sent
                   </th>
-                  <th scope="col" className="label py-2 pr-3 text-right text-ink-3">
+                  <th scope="col" className="label py-2 pr-3 text-right text-night-muted">
                     Answered
                   </th>
-                  <th scope="col" className="label py-2 pr-3 text-ink-3">
+                  <th scope="col" className="label py-2 pr-3 text-night-muted">
                     Answer
                   </th>
-                  <th scope="col" className="label py-2 text-right text-ink-3">
+                  <th scope="col" className="label py-2 text-right text-night-muted">
                     DB decision
                   </th>
                 </tr>
@@ -181,23 +184,23 @@ export function LabReport({
                 {variant.attempts.map((attempt, index) => (
                   <tr
                     key={`${attempt.actor}-${index}`}
-                    className="border-b border-rule last:border-b-0"
+                    className="border-b border-night-line last:border-b-0"
                   >
-                    <td className="py-2 pr-3 font-sans text-sm text-ink">{attempt.actor}</td>
-                    <td className="py-2 pr-3 text-right tabular text-ink-2">
+                    <td className="py-2 pr-3 font-sans text-sm text-night-ink">{attempt.actor}</td>
+                    <td className="py-2 pr-3 text-right tabular text-night-muted">
                       {attempt.startMs.toFixed(1)} ms
                     </td>
-                    <td className="py-2 pr-3 text-right tabular text-ink-2">
+                    <td className="py-2 pr-3 text-right tabular text-night-muted">
                       {attempt.endMs.toFixed(1)} ms
                     </td>
                     <td
-                      className={`py-2 pr-3 ${TONE_TEXT[toneOf(attempt.result, attempt.replayed)]}`}
+                      className={`py-2 pr-3 ${NIGHT_TEXT[toneOf(attempt.result, attempt.replayed)]}`}
                     >
                       {attempt.httpStatus ? `${attempt.httpStatus} · ` : ''}
                       {attempt.result}
                       {attempt.replayed ? ' · replayed' : ''}
                     </td>
-                    <td className="py-2 text-right tabular text-ink">
+                    <td className="py-2 text-right tabular text-night-ink">
                       {attempt.decisionIndex ? `#${attempt.decisionIndex}` : '—'}
                     </td>
                   </tr>

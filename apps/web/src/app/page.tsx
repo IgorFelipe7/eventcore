@@ -1,4 +1,4 @@
-import { SectionHeading, SheetBar, TitleBlock, ZoneRuler } from '@/components/sheet'
+import { Accent, SectionHeading, SheetBar, TitleBlock, ZoneRuler } from '@/components/sheet'
 import { HallHero } from '@/features/landing/hall/hall-hero'
 import { LastSeatFigure } from '@/features/landing/last-seat-figure'
 import { LAST_SEAT_SEQUENCE } from '@/features/landing/last-seat-sequence'
@@ -34,7 +34,11 @@ export default function LandingPage() {
             <SectionHeading
               id="statements"
               mark="Fig. 1 · Lights on"
-              title="The race you just watched, statement by statement."
+              title={
+                <>
+                  The race you just watched, statement by <Accent>statement</Accent>.
+                </>
+              }
               lead={
                 <p>
                   Same two requests, same seat — now as the SQL that decides it. Step through it at

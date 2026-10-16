@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react'
 import { Arrow, ButtonLink } from '@/components/button'
 import { CodeBlock } from '@/components/code-block'
-import { SectionHeading } from '@/components/sheet'
+import { Accent, SectionHeading } from '@/components/sheet'
 import { EvidenceLink } from './evidence-link'
 import { FAILURES, INVARIANTS, KNOWN_LIMITS, TRANSACTION_STEPS } from './evidence'
 
@@ -11,7 +11,11 @@ export function FailureSection({ baseline }: { readonly baseline?: ReactNode }) 
       <SectionHeading
         id="failures"
         mark="§1 · Failure modes"
-        title="Read, then write, is a race."
+        title={
+          <>
+            Read, then write, is a <Accent>race</Accent>.
+          </>
+        }
         lead={
           <p>
             Most booking bugs are not exotic. They are what happens by default when a read and a
@@ -72,7 +76,11 @@ export function InvariantSection() {
       <SectionHeading
         id="invariants"
         mark="§2 · Guarantees"
-        title="Eight invariants. Each one has an owner and a test."
+        title={
+          <>
+            Eight invariants. Each one has an <Accent>owner</Accent> and a test.
+          </>
+        }
         lead={
           <p>
             A guarantee is only as strong as the layer that enforces it. Each rule below names that
@@ -125,7 +133,11 @@ export function AnatomySection() {
       <SectionHeading
         id="anatomy"
         mark="§3 · Mechanism"
-        title="One transaction. One lock order. Nine steps."
+        title={
+          <>
+            One transaction. One lock <Accent>order</Accent>. Nine steps.
+          </>
+        }
         lead={
           <p>
             No distributed locks, no queues, no sagas. A modular monolith and a database that
@@ -196,7 +208,11 @@ export function LimitsSection() {
       <SectionHeading
         id="limits"
         mark="§5 · Known limits"
-        title="What this design does not solve."
+        title={
+          <>
+            What this design does <Accent>not</Accent> solve.
+          </>
+        }
         lead={<p>Every architecture trades something. These are the trades, named.</p>}
       />
       <dl className="mt-10 grid gap-px border border-ink bg-ink md:grid-cols-3">
@@ -226,7 +242,7 @@ export function VerifySection() {
         <div className="col-span-12 md:col-span-5">
           <p className="label text-ink-3">End of sheet</p>
           <h2 id="verify" className="mt-3 text-display">
-            Don’t take the page’s word for it.
+            Don’t take the page’s <Accent>word</Accent> for it.
           </h2>
         </div>
         <div className="col-span-12 grid content-start gap-5 md:col-span-7">

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Arrow, ButtonLink } from '@/components/button'
-import { SectionHeading } from '@/components/sheet'
+import { Accent, SectionHeading } from '@/components/sheet'
 import { REPLAYS, replayPasses, rushReplay } from '@/features/lab/replays'
 import { formatDateTime } from '@/lib/format'
 
@@ -53,7 +53,11 @@ export function ProofSection() {
       <SectionHeading
         id="proof"
         mark="§4 · Proof, recorded"
-        title="Same load, same database. Exactly ten."
+        title={
+          <>
+            Same load, same database. Exactly <Accent>ten</Accent>.
+          </>
+        }
         lead={
           <p>
             The Lab replays runs recorded against PostgreSQL 18 through the real API. These figures

@@ -2,7 +2,7 @@
 
 import { type LabAttempt } from '@eventcore/contracts'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
-import { TONE_FILL, TONE_TEXT, toneOf } from './result-tone'
+import { NIGHT_FILL, NIGHT_TEXT, toneOf } from './result-tone'
 
 const PLAYBACK_MS = 4_000
 
@@ -75,7 +75,7 @@ export function AttemptTimeline({
             setPlayhead(0)
             setPlaying(true)
           }}
-          className="inline-flex min-h-11 items-center gap-2 rounded-[2px] border border-ink bg-ink px-4 text-sm font-medium text-paper hover:border-signal hover:bg-signal"
+          className="inline-flex min-h-11 items-center gap-2 rounded-[2px] border border-night-ink bg-night-ink px-4 text-sm font-medium text-night hover:border-signal-glow hover:bg-signal-glow hover:text-white"
         >
           <span aria-hidden className="font-mono">
             ▶
@@ -83,7 +83,7 @@ export function AttemptTimeline({
           Replay the run
         </button>
         <label className="flex min-w-0 flex-1 items-center gap-3">
-          <span className="label shrink-0 text-ink-3">Scrub</span>
+          <span className="label shrink-0 text-night-muted">Scrub</span>
           <input
             type="range"
             min={0}
@@ -95,10 +95,10 @@ export function AttemptTimeline({
               setPlayhead(Number(event.target.value))
             }}
             aria-valuetext={`${playhead.toFixed(1)} milliseconds`}
-            className="w-full accent-[var(--color-signal)]"
+            className="w-full accent-[var(--color-signal-glow)]"
           />
         </label>
-        <span className="w-20 text-right font-mono text-sm tabular text-ink">
+        <span className="w-20 text-right font-mono text-sm tabular text-night-ink">
           {playhead.toFixed(0)} ms
         </span>
       </div>
@@ -123,7 +123,7 @@ export function AttemptTimeline({
                     x2={(tick / span) * 1000}
                     y1={0}
                     y2={height}
-                    stroke="var(--color-rule)"
+                    stroke="var(--color-night-line)"
                     strokeWidth={1}
                     vectorEffect="non-scaling-stroke"
                   />
@@ -143,8 +143,8 @@ export function AttemptTimeline({
                       height={rowHeight}
                       fill={
                         finished
-                          ? TONE_FILL[tone(attempt.result, attempt.replayed)]
-                          : 'var(--color-ink-3)'
+                          ? NIGHT_FILL[tone(attempt.result, attempt.replayed)]
+                          : 'var(--color-night-faint)'
                       }
                       opacity={finished ? 1 : 0.35}
                     />
@@ -155,7 +155,7 @@ export function AttemptTimeline({
                   x2={(playhead / span) * 1000}
                   y1={0}
                   y2={height}
-                  stroke="var(--color-signal)"
+                  stroke="var(--color-signal-glow)"
                   strokeWidth={2}
                   vectorEffect="non-scaling-stroke"
                 />
@@ -165,7 +165,7 @@ export function AttemptTimeline({
                   {sorted.map((attempt, index) => (
                     <p
                       key={`${attempt.actor}-label-${index}`}
-                      className="absolute truncate pr-2 font-mono text-[0.7rem] leading-none text-ink-2"
+                      className="absolute truncate pr-2 font-mono text-[0.7rem] leading-none text-night-muted"
                       style={{ top: index * (rowHeight + gap) + rowHeight / 2 - 5, width: '9rem' }}
                     >
                       {attempt.actor}
@@ -176,7 +176,7 @@ export function AttemptTimeline({
             </div>
           </div>
           <div
-            className={`mt-2 flex justify-between font-mono text-[0.7rem] text-ink-3 tabular ${labelled ? 'pl-36' : ''}`}
+            className={`mt-2 flex justify-between font-mono text-[0.7rem] text-night-muted tabular ${labelled ? 'pl-36' : ''}`}
           >
             {ticks.map((tick) => (
               <span key={tick}>{tick} ms</span>
@@ -186,26 +186,26 @@ export function AttemptTimeline({
 
         <div
           aria-live="polite"
-          className="grid content-start gap-1.5 border-l border-rule pl-4 font-mono text-xs"
+          className="grid content-start gap-1.5 border-l border-night-line pl-4 font-mono text-xs"
         >
-          <p className="label mb-1 text-ink-3">Answered so far</p>
+          <p className="label mb-1 text-night-muted">Answered so far</p>
           <dl className="grid gap-1.5">
             {Object.entries(tally).length === 0 ? (
               <div className="flex justify-between gap-3">
-                <dt className="text-ink-3">Nothing yet</dt>
-                <dd className="text-ink-3">—</dd>
+                <dt className="text-night-muted">Nothing yet</dt>
+                <dd className="text-night-muted">—</dd>
               </div>
             ) : (
               Object.entries(tally).map(([result, count]) => (
                 <div key={result} className="flex justify-between gap-3">
-                  <dt className={TONE_TEXT[tone(result, result === 'REPLAYED')]}>{result}</dt>
-                  <dd className="tabular text-ink">{count}</dd>
+                  <dt className={NIGHT_TEXT[tone(result, result === 'REPLAYED')]}>{result}</dt>
+                  <dd className="tabular text-night-ink">{count}</dd>
                 </div>
               ))
             )}
-            <div className="mt-2 flex justify-between gap-3 border-t border-rule pt-2">
-              <dt className="text-ink-3">In flight</dt>
-              <dd className="tabular text-ink">
+            <div className="mt-2 flex justify-between gap-3 border-t border-night-line pt-2">
+              <dt className="text-night-muted">In flight</dt>
+              <dd className="tabular text-night-ink">
                 {
                   sorted.filter(
                     (attempt) => attempt.startMs <= playhead && attempt.endMs > playhead,

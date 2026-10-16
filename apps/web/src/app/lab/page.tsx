@@ -1,6 +1,6 @@
 import { type Metadata } from 'next'
 import Link from 'next/link'
-import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { Accent, SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
 import { LabReport } from '@/features/lab/lab-report'
 import { REPLAYS, findReplay, replayPasses } from '@/features/lab/replays'
 
@@ -31,7 +31,11 @@ export default async function LabPage({
       <section className="sheet-frame mt-12">
         <SectionHeading
           mark="Sheet 04 · Test report"
-          title="Recorded runs. Not a simulation, and not a promise."
+          title={
+            <>
+              Recorded runs. Not a simulation, and not a <Accent>promise</Accent>.
+            </>
+          }
           lead={
             <p>
               Every number on this sheet was produced by <code>pnpm lab:record</code> against a real
