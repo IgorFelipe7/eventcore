@@ -1,4 +1,7 @@
+'use client'
+
 import { Fragment, type ReactNode } from 'react'
+import { useI18n } from '@/i18n/provider'
 
 const SQL_KEYWORDS = new Set(
   `SELECT FROM WHERE AND OR UPDATE SET INSERT INTO VALUES RETURNING ON CONFLICT CONSTRAINT DO NOTHING
@@ -51,6 +54,7 @@ export function CodeBlock({
   readonly highlight?: readonly number[]
   readonly wrap?: boolean
 }) {
+  const { t } = useI18n()
   const lines = code.replace(/\n$/, '').split('\n')
   return (
     <div className="min-w-0 border border-ink bg-sheet">
@@ -62,7 +66,7 @@ export function CodeBlock({
       ) : null}
       <pre
         tabIndex={wrap ? undefined : 0}
-        aria-label={wrap ? undefined : `${title ?? language} code, scrollable`}
+        aria-label={wrap ? undefined : t.common.scrollableCode(title ?? language)}
         className={`py-3 font-mono text-[0.8125rem] leading-6 text-ink-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'}`}
       >
         <code>

@@ -1,7 +1,8 @@
-import Link from 'next/link'
 import { Arrow, ButtonLink } from '@/components/button'
-import { Accent, SectionHeading } from '@/components/sheet'
-import { REPLAYS, replayPasses, rushReplay } from '@/features/lab/replays'
+import { Marked, SectionHeading } from '@/components/sheet'
+import { replayPasses, replaysIn, rushReplay } from '@/features/lab/replays'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 import { formatDateTime } from '@/lib/format'
 
 const rushVariants = () => {
@@ -12,58 +13,49 @@ const rushVariants = () => {
   return { rush, naive, locked }
 }
 
-export function BaselineCallout() {
+export async function BaselineCallout() {
+  const { t } = await getI18n()
   const { naive } = rushVariants()
   return (
     <Link
       href="/lab?scenario=rush&variant=naive"
-      className="group mt-10 grid grid-cols-12 items-center gap-x-4 gap-y-3 border border-rejected bg-rejected-wash/50 p-5 hover:bg-rejected-wash md:gap-x-6"
+      className="group mt-10 grid grid-cols-12 items-center gap-x-4 gap-y-3 border border-rejected bg-rejected-wash/50 p-5 transition-colors hover:bg-rejected-wash md:gap-x-6"
     >
-      <p className="col-span-12 font-display text-6xl font-semibold text-rejected tabular md:col-span-3">
+      <p className="col-span-12 font-display text-7xl font-semibold leading-none tracking-[-0.03em] text-rejected tabular md:col-span-3">
         {naive.final.confirmedRows}
-        <span className="text-2xl"> / {naive.final.capacity}</span>
+        <span className="text-2xl tracking-normal"> / {naive.final.capacity}</span>
       </p>
       <p className="col-span-12 text-lg text-ink md:col-span-7">
-        Recorded, not imagined: a check-then-insert implementation confirmed{' '}
-        <strong className="font-semibold">
-          {naive.final.confirmedRows} people for {naive.final.capacity} seats
-        </strong>{' '}
-        when 100 requests arrived together on a real PostgreSQL 18.
+        {t.landing.failures.baseline(naive.final.confirmedRows, naive.final.capacity)}
       </p>
       <p className="col-span-12 text-sm text-ink-2 group-hover:text-signal md:col-span-2 md:text-right">
-        Lab, test 02 <Arrow />
+        {t.landing.failures.baselineLink} <Arrow />
       </p>
     </Link>
   )
 }
 
-export function ProofSection() {
+export async function ProofSection() {
+  const { locale, t } = await getI18n()
+  const copy = t.landing.proof
   const { rush, locked } = rushVariants()
   const violations = locked.checks.filter((check) => !check.passed).length
   const stats = [
-    { label: 'Concurrent requests', value: String(locked.attempts.length) },
-    { label: 'Seats', value: String(locked.final.capacity) },
-    { label: 'Confirmed', value: String(locked.final.confirmedRows) },
-    { label: 'Waitlisted, in order', value: String(locked.final.waitlistedRows) },
-    { label: 'Invariant violations', value: String(violations) },
+    { label: copy.stats.requests, value: locked.attempts.length, tone: '' },
+    { label: copy.stats.seats, value: locked.final.capacity, tone: '' },
+    { label: copy.stats.confirmed, value: locked.final.confirmedRows, tone: '' },
+    { label: copy.stats.waitlisted, value: locked.final.waitlistedRows, tone: '' },
+    { label: copy.stats.violations, value: violations, tone: 'text-confirmed' },
   ]
 
   return (
     <section aria-labelledby="proof" className="sheet-frame mt-32">
       <SectionHeading
         id="proof"
-        mark="§4 · Proof, recorded"
-        title={
-          <>
-            Same load, same database. Exactly <Accent>ten</Accent>.
-          </>
-        }
-        lead={
-          <p>
-            The Lab replays runs recorded against PostgreSQL 18 through the real API. These figures
-            are read from those files at build time — nothing here is typed in by hand.
-          </p>
-        }
+        index="4"
+        mark={copy.mark}
+        title={<Marked text={copy.title} />}
+        lead={<p>{copy.lead}</p>}
       />
       <dl className="mt-10 grid grid-cols-2 border-y border-ink sm:grid-cols-5">
         {stats.map((stat) => (
@@ -73,7 +65,7 @@ export function ProofSection() {
           >
             <dt className="label text-ink-3">{stat.label}</dt>
             <dd
-              className={`mt-2 font-display text-5xl font-semibold tabular ${stat.label === 'Invariant violations' ? 'text-confirmed' : ''}`}
+              className={`mt-2 font-display text-[clamp(2.75rem,2rem+2.4vw,4.5rem)] font-semibold leading-none tracking-[-0.035em] tabular ${stat.tone}`}
             >
               {stat.value}
             </dd>
@@ -81,16 +73,18 @@ export function ProofSection() {
         ))}
       </dl>
       <p className="mt-4 font-mono text-xs text-ink-3">
-        Recorded {formatDateTime(rush.environment.recordedAt)} · commit {rush.environment.commit} ·{' '}
-        {rush.environment.postgres} · {rush.environment.cpu} ·{' '}
-        {locked.latency
-          ? `caller-observed p95 ${locked.latency.p95} ms with all 100 queued on one row lock`
-          : ''}
+        {copy.recorded(
+          formatDateTime(rush.environment.recordedAt, locale),
+          rush.environment.commit,
+          rush.environment.postgres,
+          rush.environment.cpu,
+        )}
+        {locked.latency ? ` · ${copy.latency(locked.latency.p95)}` : ''}
       </p>
 
       <div className="mt-12 grid grid-cols-12 gap-x-4 gap-y-6 md:gap-x-6">
         <ol className="col-span-12 grid gap-px border border-ink bg-ink sm:grid-cols-2 md:col-span-8">
-          {REPLAYS.map((replay) => (
+          {replaysIn(locale).map((replay) => (
             <li key={replay.id} className="bg-sheet">
               <Link
                 href={`/lab?scenario=${replay.id}`}
@@ -110,12 +104,9 @@ export function ProofSection() {
           ))}
         </ol>
         <div className="col-span-12 grid content-start gap-4 md:col-span-4">
-          <p className="text-ink-2">
-            Eight scenarios, each tied to the test that asserts it, each with the machine, database
-            version and commit it was measured on.
-          </p>
+          <p className="text-ink-2">{copy.scenarios}</p>
           <ButtonLink href="/lab">
-            Open the Reliability Lab <Arrow />
+            {copy.cta} <Arrow />
           </ButtonLink>
         </div>
       </div>

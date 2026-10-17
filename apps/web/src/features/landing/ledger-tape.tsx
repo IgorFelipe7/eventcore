@@ -1,10 +1,12 @@
-import Link from 'next/link'
 import { rushReplay } from '@/features/lab/replays'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 
 const toneOf = (result: string) =>
   result.startsWith('CONFIRMED') ? 'text-confirmed-glow' : 'text-waitlisted-glow'
 
-export function LedgerTape() {
+export async function LedgerTape() {
+  const { t } = await getI18n()
   const replay = rushReplay()
   const locked = replay.variants.find((variant) => variant.safe)
   if (!locked) return null
@@ -38,7 +40,7 @@ export function LedgerTape() {
 
   return (
     <section
-      aria-label="Recorded decisions"
+      aria-label={t.ledger.label}
       className="relative border-y border-night-line bg-night text-night-ink"
     >
       <div className="flex items-stretch">
@@ -46,8 +48,8 @@ export function LedgerTape() {
           href="/lab?scenario=rush&variant=locked"
           className="relative z-10 flex shrink-0 flex-col justify-center gap-0.5 border-r border-night-line bg-night px-4 py-3 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-night-muted hover:text-signal-glow sm:px-6"
         >
-          <span className="text-signal-glow">● Replay · run 02</span>
-          <span>commit {replay.environment.commit}</span>
+          <span className="text-signal-glow">● {t.ledger.replay}</span>
+          <span>{t.ledger.commit(replay.environment.commit)}</span>
         </Link>
         <div className="group relative flex overflow-hidden py-3.5 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
           <div className="flex animate-ledger group-hover:[animation-play-state:paused] motion-reduce:animate-none">
@@ -56,10 +58,7 @@ export function LedgerTape() {
           </div>
         </div>
       </div>
-      <p className="sr-only">
-        The first {decisions.length} decisions of the recorded 100-request run, in the order the
-        database took them.
-      </p>
+      <p className="sr-only">{t.ledger.description(decisions.length)}</p>
     </section>
   )
 }

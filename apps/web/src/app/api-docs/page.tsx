@@ -4,15 +4,14 @@ import { ApiFailure } from '@/components/api-state'
 import { Arrow } from '@/components/button'
 import { CodeBlock } from '@/components/code-block'
 import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { getI18n } from '@/i18n/server'
 import { callApi } from '@/lib/api'
 import { publicConfig } from '@/lib/public-config'
 
-export const metadata: Metadata = {
-  title: 'API reference',
-  description: 'Endpoint index generated from the live OpenAPI 3.1 document of the EventCore API.',
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.sheets.api, description: t.apiDocs.metaDescription }
 }
-
-const sheet = { number: 6, title: 'API reference' }
 
 const OperationSchema = z.object({
   summary: z.string().optional(),
@@ -48,7 +47,11 @@ x-request-id: 4fbf8f17-e07b-47f5-a60c-2e53f411e4fb
 { "status": "WAITLISTED", "transition": "CREATED", "waitlistPosition": 1, ... }`
 
 export default async function ApiDocsPage() {
-  const result = await callApi('/openapi.json', { schema: OpenApiSchema })
+  const [result, { t }] = await Promise.all([
+    callApi('/openapi.json', { schema: OpenApiSchema }),
+    getI18n(),
+  ])
+  const sheet = { number: 6, title: t.sheets.api }
 
   const operations = result.ok
     ? Object.entries(result.data.paths).flatMap(([path, item]) =>
@@ -75,29 +78,23 @@ export default async function ApiDocsPage() {
       <section className="sheet-frame mt-12 grid grid-cols-12 gap-x-4 gap-y-10 md:gap-x-6">
         <div className="col-span-12 lg:col-span-7">
           <SectionHeading
-            mark="Sheet 06 · Contract"
-            title="Generated from the same schemas that validate requests."
-            lead={
-              <p>
-                The API publishes OpenAPI 3.1 built from its Zod contracts, so this index cannot
-                drift from the code. Errors are RFC 9457 problem documents with a stable code and a
-                retryable flag.
-              </p>
-            }
+            mark={t.apiDocs.mark}
+            title={t.apiDocs.title}
+            lead={<p>{t.apiDocs.lead}</p>}
           />
         </div>
         <div className="col-span-12 grid content-start gap-3 lg:col-span-5">
-          <CodeBlock code={EXAMPLE} language="http" title="One idempotent call" wrap />
+          <CodeBlock code={EXAMPLE} language="http" title={t.apiDocs.example} wrap />
           <a
             href={`${publicConfig.apiOrigin}/docs`}
             className="min-h-11 text-sm underline hover:text-signal"
           >
-            Open the interactive Swagger UI <Arrow />
+            {t.apiDocs.swagger} <Arrow />
           </a>
         </div>
       </section>
 
-      <section aria-label="Endpoints" className="sheet-frame mt-16">
+      <section aria-label={t.apiDocs.endpoints} className="sheet-frame mt-16">
         {!result.ok ? (
           <ApiFailure result={result} />
         ) : (
@@ -114,7 +111,7 @@ export default async function ApiDocsPage() {
                         className="grid grid-cols-12 items-center gap-x-4 gap-y-1 border-b border-rule py-3 md:gap-x-6"
                       >
                         <span
-                          className={`col-span-3 w-fit rounded-[2px] border px-2 py-0.5 font-mono text-xs font-medium md:col-span-1 ${METHOD_TONE[operation.method] ?? ''}`}
+                          className={`col-span-3 w-fit rounded-xs border px-2 py-0.5 font-mono text-xs font-medium md:col-span-1 ${METHOD_TONE[operation.method] ?? ''}`}
                         >
                           {operation.method}
                         </span>
@@ -126,10 +123,10 @@ export default async function ApiDocsPage() {
                         </span>
                         <span className="col-span-12 flex gap-2 md:col-span-2 md:justify-end">
                           {operation.authenticated ? (
-                            <span className="label text-ink-3">bearer</span>
+                            <span className="label text-ink-3">{t.apiDocs.bearer}</span>
                           ) : null}
                           {operation.idempotent ? (
-                            <span className="label text-signal">idempotent</span>
+                            <span className="label text-signal">{t.apiDocs.idempotent}</span>
                           ) : null}
                         </span>
                       </li>

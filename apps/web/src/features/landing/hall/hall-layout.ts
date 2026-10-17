@@ -21,13 +21,15 @@ const FIRST_ROW_RADIUS = 6.4
 const ROW_SPACING = 1.32
 const RAKE = 0.34
 const ARC = 0.62
-const STAGE_Z = -2.6
+export const STAGE_Z = -2.6
+
+export const rowRadius = (row: number) => FIRST_ROW_RADIUS + row * ROW_SPACING
 
 export const seatPlacements = (): SeatPlacement[] =>
   Array.from({ length: ROWS * SEATS_PER_ROW }, (_, index) => {
     const row = Math.floor(index / SEATS_PER_ROW)
     const column = index % SEATS_PER_ROW
-    const radius = FIRST_ROW_RADIUS + row * ROW_SPACING
+    const radius = rowRadius(row)
     const angle = ((column - (SEATS_PER_ROW - 1) / 2) / (SEATS_PER_ROW - 1)) * ARC
     return {
       row,
@@ -50,21 +52,21 @@ export const contestedSeat = (): SeatPlacement => {
 
 export const queueSlot = (): Point3 => {
   const seat = contestedSeat()
-  return { x: seat.x - 3.4, y: 0.42, z: seat.z - 2.9 }
+  return { x: seat.x + 4.8, y: seat.y + 0.1, z: seat.z + 3 }
 }
 
 export const queueLane = (): Point3[] => {
   const seat = contestedSeat()
   return [
-    { x: seat.x - 0.6, y: 0.06, z: seat.z - 1.0 },
-    { x: seat.x - 2.2, y: 0.06, z: seat.z - 2.2 },
-    { x: seat.x - 4.6, y: 0.06, z: seat.z - 3.4 },
+    { x: seat.x + 0.6, y: seat.y + 0.04, z: seat.z },
+    { x: seat.x + 4.2, y: seat.y + 0.04, z: seat.z + 0.9 },
+    { x: seat.x + 4.8, y: seat.y + 0.04, z: seat.z + 3 },
   ]
 }
 
-export const contestedLabel = () => {
+export const contestedLabel = (format: (row: string, number: number) => string) => {
   const seat = contestedSeat()
-  return `Row ${ROW_LABELS[seat.row] ?? '?'} · Seat ${seat.number}`
+  return format(ROW_LABELS[seat.row] ?? '?', seat.number)
 }
 
 export interface CameraRig {
@@ -76,9 +78,9 @@ export interface CameraRig {
 export const cameraRig = (aspect: number): CameraRig => {
   const portrait = aspect < 0.9
   return {
-    position: portrait ? { x: 0, y: 8.8, z: -10.6 } : { x: 0.9, y: 6.2, z: -10.4 },
-    target: portrait ? { x: 0.8, y: 4.6, z: 5.2 } : { x: 2.3, y: 0.9, z: 5.4 },
-    fov: portrait ? 56 : 33,
+    position: portrait ? { x: 0.4, y: 11, z: -8 } : { x: 0.9, y: 9.4, z: -10.6 },
+    target: portrait ? { x: 0.2, y: -1.8, z: 7 } : { x: 3.1, y: 0.1, z: 5.8 },
+    fov: portrait ? 50 : 33,
   }
 }
 
@@ -121,49 +123,12 @@ export const segment = (progress: number, start: number, end: number) =>
 export const easeInOut = (value: number) =>
   value < 0.5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2
 
-export interface Beat {
-  readonly index: number
-  readonly title: string
-  readonly caption: string
-  readonly from: number
+export const BEAT_STARTS = [0, 0.06, 0.3, 0.42, 0.66] as const
+
+export const beatAt = (progress: number): number => {
+  const index = BEAT_STARTS.findLastIndex((start) => progress >= start)
+  return Math.max(0, index)
 }
-
-export const BEATS: readonly Beat[] = [
-  {
-    index: 1,
-    title: 'Arrival',
-    caption: '23 of 24 seats are taken. One is left, and two requests want it.',
-    from: 0,
-  },
-  {
-    index: 2,
-    title: 'Contention',
-    caption: 'A and B arrive within the same millisecond, each with its own idempotency key.',
-    from: 0.06,
-  },
-  {
-    index: 3,
-    title: 'The lock',
-    caption: 'A takes the inventory row with FOR UPDATE. B reaches the same row and waits.',
-    from: 0.3,
-  },
-  {
-    index: 4,
-    title: 'Decision',
-    caption: 'Under the lock, A re-reads 23 of 24 and an empty queue. Confirmed, committed.',
-    from: 0.42,
-  },
-  {
-    index: 5,
-    title: 'Queue',
-    caption:
-      'B takes the lock, re-reads 24 of 24 and becomes first in line. Both answers are true.',
-    from: 0.66,
-  },
-]
-
-export const beatAt = (progress: number): Beat =>
-  [...BEATS].reverse().find((beat) => progress >= beat.from) ?? (BEATS[0] as Beat)
 
 export interface HallMoment {
   readonly lockHolder: 'A' | 'B' | null

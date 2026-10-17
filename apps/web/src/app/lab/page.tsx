@@ -1,24 +1,26 @@
 import { type Metadata } from 'next'
-import Link from 'next/link'
-import { Accent, SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { Marked, SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
 import { LabReport } from '@/features/lab/lab-report'
-import { REPLAYS, findReplay, replayPasses } from '@/features/lab/replays'
+import { findReplayIn, replayPasses, replaysIn } from '@/features/lab/replays'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 
-export const metadata: Metadata = {
-  title: 'Reliability Lab',
-  description:
-    'Recorded runs against PostgreSQL 18: the last seat, 100 people on 10 seats next to a naive baseline, retries, cancellations, capacity changes, tenant probes and a notification outage.',
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.sheets.lab, description: t.lab.metaDescription }
 }
-
-const sheet = { number: 4, title: 'Reliability Lab' }
 
 export default async function LabPage({
   searchParams,
 }: {
   readonly searchParams: Promise<{ scenario?: string; variant?: string }>
 }) {
-  const { scenario, variant: variantId } = await searchParams
-  const replay = findReplay(scenario)
+  const [{ scenario, variant: variantId }, { locale, t }] = await Promise.all([
+    searchParams,
+    getI18n(),
+  ])
+  const sheet = { number: 4, title: t.sheets.lab }
+  const replay = findReplayIn(scenario, locale)
   const variant =
     replay.variants.find((candidate) => candidate.id === variantId) ??
     replay.variants.find((candidate) => !candidate.safe) ??
@@ -30,27 +32,17 @@ export default async function LabPage({
       <SheetBar sheet={sheet} />
       <section className="sheet-frame mt-12">
         <SectionHeading
-          mark="Sheet 04 · Test report"
-          title={
-            <>
-              Recorded runs. Not a simulation, and not a <Accent>promise</Accent>.
-            </>
-          }
-          lead={
-            <p>
-              Every number on this sheet was produced by <code>pnpm lab:record</code> against a real
-              PostgreSQL 18 and the real API. The Lab only replays those files — it never sends
-              traffic — and each report says exactly where and how it was measured.
-            </p>
-          }
+          mark={t.lab.mark}
+          title={<Marked text={t.lab.title} />}
+          lead={<p>{t.lab.lead}</p>}
         />
       </section>
 
       <div className="sheet-frame mt-12 grid grid-cols-12 gap-x-4 gap-y-8 md:gap-x-6">
-        <nav aria-label="Scenarios" className="col-span-12 lg:col-span-3">
-          <p className="label text-ink-3">Scenarios</p>
+        <nav aria-label={t.lab.scenarios} className="col-span-12 lg:col-span-3">
+          <p className="label text-ink-3">{t.lab.scenarios}</p>
           <ol className="mt-3 flex gap-1 overflow-x-auto border-t border-ink pb-2 lg:block lg:overflow-visible lg:pb-0">
-            {REPLAYS.map((candidate) => {
+            {replaysIn(locale).map((candidate) => {
               const active = candidate.id === replay.id
               const passes = replayPasses(candidate)
               return (
@@ -68,7 +60,7 @@ export default async function LabPage({
                       {candidate.title}
                     </span>
                     <span
-                      aria-label={passes ? 'invariants hold' : 'invariants broken'}
+                      aria-label={passes ? t.lab.holds : t.lab.broken}
                       className={`font-mono text-xs ${active ? '' : passes ? 'text-confirmed' : 'text-rejected'}`}
                     >
                       {passes ? '✓' : '×'}
@@ -78,10 +70,7 @@ export default async function LabPage({
               )
             })}
           </ol>
-          <p className="mt-4 hidden text-xs text-ink-3 lg:block">
-            ✓ means every invariant check passed for EventCore in that recording. The naive baseline
-            is shown for contrast and is expected to fail.
-          </p>
+          <p className="mt-4 hidden text-xs text-ink-3 lg:block">{t.lab.legend}</p>
         </nav>
         <div className="col-span-12 lg:col-span-9">
           <LabReport replay={replay} variant={variant} />

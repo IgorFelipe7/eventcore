@@ -1,36 +1,39 @@
+import { getI18n } from '@/i18n/server'
 import { type ApiResult } from '@/lib/api'
 import { Arrow, ButtonLink } from './button'
 import { Notice } from './notice'
 
-export function ApiUnavailable({ reason }: { readonly reason?: string }) {
+export async function ApiUnavailable({ reason }: { readonly reason?: string }) {
+  const { t } = await getI18n()
   return (
     <Notice
       tone="waiting"
-      title="The API isn’t reachable from this deployment"
+      title={t.api.unavailableTitle}
       action={
         <ButtonLink href="/lab" variant="secondary">
-          The Lab still works <Arrow />
+          {t.api.unavailableAction} <Arrow />
         </ButtonLink>
       }
     >
-      Live pages need the EventCore API. The Reliability Lab and the architecture sheet work without
-      it. Locally, run <code>pnpm db:up</code> and <code>pnpm dev</code>.
+      {t.api.unavailableBody}
       {reason ? <span className="mt-1 block font-mono text-xs text-ink-3">{reason}</span> : null}
     </Notice>
   )
 }
 
-export function ApiFailure({
+export async function ApiFailure({
   result,
 }: {
   readonly result: Exclude<ApiResult<unknown>, { ok: true }>
 }) {
   if (result.kind === 'unavailable') return <ApiUnavailable reason={result.reason} />
+  const { locale, t } = await getI18n()
+  const translated = t.api.problems[result.problem.code]
   return (
-    <Notice tone="danger" title={result.problem.title}>
-      {result.problem.detail}
+    <Notice tone="danger" title={translated ?? result.problem.title}>
+      {locale === 'en' ? result.problem.detail : null}
       <span className="mt-1 block font-mono text-xs text-ink-3">
-        {result.problem.code} · request {result.problem.requestId}
+        {result.problem.code} · {t.common.request} {result.problem.requestId}
       </span>
     </Notice>
   )

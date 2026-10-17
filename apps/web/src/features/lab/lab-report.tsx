@@ -1,8 +1,10 @@
 import { type LabReplay, type LabVariant } from '@eventcore/contracts'
-import Link from 'next/link'
 import { CodeBlock } from '@/components/code-block'
 import { CropMarks } from '@/components/sheet'
 import { EvidenceLink } from '@/features/landing/evidence-link'
+import { type Dictionary } from '@/i18n/dictionaries'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 import { formatDateTime } from '@/lib/format'
 import { AttemptTimeline } from './attempt-timeline'
 import { NIGHT_TEXT, toneOf } from './result-tone'
@@ -14,10 +16,12 @@ function VariantCard({
   replay,
   variant,
   active,
+  t,
 }: {
   readonly replay: LabReplay
   readonly variant: LabVariant
   readonly active: boolean
+  readonly t: Dictionary
 }) {
   const passed = variant.checks.every((check) => check.passed)
   return (
@@ -32,25 +36,26 @@ function VariantCard({
       <div className="flex items-center justify-between gap-3">
         <p className="label text-ink-3">{variant.label}</p>
         <span className={`font-mono text-xs ${passed ? 'text-confirmed' : 'text-rejected'}`}>
-          {passed ? '✓ invariants hold' : '× invariants broken'}
+          {passed ? t.lab.holdsMark : t.lab.brokenMark}
         </span>
       </div>
       <p className="mt-2 font-display text-4xl font-semibold tabular">
         {variant.final.confirmedRows}
-        <span className="text-xl text-ink-3"> / {variant.final.capacity} seats</span>
+        <span className="text-xl text-ink-3"> {t.lab.seats(variant.final.capacity)}</span>
       </p>
       <p className="mt-2 text-sm text-ink-2">{variant.summary}</p>
     </Link>
   )
 }
 
-export function LabReport({
+export async function LabReport({
   replay,
   variant,
 }: {
   readonly replay: LabReplay
   readonly variant: LabVariant
 }) {
+  const { locale, t } = await getI18n()
   const { environment } = replay
   const small = variant.attempts.length <= 12
 
@@ -59,19 +64,22 @@ export function LabReport({
       <CropMarks />
       <header className="grid gap-4 border-b border-ink p-5 sm:p-7">
         <p className="label text-ink-3">
-          Test {pad(replay.order)} · recorded {formatDateTime(environment.recordedAt)} · commit{' '}
-          {environment.commit}
+          {t.lab.test(
+            pad(replay.order),
+            formatDateTime(environment.recordedAt, locale),
+            environment.commit,
+          )}
         </p>
         <h2 id="report-title" className="text-[clamp(1.75rem,1.3rem+1.8vw,2.75rem)] leading-[1.02]">
           {replay.title}
         </h2>
         <dl className="grid gap-4 md:grid-cols-2">
           <div>
-            <dt className="label text-ink-3">Question</dt>
+            <dt className="label text-ink-3">{t.lab.question}</dt>
             <dd className="mt-1 text-lg text-ink">{replay.question}</dd>
           </div>
           <div>
-            <dt className="label text-ink-3">Method</dt>
+            <dt className="label text-ink-3">{t.lab.method}</dt>
             <dd className="mt-1 text-ink-2">{replay.setup}</dd>
           </div>
         </dl>
@@ -79,7 +87,7 @@ export function LabReport({
 
       {replay.variants.length > 1 ? (
         <section
-          aria-label="Compare implementations"
+          aria-label={t.lab.compare}
           className="grid gap-3 border-b border-ink p-5 sm:grid-cols-2 sm:p-7"
         >
           {replay.variants.map((candidate) => (
@@ -88,6 +96,7 @@ export function LabReport({
               replay={replay}
               variant={candidate}
               active={candidate.id === variant.id}
+              t={t}
             />
           ))}
         </section>
@@ -99,7 +108,7 @@ export function LabReport({
       >
         <div>
           <h3 id="result" className="label text-ink-3">
-            Result · {variant.label}
+            {t.lab.result(variant.label)}
           </h3>
           <p className={`mt-2 text-xl ${variant.safe ? 'text-ink' : 'text-rejected'}`}>
             {variant.summary}
@@ -109,7 +118,7 @@ export function LabReport({
           </div>
         </div>
         <div>
-          <h3 className="label text-ink-3">Invariant checks · computed from the final rows</h3>
+          <h3 className="label text-ink-3">{t.lab.checks}</h3>
           <ul className="mt-3 border-t border-rule">
             {variant.checks.map((check) => (
               <li
@@ -125,7 +134,10 @@ export function LabReport({
                 </span>
                 <span>
                   <span className="text-ink">{check.label}</span>
-                  <span className="sr-only">{check.passed ? ' — passes' : ' — fails'}</span>
+                  <span className="sr-only">
+                    {' · '}
+                    {check.passed ? t.common.passes : t.common.fails}
+                  </span>
                   <span className="block font-mono text-xs text-ink-3">{check.detail}</span>
                 </span>
               </li>
@@ -140,17 +152,13 @@ export function LabReport({
       >
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h3 id="timeline" className="label text-night-ink">
-            Fig. 4.{replay.order} · every attempt, as the caller saw it
+            {t.lab.timeline(replay.order)}
           </h3>
-          <span className="label rounded-[2px] border border-night-line px-1.5 py-0.5 text-night-muted">
-            measured
+          <span className="label rounded-xs border border-night-line px-1.5 py-0.5 text-night-muted">
+            {t.common.figureKinds.measured}
           </span>
         </div>
-        <p className="mt-2 max-w-3xl text-sm text-night-muted">
-          Each bar runs from the moment a request was sent to the moment its answer arrived,
-          including time spent waiting for a pooled connection and for the inventory lock. Colour is
-          the answer.
-        </p>
+        <p className="mt-2 max-w-3xl text-sm text-night-muted">{t.lab.timelineNote}</p>
         <div className="mt-5">
           <AttemptTimeline
             key={`${replay.id}-${variant.id}`}
@@ -164,19 +172,19 @@ export function LabReport({
               <thead>
                 <tr className="border-b border-night-line">
                   <th scope="col" className="label py-2 pr-3 text-night-muted">
-                    Actor
+                    {t.lab.columns.actor}
                   </th>
                   <th scope="col" className="label py-2 pr-3 text-right text-night-muted">
-                    Sent
+                    {t.lab.columns.sent}
                   </th>
                   <th scope="col" className="label py-2 pr-3 text-right text-night-muted">
-                    Answered
+                    {t.lab.columns.answered}
                   </th>
                   <th scope="col" className="label py-2 pr-3 text-night-muted">
-                    Answer
+                    {t.lab.columns.answer}
                   </th>
                   <th scope="col" className="label py-2 text-right text-night-muted">
-                    DB decision
+                    {t.lab.columns.decision}
                   </th>
                 </tr>
               </thead>
@@ -198,7 +206,7 @@ export function LabReport({
                     >
                       {attempt.httpStatus ? `${attempt.httpStatus} · ` : ''}
                       {attempt.result}
-                      {attempt.replayed ? ' · replayed' : ''}
+                      {attempt.replayed ? ` · ${t.lab.replayed}` : ''}
                     </td>
                     <td className="py-2 text-right tabular text-night-ink">
                       {attempt.decisionIndex ? `#${attempt.decisionIndex}` : '—'}
@@ -217,20 +225,20 @@ export function LabReport({
       >
         <div>
           <h3 id="conditions" className="label text-ink-3">
-            Conditions
+            {t.lab.conditions}
           </h3>
           <dl className="mt-3 grid grid-cols-[8rem_1fr] gap-x-4 gap-y-1.5 border-t border-rule pt-3 text-sm">
             {[
-              ['Database', environment.postgres],
-              ['Runtime', `Node.js ${environment.node}`],
-              ['Machine', environment.cpu],
-              ['Platform', environment.platform],
-              ['Transport', environment.transport],
-              ['Pool', `${environment.poolSize} connections`],
+              [t.lab.environment.database, environment.postgres],
+              [t.lab.environment.runtime, `Node.js ${environment.node}`],
+              [t.lab.environment.machine, environment.cpu],
+              [t.lab.environment.platform, environment.platform],
+              [t.lab.environment.transport, environment.transport],
+              [t.lab.environment.pool, t.lab.connections(environment.poolSize)],
               ...(variant.latency
                 ? [
                     [
-                      'Latency',
+                      t.lab.environment.latency,
                       `p50 ${variant.latency.p50} ms · p95 ${variant.latency.p95} ms · p99 ${variant.latency.p99} ms · max ${variant.latency.max} ms (n=${variant.latency.samples})`,
                     ],
                   ]
@@ -242,7 +250,7 @@ export function LabReport({
               </div>
             ))}
           </dl>
-          <h3 className="label mt-6 text-ink-3">What this run does not prove</h3>
+          <h3 className="label mt-6 text-ink-3">{t.lab.doesNotProve}</h3>
           <ul className="mt-2 grid gap-1.5 text-sm text-ink-2">
             {replay.limits.map((limit) => (
               <li key={limit} className="grid grid-cols-[1rem_1fr]">
@@ -255,15 +263,15 @@ export function LabReport({
           </ul>
         </div>
         <div className="grid content-start gap-3">
-          <h3 className="label text-ink-3">Reproduce</h3>
+          <h3 className="label text-ink-3">{t.lab.reproduce}</h3>
           <CodeBlock
             language="shell"
-            title="Terminal"
+            title={t.common.terminal}
             code={`pnpm db:up\npnpm vitest run ${replay.testFile}\npnpm lab:record`}
             wrap
           />
           <p className="text-sm text-ink-2">
-            The assertion behind this replay lives in <EvidenceLink path={replay.testFile} />.
+            {t.lab.assertion} <EvidenceLink path={replay.testFile} />.
           </p>
         </div>
       </section>

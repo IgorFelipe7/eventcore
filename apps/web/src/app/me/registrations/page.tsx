@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { MyRegistrationListSchema } from '@eventcore/contracts'
 import { type Metadata } from 'next'
-import Link from 'next/link'
 import { ApiFailure } from '@/components/api-state'
 import { Arrow, ButtonLink } from '@/components/button'
 import { PersonaRequired } from '@/components/persona-required'
@@ -9,24 +8,21 @@ import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
 import { RegistrationStatusTag } from '@/components/status-tag'
 import { CancelForm } from '@/features/registrations/cancel-form'
 import { callApi } from '@/lib/api'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 import { formatDateTime, formatSnapshot } from '@/lib/format'
 import { readSession } from '@/lib/session'
 
-export const metadata: Metadata = { title: 'My registrations' }
-
-const sheet = { number: 3, title: 'My registrations' }
-
-const REASONS: Record<string, string> = {
-  'participant.registered': 'Registered',
-  'participant.reentered': 'Registered again',
-  'participant.cancelled': 'Cancelled by you',
-  'organizer.cancelled': 'Cancelled by the organizer',
-  'waitlist.promoted': 'Promoted from the waitlist',
-  seed: 'Imported',
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.sheets.registrations }
 }
 
+const personaName = (displayName: string) => displayName.split(' (')[0] ?? displayName
+
 export default async function MyRegistrationsPage() {
-  const session = await readSession()
+  const [session, { locale, t }] = await Promise.all([readSession(), getI18n()])
+  const sheet = { number: 3, title: t.sheets.registrations }
   const result =
     session?.persona.kind === 'participant'
       ? await callApi('/v1/me/registrations', {
@@ -40,14 +36,11 @@ export default async function MyRegistrationsPage() {
       <SheetBar sheet={sheet} />
       <section className="sheet-frame mt-12">
         <SectionHeading
-          mark={session ? `Acting as ${session.persona.displayName}` : 'Participant'}
-          title="Every state you’ve been in, and why."
-          lead={
-            <p>
-              Each registration keeps its full history. Positions in line are computed from the
-              queue at read time, so they only ever move forward.
-            </p>
+          mark={
+            session ? t.persona.actingAsName(personaName(session.persona.displayName)) : t.mine.mark
           }
+          title={t.mine.title}
+          lead={<p>{t.mine.lead}</p>}
         />
         <div className="mt-10">
           {!session || session.persona.kind !== 'participant' ? (
@@ -58,9 +51,9 @@ export default async function MyRegistrationsPage() {
             ) : null
           ) : result.data.items.length === 0 ? (
             <div className="border border-dashed border-ink-3 p-8">
-              <p className="text-lg">No registrations yet.</p>
+              <p className="text-lg">{t.mine.empty}</p>
               <ButtonLink href="/explore" className="mt-4">
-                Find an event <Arrow />
+                {t.mine.find} <Arrow />
               </ButtonLink>
             </div>
           ) : (
@@ -78,7 +71,8 @@ export default async function MyRegistrationsPage() {
                       {registration.event.name}
                     </Link>
                     <p className="mt-1 text-sm text-ink-2">
-                      {formatDateTime(registration.event.startsAt)} · {registration.event.venue}
+                      {formatDateTime(registration.event.startsAt, locale)} ·{' '}
+                      {registration.event.venue}
                     </p>
                     <div className="mt-3">
                       <RegistrationStatusTag
@@ -88,7 +82,7 @@ export default async function MyRegistrationsPage() {
                     </div>
                   </div>
                   <ol
-                    aria-label="History"
+                    aria-label={t.mine.history}
                     className="col-span-12 grid content-start gap-2 md:col-span-4"
                   >
                     {registration.history.map((entry, index) => (
@@ -101,12 +95,14 @@ export default async function MyRegistrationsPage() {
                           className={`mt-1.5 size-2 rounded-full ${index === registration.history.length - 1 ? 'bg-signal' : 'bg-ink-3/60'}`}
                         />
                         <span>
-                          <span className="text-ink">{REASONS[entry.reason] ?? entry.reason}</span>
+                          <span className="text-ink">
+                            {t.mine.reasons[entry.reason] ?? entry.reason}
+                          </span>
                           <span className="ml-2 font-mono text-xs text-ink-3">
-                            {entry.from ?? 'new'} → {entry.to}
+                            {entry.from ?? t.mine.new} → {entry.to}
                           </span>
                           <span className="block font-mono text-xs text-ink-3 tabular">
-                            {formatSnapshot(entry.occurredAt)}
+                            {formatSnapshot(entry.occurredAt, locale)}
                           </span>
                         </span>
                       </li>

@@ -2,6 +2,7 @@
 
 import { type LabAttempt } from '@eventcore/contracts'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useI18n } from '@/i18n/provider'
 import { NIGHT_FILL, NIGHT_TEXT, toneOf } from './result-tone'
 
 const PLAYBACK_MS = 4_000
@@ -26,6 +27,7 @@ export function AttemptTimeline({
   readonly attempts: readonly LabAttempt[]
   readonly unsafe?: boolean
 }) {
+  const { t } = useI18n()
   const tone = (result: string, replayed: boolean) =>
     unsafe && result.startsWith('CONFIRMED') ? 'rejected' : toneOf(result, replayed)
   const sorted = useMemo(() => [...attempts].sort((a, b) => a.startMs - b.startMs), [attempts])
@@ -75,15 +77,15 @@ export function AttemptTimeline({
             setPlayhead(0)
             setPlaying(true)
           }}
-          className="inline-flex min-h-11 items-center gap-2 rounded-[2px] border border-night-ink bg-night-ink px-4 text-sm font-medium text-night hover:border-signal-glow hover:bg-signal-glow hover:text-white"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xs border border-night-ink bg-night-ink px-4 text-sm font-medium text-night hover:border-signal-glow hover:bg-signal-glow hover:text-white"
         >
           <span aria-hidden className="font-mono">
             ▶
           </span>
-          Replay the run
+          {t.lab.replay}
         </button>
         <label className="flex min-w-0 flex-1 items-center gap-3">
-          <span className="label shrink-0 text-night-muted">Scrub</span>
+          <span className="label shrink-0 text-night-muted">{t.lab.scrub}</span>
           <input
             type="range"
             min={0}
@@ -94,8 +96,8 @@ export function AttemptTimeline({
               setPlaying(false)
               setPlayhead(Number(event.target.value))
             }}
-            aria-valuetext={`${playhead.toFixed(1)} milliseconds`}
-            className="w-full accent-[var(--color-signal-glow)]"
+            aria-valuetext={t.lab.milliseconds(playhead.toFixed(1))}
+            className="w-full accent-(--color-signal-glow)"
           />
         </label>
         <span className="w-20 text-right font-mono text-sm tabular text-night-ink">
@@ -114,7 +116,7 @@ export function AttemptTimeline({
                 className="block w-full"
                 style={{ height }}
                 role="img"
-                aria-label={`${sorted.length} attempts over ${span.toFixed(0)} milliseconds`}
+                aria-label={t.lab.attemptsOver(sorted.length, span.toFixed(0))}
               >
                 {ticks.map((tick) => (
                   <line
@@ -188,11 +190,11 @@ export function AttemptTimeline({
           aria-live="polite"
           className="grid content-start gap-1.5 border-l border-night-line pl-4 font-mono text-xs"
         >
-          <p className="label mb-1 text-night-muted">Answered so far</p>
+          <p className="label mb-1 text-night-muted">{t.lab.answeredSoFar}</p>
           <dl className="grid gap-1.5">
             {Object.entries(tally).length === 0 ? (
               <div className="flex justify-between gap-3">
-                <dt className="text-night-muted">Nothing yet</dt>
+                <dt className="text-night-muted">{t.lab.nothingYet}</dt>
                 <dd className="text-night-muted">—</dd>
               </div>
             ) : (
@@ -204,7 +206,7 @@ export function AttemptTimeline({
               ))
             )}
             <div className="mt-2 flex justify-between gap-3 border-t border-night-line pt-2">
-              <dt className="text-night-muted">In flight</dt>
+              <dt className="text-night-muted">{t.lab.inFlight}</dt>
               <dd className="tabular text-night-ink">
                 {
                   sorted.filter(

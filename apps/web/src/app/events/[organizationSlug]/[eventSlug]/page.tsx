@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 import { MyRegistrationListSchema, PublicEventSchema } from '@eventcore/contracts'
 import { isEnrollmentOpen } from '@eventcore/domain'
 import { type Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ApiFailure } from '@/components/api-state'
 import { SeatMeter } from '@/components/seat-meter'
@@ -10,7 +9,10 @@ import { SheetBar, TitleBlock } from '@/components/sheet'
 import { EventStatusTag } from '@/components/status-tag'
 import { RegistrationPanel } from '@/features/registrations/registration-panel'
 import { callApi } from '@/lib/api'
-import { formatDateTime, formatSnapshot, plural } from '@/lib/format'
+import { type Dictionary } from '@/i18n/dictionaries'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
+import { formatDateTime, formatSnapshot } from '@/lib/format'
 import { readSession } from '@/lib/session'
 
 interface Params {
@@ -28,26 +30,30 @@ export async function generateMetadata({
 }: {
   readonly params: Promise<Params>
 }): Promise<Metadata> {
-  const result = await loadEvent(await params)
+  const [result, { t }] = await Promise.all([loadEvent(await params), getI18n()])
   return result.ok
     ? { title: result.data.name, description: result.data.description }
-    : { title: 'Event' }
+    : { title: t.sheets.event }
 }
 
-const closedReasonFor = (status: string, opensAt: Date, now: Date) => {
-  if (status === 'CLOSED') return 'The organizer closed enrollment. Existing seats are kept.'
-  if (status === 'CANCELLED') return 'This event was cancelled.'
-  if (opensAt > now) return 'Enrollment hasn’t opened yet.'
-  return 'Enrollment for this event has ended.'
+const closedReasonFor = (status: string, opensAt: Date, now: Date, t: Dictionary) => {
+  if (status === 'CLOSED') return t.event.closed.CLOSED
+  if (status === 'CANCELLED') return t.event.closed.CANCELLED
+  if (opensAt > now) return t.event.closed.notYet
+  return t.event.closed.ended
 }
 
 export default async function EventPage({ params }: { readonly params: Promise<Params> }) {
   const resolved = await params
-  const [result, session] = await Promise.all([loadEvent(resolved), readSession()])
+  const [result, session, { locale, t }] = await Promise.all([
+    loadEvent(resolved),
+    readSession(),
+    getI18n(),
+  ])
 
   if (!result.ok && result.kind === 'problem' && result.problem.status === 404) notFound()
 
-  const sheet = { number: 2, title: result.ok ? result.data.name : 'Event' }
+  const sheet = { number: 2, title: result.ok ? result.data.name : t.sheets.event }
 
   if (!result.ok) {
     return (
@@ -91,7 +97,7 @@ export default async function EventPage({ params }: { readonly params: Promise<P
           href="/explore"
           className="label inline-flex min-h-11 items-center text-ink-3 hover:text-signal"
         >
-          ← Event board
+          ← {t.event.back}
         </Link>
       </div>
       <section className="sheet-frame mt-4 grid grid-cols-12 gap-x-4 gap-y-12 md:gap-x-6">
@@ -107,15 +113,15 @@ export default async function EventPage({ params }: { readonly params: Promise<P
 
           <dl className="mt-10 grid grid-cols-2 border-t border-ink sm:grid-cols-3">
             {[
-              { term: 'Starts', value: formatDateTime(event.startsAt) },
-              { term: 'Venue', value: event.venue },
-              { term: 'Enrollment closes', value: formatDateTime(event.enrollmentClosesAt) },
+              { term: t.event.starts, value: formatDateTime(event.startsAt, locale) },
+              { term: t.event.venue, value: event.venue },
+              { term: t.event.closes, value: formatDateTime(event.enrollmentClosesAt, locale) },
               {
-                term: 'Waitlist',
-                value: event.waitlistEnabled ? 'Kept, first in first out' : 'None',
+                term: t.event.waitlist,
+                value: event.waitlistEnabled ? t.event.waitlistKept : t.event.waitlistNone,
               },
-              { term: 'Capacity', value: plural(inventory.capacity, 'seat') },
-              { term: 'Organizer', value: event.organization.name },
+              { term: t.event.capacity, value: t.common.seats(inventory.capacity) },
+              { term: t.event.organizer, value: event.organization.name },
             ].map((entry) => (
               <div key={entry.term} className="border-b border-rule py-4 pr-4">
                 <dt className="label text-ink-3">{entry.term}</dt>
@@ -128,30 +134,30 @@ export default async function EventPage({ params }: { readonly params: Promise<P
         <aside aria-labelledby="availability" className="col-span-12 lg:col-span-5">
           <div className="relative border border-ink bg-sheet p-5 sm:p-6">
             <p id="availability" className="label text-ink-3">
-              Availability · snapshot
+              {t.event.availability}
             </p>
             <p className="mt-3 font-display text-6xl font-semibold tabular">
               {inventory.available}
               <span className="ml-2 align-middle font-sans text-base font-normal text-ink-2">
-                of {plural(inventory.capacity, 'seat')} left
+                {t.event.left(t.common.seats(inventory.capacity))}
               </span>
             </p>
             <div className="mt-5">
               <SeatMeter inventory={inventory} size="lg" />
             </div>
             <p className="mt-3 font-mono text-xs text-ink-2 tabular">
-              {inventory.confirmed} confirmed · {inventory.waitlisted} waiting · read at{' '}
-              {formatSnapshot(event.observedAt)}
+              {t.event.snapshotLine(
+                inventory.confirmed,
+                inventory.waitlisted,
+                formatSnapshot(event.observedAt, locale),
+              )}
             </p>
             <p className="mt-4 border-t border-rule pt-4 text-sm text-ink-2">
-              This number can change before you press the button. Your request is decided by the
-              database, under a lock, not by what this page shows.
+              {t.event.disclaimer}
             </p>
             <div className="mt-6">
               {session && session.persona.kind === 'organizer' ? (
-                <p className="text-sm text-ink-2">
-                  You’re acting as an organizer. Switch to a participant persona to reserve.
-                </p>
+                <p className="text-sm text-ink-2">{t.event.organizerNotice}</p>
               ) : (
                 <RegistrationPanel
                   eventId={event.id}
@@ -161,7 +167,7 @@ export default async function EventPage({ params }: { readonly params: Promise<P
                   closedReason={
                     open
                       ? null
-                      : closedReasonFor(event.status, new Date(event.enrollmentOpensAt), now)
+                      : closedReasonFor(event.status, new Date(event.enrollmentOpensAt), now, t)
                   }
                 />
               )}

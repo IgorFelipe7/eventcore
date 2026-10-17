@@ -1,6 +1,10 @@
+'use client'
+
 import { type LabVariant } from '@eventcore/contracts'
+import { useI18n } from '@/i18n/provider'
 
 export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
+  const { t } = useI18n()
   const { capacity, confirmedRows, waitlistedRows } = variant.final
   const overbooked = Math.max(0, confirmedRows - capacity)
   const cells = Math.max(capacity, confirmedRows)
@@ -10,7 +14,7 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
     <div>
       <div
         role="img"
-        aria-label={`${confirmedRows} confirmed for ${capacity} seats${overbooked ? `, ${overbooked} overbooked` : ''}, ${waitlistedRows} waitlisted`}
+        aria-label={t.lab.outcome.summary(confirmedRows, capacity, overbooked, waitlistedRows)}
         className="flex flex-wrap gap-[3px]"
       >
         {Array.from({ length: cells }, (_, index) => {
@@ -33,7 +37,7 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
       <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tabular">
         <div className="flex items-center gap-2">
           <span aria-hidden className="size-3 rounded-[1px] bg-ink" />
-          <dt className="text-ink-3">Confirmed</dt>
+          <dt className="text-ink-3">{t.lab.outcome.confirmed}</dt>
           <dd className="text-ink">{Math.min(confirmedRows, capacity)}</dd>
         </div>
         {overbooked > 0 ? (
@@ -42,7 +46,7 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
               aria-hidden
               className="size-3 rounded-[1px] border border-rejected bg-rejected-wash"
             />
-            <dt className="text-rejected">Overbooked</dt>
+            <dt className="text-rejected">{t.lab.outcome.overbooked}</dt>
             <dd className="font-medium text-rejected">{overbooked}</dd>
           </div>
         ) : null}
@@ -51,11 +55,11 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
             aria-hidden
             className="size-3 rounded-[1px] border border-waitlisted bg-waitlisted-wash"
           />
-          <dt className="text-ink-3">Waitlisted</dt>
+          <dt className="text-ink-3">{t.lab.outcome.waitlisted}</dt>
           <dd className="text-ink">{waitlistedRows}</dd>
         </div>
         <div className="flex items-center gap-2">
-          <dt className="text-ink-3">Capacity</dt>
+          <dt className="text-ink-3">{t.lab.outcome.capacity}</dt>
           <dd className="text-ink">{capacity}</dd>
         </div>
       </dl>

@@ -1,9 +1,11 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { Dimension } from '@/components/drawing-marks'
+import { Link } from '@/i18n/link'
+import { useI18n } from '@/i18n/provider'
 import {
-  BEATS,
+  BEAT_STARTS,
   CAPACITY,
   type Point3,
   beatAt,
@@ -52,7 +54,7 @@ const supportsWebGL = () => {
   if (webglSupport !== undefined) return webglSupport
   try {
     const probe = document.createElement('canvas')
-    webglSupport = Boolean(probe.getContext('webgl2') ?? probe.getContext('webgl'))
+    webglSupport = Boolean(probe.getContext('webgl2'))
   } catch {
     webglSupport = false
   }
@@ -77,6 +79,13 @@ const staticAnchors = (width: number, height: number): HallFrame => {
     queue: at(queueSlot()),
   }
 }
+
+const stageKey = (value: number) => {
+  const moment = momentAt(value)
+  return `${beatAt(value)}|${moment.lockHolder}|${moment.confirmed}|${moment.a}|${moment.b}|${value >= 0.95}`
+}
+
+const pad = (value: number) => String(value).padStart(2, '0')
 
 function Callout({
   id,
@@ -128,7 +137,7 @@ function Callout({
         />
       </svg>
       <div
-        className={`absolute left-[var(--run)] whitespace-nowrap border bg-night/80 px-2.5 py-1.5 font-mono text-[0.68rem] uppercase leading-tight tracking-[0.12em] group-data-[side=left]:left-auto group-data-[side=left]:right-[var(--run)] ${color}`}
+        className={`absolute left-(--run) whitespace-nowrap border bg-night/85 px-2.5 py-1.5 font-mono text-[0.68rem] uppercase leading-tight tracking-[0.12em] group-data-[side=left]:left-auto group-data-[side=left]:right-(--run) ${color}`}
         style={{ top: -reach - 10, ['--run' as string]: `${run + 18}px` }}
       >
         {children}
@@ -138,11 +147,13 @@ function Callout({
 }
 
 export function HallHero() {
+  const { t } = useI18n()
   const section = useRef<HTMLElement>(null)
   const stage = useRef<HTMLDivElement>(null)
   const canvas = useRef<HTMLCanvasElement>(null)
   const callouts = useRef(new Map<CalloutId, HTMLDivElement>())
   const ruler = useRef<HTMLDivElement>(null)
+  const calloutLayer = useRef<HTMLDivElement>(null)
   const scene = useRef<HallScene | null>(null)
   const [progress, setProgress] = useState(0)
   const [sceneReady, setSceneReady] = useState(false)
@@ -163,7 +174,7 @@ export function HallHero() {
       element.style.opacity = anchor.visible ? '1' : '0'
       const relative =
         id === 'seat'
-          ? anchor.x < width * 0.45
+          ? anchor.x < width * 0.45 || frame.queue.visible
             ? 'right'
             : 'left'
           : anchor.x > width * 0.8
@@ -185,8 +196,9 @@ export function HallHero() {
     }
 
     let disposed = false
-    let lastProgress = -1
+    let lastKey = ''
     let visible = true
+    let pending: number | null = null
 
     const readScroll = () => {
       const element = section.current
@@ -196,18 +208,29 @@ export function HallHero() {
       return travel <= 0 ? 1 : Math.min(1, Math.max(0, -rect.top / travel))
     }
 
-    const onScroll = () => {
+    const apply = () => {
+      pending = null
       const value = readScroll()
       scene.current?.setProgress(value)
-      if (ruler.current) ruler.current.style.transform = `scaleY(${value})`
+      if (ruler.current) ruler.current.style.transform = `scaleX(${value})`
       const lights = Math.min(1, Math.max(0, (value - 0.9) / 0.1))
       section.current?.style.setProperty('--lights', lights.toFixed(3))
-      document.documentElement.dataset['scene'] = lights < 0.5 ? 'night' : 'paper'
-      const rounded = Math.round(value * 100) / 100
-      if (rounded !== lastProgress) {
-        lastProgress = rounded
-        setProgress(rounded)
+      const lit = lights >= 0.98
+      scene.current?.setDormant(lit)
+      if (calloutLayer.current) calloutLayer.current.style.visibility = lit ? 'hidden' : 'visible'
+      const light = lights < 0.5 ? 'night' : 'paper'
+      if (document.documentElement.dataset['scene'] !== light) {
+        document.documentElement.dataset['scene'] = light
       }
+      const key = stageKey(value)
+      if (key !== lastKey) {
+        lastKey = key
+        setProgress(value)
+      }
+    }
+
+    const onScroll = () => {
+      if (pending === null) pending = requestAnimationFrame(apply)
     }
 
     const onPointer = (event: PointerEvent) => {
@@ -228,13 +251,13 @@ export function HallHero() {
       if (disposed || !canvas.current) return
       scene.current = new HallScene(canvas.current, placeCallouts)
       resize()
-      onScroll()
+      apply()
       scene.current.renderOnce(readScroll())
       if (visible) scene.current.start()
       setSceneReady(true)
     })
 
-    onScroll()
+    apply()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', resize)
     window.addEventListener('pointermove', onPointer, { passive: true })
@@ -242,6 +265,7 @@ export function HallHero() {
 
     return () => {
       disposed = true
+      if (pending !== null) cancelAnimationFrame(pending)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', resize)
       window.removeEventListener('pointermove', onPointer)
@@ -253,7 +277,9 @@ export function HallHero() {
   }, [interactive])
 
   const shown = interactive ? progress : 1
-  const beat = beatAt(shown)
+  const beatIndex = beatAt(shown)
+  const beat = t.hero.beats[beatIndex] ?? t.hero.beats[0]
+  const finalBeat = t.hero.beats.at(-1)
   const moment = momentAt(shown)
 
   return (
@@ -261,7 +287,7 @@ export function HallHero() {
       ref={section}
       aria-labelledby="hero"
       data-interactive={interactive ? 'true' : 'false'}
-      className="hall relative -mt-16 h-dvh data-[interactive=true]:h-[240vh]"
+      className="hall relative -mt-16 h-dvh data-[interactive=true]:h-[260vh]"
     >
       <div ref={stage} className="sticky top-0 h-dvh overflow-hidden" style={HALL_TONES}>
         <HallPoster
@@ -276,121 +302,114 @@ export function HallHero() {
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_20%_10%,transparent_40%,rgb(7_9_12/0.75)_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgb(7_9_12/0.92)_0%,rgb(7_9_12/0.5)_30%,transparent_56%),radial-gradient(90%_70%_at_70%_40%,transparent_45%,rgb(7_9_12/0.7)_100%)]"
           style={{ opacity: 'calc(1 - var(--lights, 0))' }}
         />
 
         <HallDrawing host={stage} />
 
-        <div className="absolute inset-0" style={{ opacity: 'calc(1 - var(--lights, 0))' }}>
+        <div
+          ref={calloutLayer}
+          className="absolute inset-0"
+          style={{ opacity: 'calc(1 - var(--lights, 0))' }}
+        >
           <Callout
             id="seat"
             register={register}
             tone={moment.a === 'confirmed' ? 'confirmed' : 'signal'}
           >
-            <span className="block">{contestedLabel()}</span>
+            <span className="block">{contestedLabel(t.hero.seat)}</span>
             <span className="block text-night-muted max-sm:hidden">
-              capacity {CAPACITY} · confirmed {moment.confirmed}
-              {moment.lockHolder ? ` · lock: ${moment.lockHolder}` : ' · lock: free'}
+              {t.hero.seatState(CAPACITY, moment.confirmed, moment.lockHolder)}
             </span>
           </Callout>
           <Callout id="a" register={register} tone="signal">
-            {moment.a === 'arriving' ? 'A · req 7f3c' : 'A · holds the lock'}
+            {moment.a === 'arriving' ? t.hero.a.arriving : t.hero.a.holding}
           </Callout>
           <Callout
             id="b"
             register={register}
             tone={moment.b === 'arriving' ? 'neutral' : 'waiting'}
           >
-            {moment.b === 'arriving'
-              ? 'B · req 91ad'
-              : moment.b === 'waiting'
-                ? 'B · waiting for lock'
-                : moment.b === 'holding'
-                  ? 'B · re-reads 24 / 24'
-                  : 'B · 201 waitlisted #1'}
+            {t.hero.b[moment.b]}
           </Callout>
         </div>
 
-        <div className="sheet-frame relative flex h-full flex-col pb-8 pt-36 text-[var(--hall-fg)] md:pt-28">
-          <div className="flex items-start justify-between gap-6 font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--hall-muted)]">
-            <p>
-              {shown >= 0.95 ? '// Sheet 01 · lights on' : '// Sheet 01 · night'}
-              <span className="block text-[var(--hall-muted)]">
-                EventCore · reservations under contention
+        <div className="sheet-frame relative flex h-full flex-col pb-6 pt-32 text-(--hall-fg) md:pt-24">
+          <div className="grid grid-cols-12 items-start gap-x-6 gap-y-5 font-mono text-[0.68rem] uppercase tracking-[0.14em]">
+            <p className="col-span-12 text-(--hall-muted) sm:col-span-6">
+              <span className="text-(--hall-fg)">
+                {interactive && shown >= 0.95 ? t.hero.sheetLit : t.hero.sheetNight}
               </span>
+              <span className="mt-1 block">{t.hero.subject}</span>
             </p>
-            <p className="hidden text-right sm:block">
-              {'////// Recorded, not imagined'}
-              <span className="block text-[var(--hall-muted)]">Every figure links to its test</span>
-            </p>
-          </div>
-
-          <div className="mt-8 sm:mt-12">
-            <h1 id="hero" className="max-w-[9.5em] text-hero font-display font-semibold">
-              Two requests. One seat.
-              <br />
-              <span className="text-[var(--hall-muted)]">Exactly </span>
-              <span className="font-accent text-[1.06em] font-normal italic tracking-[-0.01em] text-[var(--hall-accent)]">
-                one
-              </span>
-              <span className="text-[var(--hall-muted)]"> confirmation.</span>
-            </h1>
-          </div>
-          <p className="mt-6 max-w-md text-base text-[var(--hall-muted)] sm:text-lg">
-            A reservation engine that serializes every decision on one database row — so capacity
-            holds, retries never book twice and the waitlist keeps its order.
-          </p>
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
-              href="/lab"
-              className="inline-flex min-h-11 items-center gap-2 rounded-[2px] bg-[var(--hall-fg)] px-4 text-sm font-medium text-[var(--hall-bg)] transition-colors hover:bg-[var(--hall-accent)] hover:text-white"
+            <div
+              className="col-span-12 w-full max-w-sm sm:col-span-6 sm:justify-self-end"
+              aria-live="polite"
             >
-              Open the Reliability Lab <span aria-hidden>→</span>
-            </Link>
-            <Link
-              href="#fig-1"
-              className="inline-flex min-h-11 items-center rounded-[2px] border border-[var(--hall-line)] px-4 text-sm text-[var(--hall-fg)] transition-colors hover:border-[var(--hall-fg)]"
-            >
-              Read it as SQL
-            </Link>
-          </div>
-
-          <div className="mt-auto flex items-end justify-between gap-6">
-            <div className="max-w-sm" aria-live="polite">
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--hall-accent)]">
-                {String(beat.index).padStart(2, '0')} / {String(BEATS.length).padStart(2, '0')} ·{' '}
-                {beat.title}
+              <p className="flex items-baseline justify-between gap-4 text-(--hall-accent)">
+                <span>
+                  {pad(beatIndex + 1)} / {pad(BEAT_STARTS.length)} · {beat?.title}
+                </span>
+                <span aria-hidden className="text-(--hall-muted) max-sm:hidden">
+                  {!interactive
+                    ? t.hero.finalState
+                    : shown >= 0.95
+                      ? t.hero.finished
+                      : t.hero.scroll}
+                </span>
               </p>
-              <p className="mt-2 text-sm text-[var(--hall-fg)]">
-                {interactive ? beat.caption : BEATS.at(-1)?.caption}
-              </p>
-            </div>
-            <div className="hidden items-end gap-3 sm:flex" aria-hidden>
-              <p className="font-mono text-[0.68rem] uppercase tracking-[0.14em] text-[var(--hall-muted)]">
-                {!interactive
-                  ? 'Final state'
-                  : shown >= 0.95
-                    ? 'Now read it as SQL ↓'
-                    : 'Scroll to run the race'}
-              </p>
-              <div className="relative h-24 w-px bg-[var(--hall-line)]">
+              <div aria-hidden className="relative mt-2.5 h-px w-full bg-(--hall-line)">
                 <div
                   ref={ruler}
-                  className="absolute inset-0 origin-top bg-[var(--hall-accent)]"
-                  style={{ transform: `scaleY(${interactive ? 0 : 1})` }}
+                  className="absolute inset-0 origin-left bg-(--hall-accent)"
+                  style={{ transform: `scaleX(${interactive ? 0 : 1})` }}
                 />
-                {BEATS.map((entry) => (
+                {BEAT_STARTS.map((start) => (
                   <span
-                    key={entry.index}
-                    className="absolute -left-1 h-px w-2 bg-[var(--hall-muted)]"
-                    style={{ top: `${entry.from * 100}%` }}
+                    key={start}
+                    className="absolute -top-1 h-2 w-px bg-(--hall-muted)"
+                    style={{ left: `${start * 100}%` }}
                   />
                 ))}
               </div>
+              <p className="mt-3 font-sans text-sm normal-case tracking-normal text-(--hall-fg)">
+                {interactive ? beat?.caption : finalBeat?.caption}
+              </p>
             </div>
           </div>
-          <div aria-hidden className="mt-6 flex justify-between font-mono text-[var(--hall-faint)]">
+
+          <div className="mt-auto grid grid-cols-12 items-end gap-x-6 gap-y-7">
+            <h1
+              id="hero"
+              className="col-span-12 text-hero font-display font-semibold lg:col-span-8"
+              style={{ ['--dimension-color' as string]: 'var(--hall-accent)' }}
+            >
+              <span className="block">{t.hero.titleLead}</span>
+              <span className="block text-(--hall-muted)">
+                {t.hero.titleBefore} <Dimension>{t.hero.titleKeyword}</Dimension>{' '}
+                {t.hero.titleAfter}
+              </span>
+            </h1>
+            <div className="col-span-12 grid gap-6 lg:col-span-4 lg:pb-3">
+              <p className="max-w-md text-base text-(--hall-muted) sm:text-lg">{t.hero.lead}</p>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  href="/lab"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xs bg-(--hall-fg) px-4 text-sm font-medium text-(--hall-bg) transition-colors hover:bg-(--hall-accent) hover:text-white"
+                >
+                  {t.hero.primary} <span aria-hidden>→</span>
+                </Link>
+                <a
+                  href="#fig-1"
+                  className="inline-flex min-h-11 items-center rounded-xs border border-(--hall-line) px-4 text-sm text-(--hall-fg) transition-colors hover:border-(--hall-fg)"
+                >
+                  {t.hero.secondary}
+                </a>
+              </div>
+            </div>
+          </div>
+          <div aria-hidden className="mt-6 flex justify-between font-mono text-(--hall-faint)">
             <span>+</span>
             <span>+</span>
             <span className="hidden sm:inline">+</span>
@@ -399,8 +418,8 @@ export function HallHero() {
         </div>
       </div>
       <ol className="sr-only">
-        {BEATS.map((entry) => (
-          <li key={entry.index}>
+        {t.hero.beats.map((entry) => (
+          <li key={entry.title}>
             {entry.title}: {entry.caption}
           </li>
         ))}

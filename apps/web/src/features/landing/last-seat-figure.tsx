@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useReducer, useRef, useSyncExternalStore } from 'react'
 import { CodeBlock } from '@/components/code-block'
-import { CropMarks } from '@/components/sheet'
+import { CropMarks } from '@/components/drawing-marks'
+import { useI18n } from '@/i18n/provider'
 import {
   CAPACITY,
   LAST_SEAT_SEQUENCE,
@@ -70,6 +71,7 @@ const LANE_SHIFT: Record<LanePosition, string> = {
 const REQUEST_LABEL: Record<LaneId, string> = { A: 'req 7f3c', B: 'req 91ad' }
 
 function Lane({ id, step }: { readonly id: LaneId; readonly step: SequenceStep }) {
+  const { t } = useI18n()
   const position = step.lanes[id]
   const holding = step.lock === id
   const outcome = step.outcomes[id]
@@ -80,14 +82,14 @@ function Lane({ id, step }: { readonly id: LaneId; readonly step: SequenceStep }
         className="absolute inset-x-0 top-1/2 border-t border-dashed border-ink-3/50"
       />
       <div
-        className="absolute top-1/2 transition-[left,transform] duration-700 ease-[var(--ease-sheet)]"
+        className="absolute top-1/2 transition-[left,transform] duration-700 ease-(--ease-sheet)"
         style={{
           left: LANE_OFFSET[position],
           transform: `translate(${LANE_SHIFT[position]}, -50%)`,
         }}
       >
         <div
-          className={`flex items-center gap-2 whitespace-nowrap rounded-[2px] border px-2.5 py-1.5 font-mono text-xs transition-colors duration-300 ${
+          className={`flex items-center gap-2 whitespace-nowrap rounded-xs border px-2.5 py-1.5 font-mono text-xs transition-colors duration-300 ${
             holding
               ? 'border-signal bg-signal text-white'
               : outcome
@@ -107,7 +109,7 @@ function Lane({ id, step }: { readonly id: LaneId; readonly step: SequenceStep }
           <span
             className={holding || outcome || position === 'waiting' ? 'opacity-85' : 'text-ink-3'}
           >
-            {outcome ?? (position === 'waiting' ? 'waiting for lock' : REQUEST_LABEL[id])}
+            {outcome ?? (position === 'waiting' ? t.fig1.waitingForLock : REQUEST_LABEL[id])}
           </span>
         </div>
       </div>
@@ -116,19 +118,20 @@ function Lane({ id, step }: { readonly id: LaneId; readonly step: SequenceStep }
 }
 
 function SeatPlan({ step }: { readonly step: SequenceStep }) {
+  const { t } = useI18n()
   const lastSeatTaken = step.confirmed >= CAPACITY
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <p className="label text-ink-3">Seat plan · capacity {CAPACITY}</p>
+        <p className="label text-ink-3">{t.fig1.seatPlan(CAPACITY)}</p>
         <p className="font-mono text-sm tabular text-ink" aria-live="off">
           <span className="font-medium">{step.confirmed}</span>
-          <span className="text-ink-3"> / {CAPACITY} confirmed</span>
+          <span className="text-ink-3"> {t.fig1.confirmed(CAPACITY)}</span>
         </p>
       </div>
       <div
         role="img"
-        aria-label={`${step.confirmed} of ${CAPACITY} seats confirmed`}
+        aria-label={t.fig1.seatsConfirmed(step.confirmed, CAPACITY)}
         className="mt-3 grid grid-cols-12 gap-1"
       >
         {Array.from({ length: CAPACITY }, (_, index) => {
@@ -156,14 +159,14 @@ function SeatPlan({ step }: { readonly step: SequenceStep }) {
         })}
       </div>
       <div className="mt-3 flex items-center gap-2 font-mono text-xs text-ink-2">
-        <span className="label text-ink-3">Waitlist</span>
+        <span className="label text-ink-3">{t.fig1.waitlist}</span>
         {step.queue.length === 0 ? (
-          <span className="text-ink-3">empty</span>
+          <span className="text-ink-3">{t.fig1.empty}</span>
         ) : (
           step.queue.map((lane, index) => (
             <span
               key={lane}
-              className="rounded-[2px] border border-waitlisted bg-waitlisted-wash px-1.5 py-0.5 text-waitlisted"
+              className="rounded-xs border border-waitlisted bg-waitlisted-wash px-1.5 py-0.5 text-waitlisted"
             >
               #{index + 1} · {lane}
             </span>
@@ -175,6 +178,7 @@ function SeatPlan({ step }: { readonly step: SequenceStep }) {
 }
 
 function LockBox({ step }: { readonly step: SequenceStep }) {
+  const { t } = useI18n()
   return (
     <div
       className={`absolute inset-y-0 left-[46%] w-[26%] -translate-x-1/2 border-x transition-colors duration-300 ${
@@ -184,13 +188,14 @@ function LockBox({ step }: { readonly step: SequenceStep }) {
       <p
         className={`label absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap ${step.lock ? 'text-signal' : 'text-ink-3'}`}
       >
-        event_inventory row {step.lock ? `· held by ${step.lock}` : '· free'}
+        {t.fig1.row} {step.lock ? t.fig1.heldBy(step.lock) : t.fig1.free}
       </p>
     </div>
   )
 }
 
 export function LastSeatFigure() {
+  const { t } = useI18n()
   const [state, dispatch] = useReducer(playback, { step: 0, playing: false })
   const reducedMotion = usePrefersReducedMotion()
   const timer = useRef<number | null>(null)
@@ -214,10 +219,10 @@ export function LastSeatFigure() {
   }, [reducedMotion, state.playing])
 
   const runLabel = state.playing
-    ? 'Pause'
+    ? t.fig1.pause
     : state.step >= LAST_STEP
-      ? 'Run again'
-      : 'Run the sequence'
+      ? t.fig1.runAgain
+      : t.fig1.run
 
   return (
     <figure
@@ -240,17 +245,17 @@ export function LastSeatFigure() {
         <div aria-live="polite" className="min-h-[4.5rem]">
           <p className="text-[0.95rem] text-ink">
             <span className="mr-2 font-mono font-medium text-signal">{step.tick}</span>
-            {step.caption}
+            {t.fig1.captions[state.step]}
           </p>
         </div>
 
-        <CodeBlock code={step.statement} language="sql" title="Statement at this step" wrap />
+        <CodeBlock code={step.statement} language="sql" title={t.fig1.statementTitle} wrap />
 
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
             onClick={run}
-            className="inline-flex min-h-11 items-center gap-2 rounded-[2px] border border-ink bg-ink px-4 text-sm font-medium text-paper transition-colors hover:border-signal hover:bg-signal"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xs border border-ink bg-ink px-4 text-sm font-medium text-paper transition-colors hover:border-signal hover:bg-signal"
           >
             <span aria-hidden className="font-mono">
               {state.playing ? '❚❚' : '▶'}
@@ -262,7 +267,7 @@ export function LastSeatFigure() {
               type="button"
               onClick={() => dispatch({ type: 'go', step: state.step - 1 })}
               disabled={state.step === 0}
-              aria-label="Previous step"
+              aria-label={t.fig1.previous}
               className="grid min-h-11 min-w-11 place-items-center border border-ink font-mono text-sm hover:bg-ink hover:text-paper disabled:border-rule disabled:text-ink-3 disabled:hover:bg-transparent"
             >
               ←
@@ -271,13 +276,13 @@ export function LastSeatFigure() {
               type="button"
               onClick={() => dispatch({ type: 'go', step: state.step + 1 })}
               disabled={state.step === LAST_STEP}
-              aria-label="Next step"
+              aria-label={t.fig1.next}
               className="-ml-px grid min-h-11 min-w-11 place-items-center border border-ink font-mono text-sm hover:bg-ink hover:text-paper disabled:border-rule disabled:text-ink-3 disabled:hover:bg-transparent"
             >
               →
             </button>
           </div>
-          <ol aria-label="Steps" className="ml-auto flex items-center">
+          <ol aria-label={t.fig1.steps} className="ml-auto flex items-center">
             {LAST_SEAT_SEQUENCE.map((entry, index) => (
               <li key={entry.tick} className="flex items-center">
                 {index > 0 ? (
@@ -289,7 +294,7 @@ export function LastSeatFigure() {
                 <button
                   type="button"
                   onClick={() => dispatch({ type: 'go', step: index })}
-                  aria-label={`${entry.tick}, step ${index}: ${entry.caption}`}
+                  aria-label={t.fig1.stepLabel(entry.tick, index, t.fig1.captions[index] ?? '')}
                   aria-current={index === state.step ? 'step' : undefined}
                   className={`grid size-8 place-items-center rounded-full border font-mono text-[0.7rem] transition-colors ${
                     index === state.step
@@ -308,13 +313,11 @@ export function LastSeatFigure() {
       </div>
 
       <figcaption id="fig-1-caption" className="border-t border-ink px-4 py-3 sm:px-6">
-        <span className="label mr-3 text-ink">Fig. 1</span>
-        <span className="label mr-3 rounded-[2px] border border-ink-3/50 px-1.5 py-0.5 text-ink-3">
-          illustrative
+        <span className="label mr-3 text-ink">{t.common.figure} 1</span>
+        <span className="label mr-3 rounded-xs border border-ink-3/50 px-1.5 py-0.5 text-ink-3">
+          {t.common.figureKinds.illustrative}
         </span>
-        <span className="text-sm text-ink-2">
-          The real algorithm, step by step. Not a measurement: recorded runs live on Sheet 04.
-        </span>
+        <span className="text-sm text-ink-2">{t.fig1.caption}</span>
       </figcaption>
     </figure>
   )

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { Button } from '@/components/button'
+import { useI18n } from '@/i18n/provider'
 
 export default function ErrorSheet({
   error,
@@ -10,25 +11,27 @@ export default function ErrorSheet({
   readonly error: Error & { digest?: string }
   readonly reset: () => void
 }) {
+  const { t } = useI18n()
+
   useEffect(() => {
-    document.title = 'Something broke · EventCore'
-  }, [])
+    document.title = t.meta.errorTitle
+  }, [t])
 
   return (
     <main id="main" className="sheet-frame py-24">
-      <p className="label text-rejected">Unexpected failure</p>
-      <h1 className="mt-4 max-w-3xl text-display">This sheet failed to render.</h1>
+      <p className="label text-rejected">{t.error.mark}</p>
+      <h1 className="mt-4 max-w-3xl text-display">{t.error.title}</h1>
       <p className="measure mt-6 text-lg text-ink-2">
-        Nothing you submitted was lost: every command is idempotent, so trying again is safe.
+        {t.error.lead}
         {error.digest ? (
           <>
             {' '}
-            Reference <code className="tabular">{error.digest}</code>.
+            {t.error.reference} <code className="tabular">{error.digest}</code>.
           </>
         ) : null}
       </p>
       <Button className="mt-10" onClick={reset}>
-        Try again
+        {t.error.retry}
       </Button>
     </main>
   )

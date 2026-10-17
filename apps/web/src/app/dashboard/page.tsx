@@ -1,5 +1,4 @@
 import { type Metadata } from 'next'
-import Link from 'next/link'
 import { ApiFailure } from '@/components/api-state'
 import { ButtonLink } from '@/components/button'
 import { PersonaRequired } from '@/components/persona-required'
@@ -7,15 +6,21 @@ import { SeatMeter } from '@/components/seat-meter'
 import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
 import { EventStatusTag } from '@/components/status-tag'
 import { loadOrganizationEvents, loadViewer } from '@/features/dashboard/organizer-data'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 import { formatDateTime } from '@/lib/format'
 import { readSession } from '@/lib/session'
 
-export const metadata: Metadata = { title: 'Organizer dashboard' }
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.sheets.dashboard }
+}
 
-const sheet = { number: 5, title: 'Organizer dashboard' }
+const personaName = (displayName: string) => displayName.split(' (')[0] ?? displayName
 
 export default async function DashboardPage() {
-  const session = await readSession()
+  const [session, { locale, t }] = await Promise.all([readSession(), getI18n()])
+  const sheet = { number: 5, title: t.sheets.dashboard }
   const viewer = session?.persona.kind === 'organizer' ? await loadViewer(session.token) : null
   const organizations =
     session && viewer?.ok
@@ -32,14 +37,13 @@ export default async function DashboardPage() {
       <SheetBar sheet={sheet} />
       <section className="sheet-frame mt-12">
         <SectionHeading
-          mark={session ? `Acting as ${session.persona.displayName}` : 'Organizer'}
-          title="Only the organizations you belong to. Nothing else exists."
-          lead={
-            <p>
-              Every request below carries your token, and the API resolves your role for the
-              organization in the path before it reads anything.
-            </p>
+          mark={
+            session
+              ? t.persona.actingAsName(personaName(session.persona.displayName))
+              : t.dashboard.mark
           }
+          title={t.dashboard.title}
+          lead={<p>{t.dashboard.lead}</p>}
         />
 
         <div className="mt-10 grid gap-14">
@@ -57,7 +61,9 @@ export default async function DashboardPage() {
               >
                 <header className="flex flex-wrap items-end justify-between gap-4 border-b border-ink pb-3">
                   <div>
-                    <p className="label text-ink-3">Your role · {membership.role}</p>
+                    <p className="label text-ink-3">
+                      {t.dashboard.role(t.dashboard.roles[membership.role] ?? membership.role)}
+                    </p>
                     <h2
                       id={membership.organization.id}
                       className="mt-1 font-display text-3xl font-semibold"
@@ -69,7 +75,7 @@ export default async function DashboardPage() {
                     href={`/dashboard/events/new?organization=${membership.organization.id}`}
                     variant="secondary"
                   >
-                    New draft event
+                    {t.dashboard.newDraft}
                   </ButtonLink>
                 </header>
                 {!events.ok ? (
@@ -88,13 +94,18 @@ export default async function DashboardPage() {
                             <p className="font-display text-lg font-semibold group-hover:text-signal">
                               {event.name}
                             </p>
-                            <p className="text-sm text-ink-2">{formatDateTime(event.startsAt)}</p>
+                            <p className="text-sm text-ink-2">
+                              {formatDateTime(event.startsAt, locale)}
+                            </p>
                           </div>
                           <div className="col-span-8 md:col-span-5">
                             <SeatMeter inventory={event.inventory} />
                             <p className="mt-1.5 font-mono text-xs text-ink-2 tabular">
-                              {event.inventory.confirmed}/{event.inventory.capacity} confirmed ·{' '}
-                              {event.inventory.waitlisted} waiting
+                              {t.dashboard.meter(
+                                event.inventory.confirmed,
+                                event.inventory.capacity,
+                                event.inventory.waitlisted,
+                              )}
                             </p>
                           </div>
                           <div className="col-span-4 flex justify-end md:col-span-2">

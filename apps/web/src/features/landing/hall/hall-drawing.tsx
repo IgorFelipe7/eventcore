@@ -1,11 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
+import { useI18n } from '@/i18n/provider'
 import {
-  CONTESTED,
   ROW_LABELS,
   SEATS_PER_ROW,
-  type SeatPlacement,
   cameraRig,
   contestedLabel,
   contestedSeat,
@@ -14,36 +13,56 @@ import {
   queueSlot,
   seatPlacements,
 } from './hall-layout'
+import { seatOutlines } from './hall-outline'
 
-type Local = readonly (readonly [number, number, number])[]
+const GLYPH_WIDTH = 7.4
 
-const CUSHION: Local = [
-  [-0.41, 0.42, -0.36],
-  [0.41, 0.42, -0.36],
-  [0.41, 0.42, 0.28],
-  [-0.41, 0.42, 0.28],
-]
-
-const BACK: Local = [
-  [-0.41, 0.42, 0.27],
-  [0.41, 0.42, 0.27],
-  [0.41, 0.95, 0.27],
-  [-0.41, 0.95, 0.27],
-]
-
-const outline = (placement: SeatPlacement, corners: Local) =>
-  corners.map(([x, y, z]) => ({
-    x: placement.x + x * Math.cos(placement.yaw) + z * Math.sin(placement.yaw),
-    y: placement.y + y,
-    z: placement.z - x * Math.sin(placement.yaw) + z * Math.cos(placement.yaw),
-  }))
+function Label({
+  x,
+  y,
+  anchor = 'start',
+  color,
+  children,
+}: {
+  readonly x: number
+  readonly y: number
+  readonly anchor?: 'start' | 'middle' | 'end'
+  readonly color: string
+  readonly children: string
+}) {
+  const width = children.length * GLYPH_WIDTH
+  const left = anchor === 'end' ? x - width : anchor === 'middle' ? x - width / 2 : x
+  return (
+    <g>
+      <rect
+        x={left - 4}
+        y={y - 10}
+        width={width + 8}
+        height={14}
+        fill="var(--color-paper)"
+        stroke="none"
+      />
+      <text
+        x={x}
+        y={y}
+        textAnchor={anchor}
+        fill={color}
+        stroke="none"
+        className="font-mono text-[10px] uppercase tracking-[0.14em]"
+      >
+        {children}
+      </text>
+    </g>
+  )
+}
 
 interface Size {
   readonly width: number
   readonly height: number
 }
 
-export function HallDrawing({ host }: { readonly host: React.RefObject<HTMLDivElement | null> }) {
+function Drawing({ host }: { readonly host: React.RefObject<HTMLDivElement | null> }) {
+  const { t } = useI18n()
   const [size, setSize] = useState<Size | null>(null)
 
   useEffect(() => {
@@ -80,28 +99,19 @@ export function HallDrawing({ host }: { readonly host: React.RefObject<HTMLDivEl
       style={{ opacity: 'var(--lights, 0)' }}
     >
       <g fill="none" stroke="var(--color-ink)" strokeWidth="1">
-        {[...seats]
-          .sort((first, second) => project(second).depth - project(first).depth)
-          .map((placement) => {
-            const isContested =
-              placement.row === CONTESTED.row && placement.column === CONTESTED.column
-            const cushion = outline(placement, CUSHION).map(project)
-            const back = outline(placement, BACK).map(project)
-            const path = (points: { x: number; y: number }[]) =>
-              points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ')
-            return (
-              <g
-                key={placement.number}
-                fill={isContested ? 'var(--color-confirmed-wash)' : 'var(--color-sheet)'}
-                stroke={isContested ? 'var(--color-confirmed)' : 'var(--color-ink)'}
-                strokeWidth={isContested ? 1.4 : 0.8}
-                strokeLinejoin="round"
-              >
-                <polygon points={path(back)} />
-                <polygon points={path(cushion)} />
-              </g>
-            )
-          })}
+        {seatOutlines(rig, width, height).map((outline) => (
+          <g
+            key={outline.number}
+            fill={outline.contested ? 'var(--color-confirmed-wash)' : 'var(--color-sheet)'}
+            stroke={outline.contested ? 'var(--color-confirmed)' : 'var(--color-ink)'}
+            strokeWidth={outline.contested ? 1.4 : 0.8}
+            strokeLinejoin="round"
+          >
+            {outline.polygons.map((points, index) => (
+              <polygon key={index} points={points} />
+            ))}
+          </g>
+        ))}
         {ROW_LABELS.map((label, row) => {
           const edge = seats
             .filter((placement) => placement.row === row)
@@ -110,16 +120,9 @@ export function HallDrawing({ host }: { readonly host: React.RefObject<HTMLDivEl
           if (!edge) return null
           const point = { x: edge.point.x - 64, y: edge.point.y - 4 }
           return (
-            <text
-              key={label}
-              x={point.x}
-              y={point.y}
-              fill="var(--color-ink-3)"
-              stroke="none"
-              className="font-mono text-[10px] uppercase tracking-[0.14em]"
-            >
-              Row {label}
-            </text>
+            <Label key={label} x={point.x} y={point.y} color="var(--color-ink-3)">
+              {t.hero.row(label)}
+            </Label>
           )
         })}
         <polyline
@@ -148,16 +151,14 @@ export function HallDrawing({ host }: { readonly host: React.RefObject<HTMLDivEl
               x2={dimensionEnd.x}
               y2={dimensionEnd.y + 6}
             />
-            <text
+            <Label
               x={(dimensionStart.x + dimensionEnd.x) / 2}
               y={(dimensionStart.y + dimensionEnd.y) / 2 + 16}
-              textAnchor="middle"
-              fill="var(--color-ink-3)"
-              stroke="none"
-              className="font-mono text-[10px] uppercase tracking-[0.14em]"
+              anchor="middle"
+              color="var(--color-ink-3)"
             >
-              6 seats · 4 rows · capacity 24
-            </text>
+              {t.hero.drawingDimension}
+            </Label>
           </g>
         ) : null}
         <g stroke="var(--color-confirmed)">
@@ -169,31 +170,24 @@ export function HallDrawing({ host }: { readonly host: React.RefObject<HTMLDivEl
             x2={seatPoint.x - 100}
             y2={seatPoint.y - 150}
           />
-          <text
+          <Label
             x={seatPoint.x - 106}
             y={seatPoint.y - 146}
-            textAnchor="end"
-            fill="var(--color-confirmed)"
-            stroke="none"
-            className="font-mono text-[10px] uppercase tracking-[0.14em]"
+            anchor="end"
+            color="var(--color-confirmed)"
           >
-            {contestedLabel()} · A · confirmed
-          </text>
+            {t.hero.drawingSeat(contestedLabel(t.hero.seat))}
+          </Label>
         </g>
         <g stroke="var(--color-waitlisted)">
           <line x1={slot.x} y1={slot.y} x2={slot.x - 30} y2={slot.y + 34} />
-          <text
-            x={slot.x - 36}
-            y={slot.y + 38}
-            textAnchor="end"
-            fill="var(--color-waitlisted)"
-            stroke="none"
-            className="font-mono text-[10px] uppercase tracking-[0.14em]"
-          >
-            B · waitlisted #1
-          </text>
+          <Label x={slot.x - 36} y={slot.y + 38} anchor="end" color="var(--color-waitlisted)">
+            {t.hero.drawingQueue}
+          </Label>
         </g>
       </g>
     </svg>
   )
 }
+
+export const HallDrawing = memo(Drawing)

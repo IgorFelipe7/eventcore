@@ -1,4 +1,5 @@
-import Link, { type LinkProps } from 'next/link'
+import { type LinkProps } from 'next/link'
+import { Link } from '@/i18n/link'
 import { type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 export type ButtonVariant = 'primary' | 'secondary' | 'quiet'
@@ -12,7 +13,7 @@ const variants: Record<ButtonVariant, string> = {
 }
 
 export const buttonClass = (variant: ButtonVariant = 'primary', extra = '') =>
-  `inline-flex min-h-11 items-center justify-center gap-2 rounded-[2px] px-4 py-2 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed ${variants[variant]} ${extra}`
+  `inline-flex min-h-11 items-center justify-center gap-2 rounded-xs px-4 py-2 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed ${variants[variant]} ${extra}`
 
 export function ButtonLink({
   href,

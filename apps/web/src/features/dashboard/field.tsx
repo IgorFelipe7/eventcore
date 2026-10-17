@@ -24,7 +24,7 @@ export function Field({
         name={name}
         aria-invalid={error ? true : undefined}
         aria-describedby={hint || error ? describedBy : undefined}
-        className="min-h-11 rounded-[2px] border border-ink-3 bg-sheet px-3 font-mono text-sm text-ink outline-offset-0 aria-[invalid=true]:border-rejected"
+        className="min-h-11 rounded-xs border border-ink-3 bg-sheet px-3 font-mono text-sm text-ink outline-offset-0 aria-[invalid=true]:border-rejected"
         {...input}
       />
       {error || hint ? (

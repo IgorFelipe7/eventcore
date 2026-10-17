@@ -1,11 +1,13 @@
+import { getI18n } from '@/i18n/server'
 import { Notice } from './notice'
 
-export function PersonaRequired({ kind }: { readonly kind: 'participant' | 'organizer' }) {
+export async function PersonaRequired({ kind }: { readonly kind: 'participant' | 'organizer' }) {
+  const { t } = await getI18n()
   return (
-    <Notice tone="signal" title={`Act as a demo ${kind} to open this sheet`}>
-      Use <strong>Acting as</strong> in the header and pick{' '}
-      {kind === 'participant' ? 'Rio, Sol or Ivo' : 'Mara, Teo or Lis'}. Demo personas carry no
-      personal data; choosing one signs a short-lived token on the server.
+    <Notice tone="signal" title={t.persona.required(kind)}>
+      {t.persona.requiredBody(
+        kind === 'participant' ? t.persona.participantNames : t.persona.organizerNames,
+      )}
     </Notice>
   )
 }

@@ -6,52 +6,49 @@ import { useFormStatus } from 'react-dom'
 import { Notice } from '@/components/notice'
 import { RegistrationStatusTag } from '@/components/status-tag'
 import { Ticket, type TicketTone } from '@/components/ticket'
+import { useI18n } from '@/i18n/provider'
 import { registerForEventAction } from '@/lib/actions/registration-actions'
 import { type CommandState, IDLE } from './action-state'
 
 function SubmitButton({ label }: { readonly label: string }) {
+  const { t } = useI18n()
   const { pending } = useFormStatus()
   return (
     <button
       type="submit"
       disabled={pending}
       aria-disabled={pending}
-      className="relative inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[2px] border border-ink bg-ink px-5 text-[0.95rem] font-medium text-paper transition-colors hover:border-signal hover:bg-signal disabled:cursor-wait disabled:hover:border-ink disabled:hover:bg-ink"
+      className="relative inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xs border border-ink bg-ink px-5 text-[0.95rem] font-medium text-paper transition-colors hover:border-signal hover:bg-signal disabled:cursor-wait disabled:hover:border-ink disabled:hover:bg-ink"
     >
       <span className={pending ? 'invisible' : undefined}>{label}</span>
       {pending ? (
         <span className="absolute inset-0 flex items-center justify-center gap-2">
           <span aria-hidden className="size-2 animate-pulse rounded-full bg-signal" />
-          Asking the database…
+          {t.registration.asking}
         </span>
       ) : null}
     </button>
   )
 }
 
-const SERVER_STEPS = [
-  'Verified the demo token and resolved the participant',
-  'Claimed the idempotency key, or found its committed twin',
-  'Locked the inventory row and re-read seats, queue and your row',
-  'Committed the decision with its history, audit entry and outbox event',
-]
-
 function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'registered' }> }) {
+  const { t } = useI18n()
+  const position = String(state.waitlistPosition ?? '?')
   const headline: Record<RegistrationStatus, string> = {
-    CONFIRMED: 'You’re confirmed. The seat is held by the database, not by this page.',
-    WAITLISTED: `You’re #${state.waitlistPosition ?? '?'} in line. If a seat opens you’re promoted automatically, in order.`,
-    REJECTED: 'Every seat is taken and this event doesn’t keep a waitlist.',
-    CANCELLED: 'This registration is cancelled.',
+    CONFIRMED: t.registration.headline.CONFIRMED,
+    WAITLISTED: t.registration.headline.WAITLISTED(position),
+    REJECTED: t.registration.headline.REJECTED,
+    CANCELLED: t.registration.headline.CANCELLED,
   }
   const stub: Record<RegistrationStatus, { label: string; value: string; tone: TicketTone }> = {
-    CONFIRMED: { label: 'Admit one', value: '✓', tone: 'confirmed' },
+    CONFIRMED: { label: t.registration.stub.CONFIRMED, value: '✓', tone: 'confirmed' },
     WAITLISTED: {
-      label: 'In line',
-      value: `#${state.waitlistPosition ?? '?'}`,
+      label: t.registration.stub.WAITLISTED,
+      value: `#${position}`,
       tone: 'waitlisted',
     },
-    REJECTED: { label: 'Sold out', value: '×', tone: 'rejected' },
-    CANCELLED: { label: 'Cancelled', value: '○', tone: 'neutral' },
+    REJECTED: { label: t.registration.stub.REJECTED, value: '×', tone: 'rejected' },
+    CANCELLED: { label: t.registration.stub.CANCELLED, value: '○', tone: 'neutral' },
   }
   const { label, value, tone } = stub[state.status]
   return (
@@ -60,26 +57,21 @@ function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'reg
         <RegistrationStatusTag status={state.status} position={state.waitlistPosition} />
         <span className="label text-ink-3">
           {state.replayed
-            ? 'Replayed answer'
+            ? t.registration.replayedAnswer
             : state.transition === 'UNCHANGED'
-              ? 'No change'
-              : 'New decision'}
+              ? t.registration.noChange
+              : t.registration.newDecision}
         </span>
       </div>
       <div className="px-4 py-4">
         <p className="text-ink">{headline[state.status]}</p>
         {state.replayed ? (
-          <p className="mt-2 text-sm text-ink-2">
-            Same request as before — here is the original answer. Nothing was booked twice.
-          </p>
+          <p className="mt-2 text-sm text-ink-2">{t.registration.replayedNote}</p>
         ) : state.transition === 'UNCHANGED' ? (
-          <p className="mt-2 text-sm text-ink-2">
-            You already held this registration, so the database returned it instead of creating
-            another.
-          </p>
+          <p className="mt-2 text-sm text-ink-2">{t.registration.unchangedNote}</p>
         ) : null}
         <ol className="mt-4 grid gap-1.5 border-t border-rule pt-3 text-sm text-ink-2">
-          {SERVER_STEPS.map((step, index) => (
+          {t.registration.steps.map((step, index) => (
             <li key={step} className="grid grid-cols-[1.75rem_1fr]">
               <span className="font-mono text-xs leading-5 text-confirmed">✓ {index + 1}</span>
               <span>{step}</span>
@@ -87,19 +79,19 @@ function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'reg
           ))}
         </ol>
         <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-rule pt-3 font-mono text-xs">
-          <dt className="text-ink-3">Idempotency key</dt>
+          <dt className="text-ink-3">{t.registration.key}</dt>
           <dd className="truncate text-ink">{state.key}</dd>
-          <dt className="text-ink-3">Decided by request</dt>
+          <dt className="text-ink-3">{t.registration.decidedBy}</dt>
           <dd className="truncate text-ink">{state.requestId}</dd>
           {state.replayed && state.answeredRequestId ? (
             <>
-              <dt className="text-ink-3">Answered request</dt>
+              <dt className="text-ink-3">{t.registration.answered}</dt>
               <dd className="truncate text-ink">{state.answeredRequestId}</dd>
             </>
           ) : null}
-          <dt className="text-ink-3">Snapshot after decision</dt>
+          <dt className="text-ink-3">{t.registration.after}</dt>
           <dd className="text-ink tabular">
-            {state.inventory.confirmed}/{state.inventory.capacity} · queue{' '}
+            {state.inventory.confirmed}/{state.inventory.capacity} · {t.registration.queue}{' '}
             {state.inventory.waitlisted}
           </dd>
         </dl>
@@ -121,6 +113,7 @@ export function RegistrationPanel({
   readonly currentPosition: number | null
   readonly closedReason: string | null
 }) {
+  const { t } = useI18n()
   const [state, formAction] = useActionState(registerForEventAction, IDLE)
   const held = currentStatus === 'CONFIRMED' || currentStatus === 'WAITLISTED'
   const retryKey =
@@ -131,10 +124,10 @@ export function RegistrationPanel({
       {held && state.kind === 'idle' ? (
         <Notice
           tone={currentStatus === 'CONFIRMED' ? 'success' : 'waiting'}
-          title="You already hold this registration"
+          title={t.registration.alreadyHeld}
         >
           <span className="inline-flex items-center gap-2">
-            Current status{' '}
+            {t.registration.currentStatus}{' '}
             <RegistrationStatusTag status={currentStatus} position={currentPosition} />
           </span>
         </Notice>
@@ -143,32 +136,33 @@ export function RegistrationPanel({
       {state.kind === 'registered' ? <Receipt state={state} /> : null}
 
       {state.kind === 'problem' ? (
-        <Notice tone={state.retryable ? 'waiting' : 'danger'} title={state.title} live>
-          {state.detail}
-          {state.retryable ? (
-            <span className="mt-1 block">
-              Retrying is safe: it reuses the same key, so it can’t book twice.
-            </span>
-          ) : null}
-          <span className="mt-1 block font-mono text-xs text-ink-3">request {state.requestId}</span>
+        <Notice
+          tone={state.retryable ? 'waiting' : 'danger'}
+          title={t.api.problems[state.code] ?? state.title}
+          live
+        >
+          {t.api.problems[state.code] ? null : state.detail}
+          {state.retryable ? <span className="mt-1 block">{t.registration.retrySafe}</span> : null}
+          <span className="mt-1 block font-mono text-xs text-ink-3">
+            {t.common.request} {state.requestId}
+          </span>
         </Notice>
       ) : null}
 
       {state.kind === 'unavailable' ? (
-        <Notice tone="waiting" title="We couldn’t confirm the outcome" live>
-          The API didn’t answer in time. Retrying is safe: the same idempotency key goes with it, so
-          it can’t book twice.
+        <Notice tone="waiting" title={t.registration.unavailableTitle} live>
+          {t.registration.unavailable}
         </Notice>
       ) : null}
 
       {state.kind === 'needs-persona' ? (
-        <Notice tone="signal" title="Choose a demo persona first" live>
-          Use “Acting as” in the header. No account and no personal data.
+        <Notice tone="signal" title={t.registration.personaTitle} live>
+          {t.registration.persona}
         </Notice>
       ) : null}
 
       {closedReason ? (
-        <Notice title="Registration is not open">{closedReason}</Notice>
+        <Notice title={t.registration.closedTitle}>{closedReason}</Notice>
       ) : (
         <form action={formAction} className="grid gap-3">
           <input type="hidden" name="eventId" value={eventId} />
@@ -176,10 +170,10 @@ export function RegistrationPanel({
           <SubmitButton
             label={
               state.kind === 'problem' || state.kind === 'unavailable'
-                ? 'Retry with the same key'
+                ? t.registration.retry
                 : held
-                  ? 'Ask again — it won’t duplicate'
-                  : 'Reserve a seat'
+                  ? t.registration.askAgain
+                  : t.registration.reserve
             }
           />
           <p className="font-mono text-[0.7rem] text-ink-3">
@@ -196,7 +190,7 @@ export function RegistrationPanel({
             type="submit"
             className="min-h-11 text-sm text-ink underline decoration-ink-3/60 hover:text-signal"
           >
-            Resend the exact same request ({state.key.slice(0, 8)}…)
+            {t.registration.resend(state.key.slice(0, 8))}
           </button>
         </form>
       ) : null}

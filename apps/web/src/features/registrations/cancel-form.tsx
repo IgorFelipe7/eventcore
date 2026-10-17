@@ -2,18 +2,20 @@
 
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
+import { useI18n } from '@/i18n/provider'
 import { cancelRegistrationAction } from '@/lib/actions/registration-actions'
 import { IDLE } from './action-state'
 
 function CancelButton() {
+  const { t } = useI18n()
   const { pending } = useFormStatus()
   return (
     <button
       type="submit"
       disabled={pending}
-      className="min-h-11 rounded-[2px] border border-ink px-3 text-sm hover:bg-ink hover:text-paper disabled:cursor-wait disabled:border-rule disabled:text-ink-3"
+      className="min-h-11 rounded-xs border border-ink px-3 text-sm hover:bg-ink hover:text-paper disabled:cursor-wait disabled:border-rule disabled:text-ink-3"
     >
-      {pending ? 'Cancelling…' : 'Cancel registration'}
+      {pending ? t.registration.cancelling : t.registration.cancel}
     </button>
   )
 }
@@ -27,6 +29,7 @@ export function CancelForm({
   readonly idempotencyKey: string
   readonly cancellable: boolean
 }) {
+  const { t } = useI18n()
   const [state, formAction] = useActionState(cancelRegistrationAction, IDLE)
   const key = state.kind === 'problem' || state.kind === 'unavailable' ? state.key : idempotencyKey
 
@@ -38,12 +41,12 @@ export function CancelForm({
       <p role="status" className="text-sm text-ink-2">
         {state.kind === 'cancelled'
           ? state.promoted
-            ? 'Cancelled. The next person in line was promoted in the same transaction.'
-            : 'Cancelled.'
+            ? t.registration.cancelledPromoted
+            : t.registration.cancelled
           : state.kind === 'problem'
-            ? `${state.title}${state.retryable ? ' Retrying is safe.' : ''}`
+            ? `${t.api.problems[state.code] ?? state.title}${state.retryable ? t.registration.retrySafeShort : ''}`
             : state.kind === 'unavailable'
-              ? 'No answer from the API. Retrying is safe: it reuses the same key.'
+              ? t.registration.noAnswer
               : null}
       </p>
     </form>

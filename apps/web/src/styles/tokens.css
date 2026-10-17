@@ -31,7 +31,6 @@
   --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-plex-condensed), var(--font-plex-sans), ui-sans-serif, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
-  --font-accent: var(--font-instrument-serif), 'Times New Roman', serif;
 
   --text-label: 0.6875rem;
   --text-label--letter-spacing: 0.08em;

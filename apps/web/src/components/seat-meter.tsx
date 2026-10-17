@@ -1,4 +1,7 @@
+'use client'
+
 import { type Inventory } from '@eventcore/contracts'
+import { useI18n } from '@/i18n/provider'
 
 const CELL_LIMIT = 60
 
@@ -11,8 +14,9 @@ export function SeatMeter({
   readonly size?: 'sm' | 'lg'
   readonly label?: string
 }) {
+  const { t } = useI18n()
   const { capacity, confirmed, available, waitlisted } = inventory
-  const summary = `${confirmed} of ${capacity} seats confirmed, ${available} available, ${waitlisted} waitlisted`
+  const summary = t.meter.summary(confirmed, capacity, available, waitlisted)
   const cell = size === 'lg' ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-2.5 w-2.5'
 
   return (

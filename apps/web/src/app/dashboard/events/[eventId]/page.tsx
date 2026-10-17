@@ -7,7 +7,6 @@ import {
 } from '@eventcore/contracts'
 import { hasPermission } from '@eventcore/domain'
 import { type Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ApiFailure } from '@/components/api-state'
 import { PersonaRequired } from '@/components/persona-required'
@@ -17,10 +16,15 @@ import { EventStatusTag, RegistrationStatusTag } from '@/components/status-tag'
 import { CapacityControl, LifecycleControls } from '@/features/dashboard/event-controls'
 import { loadViewer, locateEvent } from '@/features/dashboard/organizer-data'
 import { callApi } from '@/lib/api'
+import { Link } from '@/i18n/link'
+import { getI18n } from '@/i18n/server'
 import { formatDateTime, formatSnapshot, shortId } from '@/lib/format'
 import { readSession } from '@/lib/session'
 
-export const metadata: Metadata = { title: 'Event panel' }
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getI18n()
+  return { title: t.sheets.eventPanel }
+}
 
 function Panel({
   title,
@@ -49,8 +53,8 @@ export default async function EventPanelPage({
   const { eventId } = await params
   if (!IdSchema.safeParse(eventId).success) notFound()
 
-  const session = await readSession()
-  const sheet = { number: 5, title: 'Event panel' }
+  const [session, { locale, t }] = await Promise.all([readSession(), getI18n()])
+  const sheet = { number: 5, title: t.sheets.eventPanel }
 
   if (!session || session.persona.kind !== 'organizer') {
     return (
@@ -117,11 +121,13 @@ export default async function EventPanelPage({
         <div>
           <div className="flex items-center gap-3">
             <EventStatusTag status={event.status} />
-            <span className="label text-ink-3">Your role · {membership.role}</span>
+            <span className="label text-ink-3">
+              {t.dashboard.role(t.dashboard.roles[membership.role] ?? membership.role)}
+            </span>
           </div>
           <h1 className="mt-4 text-[clamp(2rem,1.4rem+2.5vw,3.5rem)] leading-none">{event.name}</h1>
           <p className="mt-3 text-ink-2">
-            {formatDateTime(event.startsAt)} · {event.venue}
+            {formatDateTime(event.startsAt, locale)} · {event.venue}
           </p>
         </div>
         {event.status !== 'DRAFT' ? (
@@ -129,13 +135,13 @@ export default async function EventPanelPage({
             href={`/events/${event.organization.slug}/${event.slug}`}
             className="min-h-11 text-sm underline hover:text-signal"
           >
-            Public sheet →
+            {t.panel.publicSheet} →
           </Link>
         ) : null}
       </header>
 
       <div className="sheet-frame mt-10 grid grid-cols-12 gap-4 md:gap-6">
-        <Panel title="Inventory" className="col-span-12 lg:col-span-5">
+        <Panel title={t.panel.inventory} className="col-span-12 lg:col-span-5">
           <p className="font-display text-5xl font-semibold tabular">
             {event.inventory.confirmed}
             <span className="text-2xl text-ink-3"> / {event.inventory.capacity}</span>
@@ -144,8 +150,11 @@ export default async function EventPanelPage({
             <SeatMeter inventory={event.inventory} size="lg" />
           </div>
           <p className="mt-3 font-mono text-xs text-ink-2 tabular">
-            {event.inventory.available} available · {event.inventory.waitlisted} waiting · read at{' '}
-            {formatSnapshot(event.observedAt)}
+            {t.panel.inventoryLine(
+              event.inventory.available,
+              event.inventory.waitlisted,
+              formatSnapshot(event.observedAt, locale),
+            )}
           </p>
           <div className="mt-6 border-t border-rule pt-5">
             <CapacityControl
@@ -160,20 +169,20 @@ export default async function EventPanelPage({
         </Panel>
 
         <div className="col-span-12 grid content-start gap-4 md:gap-6 lg:col-span-7">
-          <Panel title="Lifecycle">
+          <Panel title={t.panel.lifecycle}>
             <LifecycleControls
               organizationId={organizationId}
               eventId={eventId}
               transitions={event.allowedTransitions}
             />
           </Panel>
-          <Panel title="Integrity check">
+          <Panel title={t.panel.integrity}>
             {check ? (
               <ul className="grid gap-2 text-sm sm:grid-cols-3">
                 {[
-                  { label: 'Within capacity', ok: check.withinCapacity },
-                  { label: 'Counter matches rows', ok: check.projectionMatches },
-                  { label: 'No idle seat while queued', ok: check.noIdleSeatWhileQueued },
+                  { label: t.panel.integrityItems.withinCapacity, ok: check.withinCapacity },
+                  { label: t.panel.integrityItems.projection, ok: check.projectionMatches },
+                  { label: t.panel.integrityItems.idle, ok: check.noIdleSeatWhileQueued },
                 ].map((item) => (
                   <li key={item.label} className="flex items-center gap-2">
                     <span
@@ -183,40 +192,43 @@ export default async function EventPanelPage({
                       {item.ok ? '✓' : '×'}
                     </span>
                     {item.label}
-                    <span className="sr-only">{item.ok ? 'passes' : 'fails'}</span>
+                    <span className="sr-only">{item.ok ? t.common.passes : t.common.fails}</span>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-ink-2">Integrity report unavailable.</p>
+              <p className="text-sm text-ink-2">{t.panel.integrityUnavailable}</p>
             )}
             {check ? (
               <p className="mt-3 font-mono text-xs text-ink-3 tabular">
-                counter {check.confirmedCount} · confirmed rows {check.confirmedRows} · waitlisted
-                rows {check.waitlistedRows}
+                {t.panel.integrityLine(
+                  check.confirmedCount,
+                  check.confirmedRows,
+                  check.waitlistedRows,
+                )}
               </p>
             ) : null}
           </Panel>
         </div>
 
-        <Panel title="Registrations" className="col-span-12 lg:col-span-7">
+        <Panel title={t.panel.registrations} className="col-span-12 lg:col-span-7">
           {!registrations.ok ? (
             <ApiFailure result={registrations} />
           ) : registrations.data.items.length === 0 ? (
-            <p className="text-sm text-ink-2">Nobody has registered yet.</p>
+            <p className="text-sm text-ink-2">{t.panel.nobody}</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[30rem] text-left text-sm">
                 <thead>
                   <tr className="border-b border-ink">
                     <th scope="col" className="label py-2 pr-3 text-ink-3">
-                      Participant
+                      {t.panel.columns.participant}
                     </th>
                     <th scope="col" className="label py-2 pr-3 text-ink-3">
-                      Status
+                      {t.panel.columns.status}
                     </th>
                     <th scope="col" className="label py-2 pr-3 text-right text-ink-3">
-                      Registered
+                      {t.panel.columns.registered}
                     </th>
                   </tr>
                 </thead>
@@ -234,7 +246,7 @@ export default async function EventPanelPage({
                         />
                       </td>
                       <td className="py-2.5 text-right font-mono text-xs text-ink-2 tabular">
-                        {formatSnapshot(registration.createdAt)}
+                        {formatSnapshot(registration.createdAt, locale)}
                       </td>
                     </tr>
                   ))}
@@ -244,9 +256,9 @@ export default async function EventPanelPage({
           )}
         </Panel>
 
-        <Panel title="Audit trail · latest" className="col-span-12 lg:col-span-5">
+        <Panel title={t.panel.audit} className="col-span-12 lg:col-span-5">
           {!audit ? (
-            <p className="text-sm text-ink-2">The audit trail is visible to admins only.</p>
+            <p className="text-sm text-ink-2">{t.panel.auditAdmins}</p>
           ) : !audit.ok ? (
             <ApiFailure result={audit} />
           ) : (
@@ -258,7 +270,7 @@ export default async function EventPanelPage({
                 >
                   <span className="font-mono text-xs text-ink">{entry.action}</span>
                   <span className="font-mono text-xs text-ink-3 tabular">
-                    {formatSnapshot(entry.createdAt)}
+                    {formatSnapshot(entry.createdAt, locale)}
                   </span>
                   <span className="col-span-2 font-mono text-[0.7rem] text-ink-3">
                     {entry.resourceType} …{shortId(entry.resourceId)} · req …

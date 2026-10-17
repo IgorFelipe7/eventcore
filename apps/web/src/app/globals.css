@@ -222,3 +222,53 @@ html:not([data-scene='paper']) body:has(.hall) [data-site-header] :is(a, summary
     color 300ms ease,
     border-color 300ms ease;
 }
+
+@layer components {
+  .dimension {
+    position: relative;
+    display: inline-block;
+    color: var(--dimension-color, var(--color-signal));
+  }
+
+  .dimension-line {
+    position: absolute;
+    inset-inline: 0.02em;
+    bottom: -0.03em;
+    height: 0.16em;
+    border-inline: max(1.5px, 0.028em) solid currentColor;
+    background: linear-gradient(currentColor, currentColor) center / 100% max(1.5px, 0.028em)
+      no-repeat;
+    transform-origin: left center;
+    animation: dimension-draw 900ms var(--ease-sheet) 350ms both;
+  }
+
+  .dimension-note {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    translate: -50% 0.5em;
+    white-space: nowrap;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+    animation: rise 600ms var(--ease-sheet) 900ms both;
+  }
+
+  [data-reveal='waiting'] .dimension-line {
+    animation: none;
+    transform: scaleX(0);
+  }
+
+  [data-reveal='shown'] .dimension-line {
+    animation: dimension-draw 900ms var(--ease-sheet) 350ms both;
+  }
+}
+
+@keyframes dimension-draw {
+  from {
+    transform: scaleX(0);
+  }
+}

@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { getI18n } from '@/i18n/server'
 
 function Node({
   title,
@@ -57,22 +58,22 @@ const MODULES = [
   'reporting',
 ]
 
-export function SystemDiagram() {
+export async function SystemDiagram() {
+  const { t } = await getI18n()
+  const copy = t.architecture.diagram
   return (
     <div
       role="img"
-      aria-label="Browser to Next.js server to Fastify API with eight modules to PostgreSQL; a worker reads the outbox from PostgreSQL and delivers to the demo mailbox."
+      aria-label={copy.label}
       className="grid items-center gap-0 lg:grid-cols-[1fr_auto_1fr_auto_1.6fr_auto_1fr]"
     >
-      <Node title="Browser" detail="no tokens, no keys" tone="muted" />
-      <Link label="HTTPS · cookie" />
-      <Node title="Next.js 16" detail="server components · actions">
-        <p className="mt-2 text-xs text-ink-2">
-          Signs demo tokens server-side. Renders the Lab from replay files.
-        </p>
+      <Node title={copy.browser[0] ?? ''} detail={copy.browser[1] ?? ''} tone="muted" />
+      <Link label={copy.links.https} />
+      <Node title={copy.next[0] ?? ''} detail={copy.next[1] ?? ''}>
+        <p className="mt-2 text-xs text-ink-2">{copy.nextNote}</p>
       </Node>
-      <Link label="bearer JWT" />
-      <Node title="Fastify API" detail="one process · modular monolith" tone="signal">
+      <Link label={copy.links.bearer} />
+      <Node title={copy.api[0] ?? ''} detail={copy.api[1] ?? ''} tone="signal">
         <ul className="mt-3 grid grid-cols-2 gap-1">
           {MODULES.map((module) => (
             <li
@@ -84,13 +85,13 @@ export function SystemDiagram() {
           ))}
         </ul>
       </Node>
-      <Link label="1 transaction" />
+      <Link label={copy.links.transaction} />
       <div className="grid gap-0">
-        <Node title="PostgreSQL 18" detail="locks · constraints · outbox" />
-        <Link label="SKIP LOCKED" vertical />
-        <Node title="Worker" detail="relay · backoff · sweep" />
-        <Link label="dedupe key" vertical />
-        <Node title="Demo mailbox" detail="no real email in MVP" tone="muted" />
+        <Node title={copy.postgres[0] ?? ''} detail={copy.postgres[1] ?? ''} />
+        <Link label={copy.links.skipLocked} vertical />
+        <Node title={copy.worker[0] ?? ''} detail={copy.worker[1] ?? ''} />
+        <Link label={copy.links.dedupe} vertical />
+        <Node title={copy.mailbox[0] ?? ''} detail={copy.mailbox[1] ?? ''} tone="muted" />
       </div>
     </div>
   )
