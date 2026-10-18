@@ -37,6 +37,7 @@ for (const path of [
   '/events/northwind-assembly/the-last-seat',
 ]) {
   test(`no serious accessibility violations on ${path}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto(path)
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
