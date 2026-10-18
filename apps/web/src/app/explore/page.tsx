@@ -77,7 +77,7 @@ export default async function ExplorePage({
                   <Link
                     href={`/events/${event.organization.slug}/${event.slug}`}
                     data-spotlight
-                    className="surface group flex h-full flex-col gap-6 p-6 transition-transform duration-500 ease-(--ease-out-expo) hover:-translate-y-1 sm:p-7"
+                    className="surface group flex h-full flex-col gap-6 p-6 transition-transform duration-500 ease-out-expo hover:-translate-y-1 sm:p-7"
                   >
                     <div className="flex items-start gap-5">
                       <div className="grid w-16 shrink-0 place-items-center rounded-2xl border border-rule bg-[rgb(238_241_246/0.03)] py-2.5 text-center">

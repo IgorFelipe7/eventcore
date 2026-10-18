@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 const DURATION_MS = 1_400
 
@@ -12,7 +12,6 @@ export function CountUp({
   readonly className?: string
 }) {
   const element = useRef<HTMLSpanElement>(null)
-  const [shown, setShown] = useState(value)
 
   useEffect(() => {
     const target = element.current
@@ -20,6 +19,7 @@ export function CountUp({
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     if (target.getBoundingClientRect().top < window.innerHeight * 0.95) return
     let frame: number | null = null
+    target.textContent = '0'
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return
@@ -27,24 +27,24 @@ export function CountUp({
         const started = performance.now()
         const tick = (now: number) => {
           const progress = Math.min(1, (now - started) / DURATION_MS)
-          setShown(Math.round(value * (1 - (1 - progress) ** 4)))
+          target.textContent = String(Math.round(value * (1 - (1 - progress) ** 4)))
           if (progress < 1) frame = requestAnimationFrame(tick)
         }
         frame = requestAnimationFrame(tick)
       },
       { rootMargin: '0px 0px -15% 0px' },
     )
-    frame = requestAnimationFrame(() => setShown(0))
     observer.observe(target)
     return () => {
       observer.disconnect()
       if (frame !== null) cancelAnimationFrame(frame)
+      target.textContent = String(value)
     }
   }, [value])
 
   return (
     <span ref={element} className={className}>
-      {shown}
+      {value}
     </span>
   )
 }

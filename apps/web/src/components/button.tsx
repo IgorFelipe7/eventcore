@@ -13,7 +13,7 @@ const variants: Record<ButtonVariant, string> = {
 }
 
 export const buttonClass = (variant: ButtonVariant = 'primary', extra = '') =>
-  `group/button inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-[background-color,box-shadow,border-color,color,transform] duration-300 ease-(--ease-out-expo) active:scale-[0.98] disabled:cursor-not-allowed ${variants[variant]} ${extra}`
+  `group/button inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-medium transition-[background-color,box-shadow,border-color,color,transform] duration-300 ease-out-expo active:scale-[0.98] disabled:cursor-not-allowed ${variants[variant]} ${extra}`
 
 export function ButtonLink({
   href,
@@ -45,7 +45,7 @@ export function Arrow() {
   return (
     <span
       aria-hidden
-      className="inline-block transition-transform duration-300 ease-(--ease-out-expo) group-hover/button:translate-x-1"
+      className="inline-block transition-transform duration-300 ease-out-expo group-hover/button:translate-x-1"
     >
       →
     </span>

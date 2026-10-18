@@ -61,7 +61,7 @@ export function AnatomyScroller({
               aria-hidden
               className="absolute bottom-0 left-[1.1rem] top-0 w-px bg-rule group-first:top-1/2 group-last:bottom-1/2"
             />
-            <span className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full border border-rule bg-paper font-mono text-xs text-ink-3 transition-all duration-500 ease-(--ease-out-expo) group-data-[active=true]:border-signal group-data-[active=true]:bg-signal group-data-[active=true]:text-paper group-data-[active=true]:shadow-[0_0_24px_var(--color-signal)]">
+            <span className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full border border-rule bg-paper font-mono text-xs text-ink-3 transition-all duration-500 ease-out-expo group-data-[active=true]:border-signal group-data-[active=true]:bg-signal group-data-[active=true]:text-paper group-data-[active=true]:shadow-[0_0_24px_var(--color-signal)]">
               {String(index + 1).padStart(2, '0')}
             </span>
             <div>

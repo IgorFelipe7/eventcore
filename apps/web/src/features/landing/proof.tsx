@@ -131,7 +131,7 @@ export async function ProofSection() {
               <Link
                 href={`/lab?scenario=${replay.id}`}
                 data-spotlight
-                className="surface group flex min-h-16 items-center gap-4 px-5 py-4 text-sm transition-transform duration-300 ease-(--ease-out-expo) hover:-translate-y-0.5"
+                className="surface group flex min-h-16 items-center gap-4 px-5 py-4 text-sm transition-transform duration-300 ease-out-expo hover:-translate-y-0.5"
               >
                 <span className="font-mono text-xs text-ink-3">
                   {String(replay.order).padStart(2, '0')}

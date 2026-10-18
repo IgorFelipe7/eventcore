@@ -1,6 +1,6 @@
 'use client'
 
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type ReactNode, useMemo } from 'react'
 import { useI18n } from '@/i18n/provider'
 
 const SQL_KEYWORDS = new Set(
@@ -58,7 +58,14 @@ export function CodeBlock({
   readonly wrap?: boolean
 }) {
   const { t } = useI18n()
-  const lines = code.replace(/\n$/, '').split('\n')
+  const lines = useMemo(
+    () =>
+      code
+        .replace(/\n$/, '')
+        .split('\n')
+        .map((line) => (language === 'sql' ? highlightSql(line) : line)),
+    [code, language],
+  )
   return (
     <div className="surface min-w-0 overflow-clip">
       {title ? (
@@ -85,7 +92,7 @@ export function CodeBlock({
                 {index + 1}
               </span>
               <span>
-                {language === 'sql' ? highlightSql(line) : line}
+                {line}
                 {'\n'}
               </span>
             </span>
