@@ -230,7 +230,6 @@ export class HallScene {
   private pixelRatio: number
   private frame: number | null = null
   private running = false
-  private dormant = false
   private lastTime = 0
   private lastRender = 0
   private elapsed = 0
@@ -421,10 +420,6 @@ export class HallScene {
     this.targetProgress = Math.min(1, Math.max(0, value))
   }
 
-  setDormant(value: boolean) {
-    this.dormant = value
-  }
-
   setPointer(x: number, y: number) {
     this.pointer.set(x, y)
   }
@@ -457,7 +452,7 @@ export class HallScene {
       this.adapt(interval)
       const delta = Math.min(0.1, interval / 1000)
       this.elapsed += delta
-      if (this.dormant || (this.isSettled() && now - this.lastRender < IDLE_FRAME_MS)) {
+      if (this.isSettled() && now - this.lastRender < IDLE_FRAME_MS) {
         this.frame = requestAnimationFrame(loop)
         return
       }

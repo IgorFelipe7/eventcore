@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { Dimension } from '@/components/drawing-marks'
+import { Keyword } from '@/components/headline'
 import { Link } from '@/i18n/link'
 import { useI18n } from '@/i18n/provider'
 import {
@@ -16,24 +16,12 @@ import {
   projectPoint,
   queueSlot,
 } from './hall-layout'
-import { HallDrawing } from './hall-drawing'
 import { HallPoster } from './hall-poster'
 import { type HallFrame, type HallScene, type ScreenAnchor } from './hall-scene'
 
 type CalloutId = keyof HallFrame
 
-const mix = (night: string, paper: string) =>
-  `color-mix(in oklab, var(${night}), var(${paper}) calc(var(--lights, 0) * 100%))`
-
-const HALL_TONES = {
-  '--hall-bg': mix('--color-night', '--color-paper'),
-  '--hall-fg': mix('--color-night-ink', '--color-ink'),
-  '--hall-muted': mix('--color-night-muted', '--color-ink-3'),
-  '--hall-faint': mix('--color-night-faint', '--color-ink-3'),
-  '--hall-line': mix('--color-night-line', '--color-rule'),
-  '--hall-accent': mix('--color-signal-glow', '--color-signal'),
-  backgroundColor: 'var(--hall-bg)',
-} as React.CSSProperties
+const HEADER_HEIGHT = 64
 
 const subscribeToMotion = (onChange: () => void) => {
   const query = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -137,7 +125,7 @@ function Callout({
         />
       </svg>
       <div
-        className={`absolute left-(--run) whitespace-nowrap border bg-night/85 px-2.5 py-1.5 font-mono text-[0.68rem] uppercase leading-tight tracking-[0.12em] group-data-[side=left]:left-auto group-data-[side=left]:right-(--run) ${color}`}
+        className={`absolute left-(--run) whitespace-nowrap rounded-lg border bg-night/85 px-2.5 py-1.5 font-mono backdrop-blur-sm text-[0.68rem] uppercase leading-tight tracking-[0.12em] group-data-[side=left]:left-auto group-data-[side=left]:right-(--run) ${color}`}
         style={{ top: -reach - 10, ['--run' as string]: `${run + 18}px` }}
       >
         {children}
@@ -153,7 +141,7 @@ export function HallHero() {
   const canvas = useRef<HTMLCanvasElement>(null)
   const callouts = useRef(new Map<CalloutId, HTMLDivElement>())
   const ruler = useRef<HTMLDivElement>(null)
-  const calloutLayer = useRef<HTMLDivElement>(null)
+  const stageWidth = useRef(0)
   const scene = useRef<HallScene | null>(null)
   const [progress, setProgress] = useState(0)
   const [sceneReady, setSceneReady] = useState(false)
@@ -167,7 +155,7 @@ export function HallHero() {
   }
 
   const placeCallouts = (frame: HallFrame) => {
-    const width = stage.current?.clientWidth ?? window.innerWidth
+    const width = stageWidth.current || window.innerWidth
     for (const [id, element] of callouts.current) {
       const anchor = frame[id]
       element.style.transform = `translate3d(${anchor.x}px, ${anchor.y}px, 0)`
@@ -185,11 +173,39 @@ export function HallHero() {
   }
 
   useEffect(() => {
+    const header = document.querySelector<HTMLElement>('[data-site-header]')
+    const element = section.current
+    if (!header || !element) return
+    let pending: number | null = null
+    const update = () => {
+      pending = null
+      const bottom = element.getBoundingClientRect().bottom
+      const scene = bottom > HEADER_HEIGHT ? 'night' : 'paper'
+      if (header.dataset['scene'] !== scene) header.dataset['scene'] = scene
+    }
+    const schedule = () => {
+      if (pending === null) pending = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', schedule, { passive: true })
+    window.addEventListener('resize', schedule)
+    return () => {
+      if (pending !== null) cancelAnimationFrame(pending)
+      window.removeEventListener('scroll', schedule)
+      window.removeEventListener('resize', schedule)
+      delete header.dataset['scene']
+    }
+  }, [])
+
+  useEffect(() => {
     const host = stage.current
     if (!host) return
 
     if (!interactive) {
-      const layout = () => placeCallouts(staticAnchors(host.clientWidth, host.clientHeight))
+      const layout = () => {
+        stageWidth.current = host.clientWidth
+        placeCallouts(staticAnchors(host.clientWidth, host.clientHeight))
+      }
       layout()
       window.addEventListener('resize', layout)
       return () => window.removeEventListener('resize', layout)
@@ -199,29 +215,25 @@ export function HallHero() {
     let lastKey = ''
     let visible = true
     let pending: number | null = null
+    let sectionTop = 0
+    let travel = 1
 
-    const readScroll = () => {
+    const measure = () => {
       const element = section.current
-      if (!element) return 0
-      const rect = element.getBoundingClientRect()
-      const travel = rect.height - window.innerHeight
-      return travel <= 0 ? 1 : Math.min(1, Math.max(0, -rect.top / travel))
+      if (!element) return
+      sectionTop = element.getBoundingClientRect().top + window.scrollY
+      travel = element.offsetHeight - window.innerHeight
+      stageWidth.current = host.clientWidth
     }
+
+    const readScroll = () =>
+      travel <= 0 ? 1 : Math.min(1, Math.max(0, (window.scrollY - sectionTop) / travel))
 
     const apply = () => {
       pending = null
       const value = readScroll()
       scene.current?.setProgress(value)
       if (ruler.current) ruler.current.style.transform = `scaleX(${value})`
-      const lights = Math.min(1, Math.max(0, (value - 0.9) / 0.1))
-      section.current?.style.setProperty('--lights', lights.toFixed(3))
-      const lit = lights >= 0.98
-      scene.current?.setDormant(lit)
-      if (calloutLayer.current) calloutLayer.current.style.visibility = lit ? 'hidden' : 'visible'
-      const light = lights < 0.5 ? 'night' : 'paper'
-      if (document.documentElement.dataset['scene'] !== light) {
-        document.documentElement.dataset['scene'] = light
-      }
       const key = stageKey(value)
       if (key !== lastKey) {
         lastKey = key
@@ -240,7 +252,11 @@ export function HallHero() {
       )
     }
 
-    const resize = () => scene.current?.resize(host.clientWidth, host.clientHeight)
+    const resize = () => {
+      measure()
+      scene.current?.resize(host.clientWidth, host.clientHeight)
+      apply()
+    }
     const observer = new IntersectionObserver(([entry]) => {
       visible = Boolean(entry?.isIntersecting)
       if (visible) scene.current?.start()
@@ -257,6 +273,7 @@ export function HallHero() {
       setSceneReady(true)
     })
 
+    measure()
     apply()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', resize)
@@ -272,7 +289,6 @@ export function HallHero() {
       observer.disconnect()
       scene.current?.dispose()
       scene.current = null
-      delete document.documentElement.dataset['scene']
     }
   }, [interactive])
 
@@ -287,9 +303,9 @@ export function HallHero() {
       ref={section}
       aria-labelledby="hero"
       data-interactive={interactive ? 'true' : 'false'}
-      className="hall relative -mt-16 h-dvh data-[interactive=true]:h-[260vh]"
+      className="hall relative -mt-[7.75rem] h-dvh data-[interactive=true]:h-[230vh] md:-mt-[4.25rem]"
     >
-      <div ref={stage} className="sticky top-0 h-dvh overflow-hidden" style={HALL_TONES}>
+      <div ref={stage} className="sticky top-0 h-dvh overflow-clip bg-night">
         <HallPoster
           final={!interactive}
           className={`absolute inset-0 h-full w-full transition-opacity duration-700 ${sceneReady ? 'opacity-0' : 'opacity-100'}`}
@@ -297,22 +313,14 @@ export function HallHero() {
         <canvas
           ref={canvas}
           aria-hidden
-          className="absolute inset-0 h-full w-full transition-opacity duration-700"
-          style={{ opacity: sceneReady ? 'calc(1 - var(--lights, 0))' : 0 }}
+          className={`absolute inset-0 h-full w-full ${sceneReady ? 'opacity-100' : 'opacity-0'}`}
         />
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgb(7_9_12/0.92)_0%,rgb(7_9_12/0.5)_30%,transparent_56%),radial-gradient(90%_70%_at_70%_40%,transparent_45%,rgb(7_9_12/0.7)_100%)]"
-          style={{ opacity: 'calc(1 - var(--lights, 0))' }}
         />
 
-        <HallDrawing host={stage} />
-
-        <div
-          ref={calloutLayer}
-          className="absolute inset-0"
-          style={{ opacity: 'calc(1 - var(--lights, 0))' }}
-        >
+        <div className="absolute inset-0">
           <Callout
             id="seat"
             register={register}
@@ -335,23 +343,21 @@ export function HallHero() {
           </Callout>
         </div>
 
-        <div className="sheet-frame relative flex h-full flex-col pb-6 pt-32 text-(--hall-fg) md:pt-24">
+        <div className="sheet-frame relative flex h-full flex-col pb-10 pt-36 text-night-ink md:pt-28">
           <div className="grid grid-cols-12 items-start gap-x-6 gap-y-5 font-mono text-[0.68rem] uppercase tracking-[0.14em]">
-            <p className="col-span-12 text-(--hall-muted) sm:col-span-6">
-              <span className="text-(--hall-fg)">
-                {interactive && shown >= 0.95 ? t.hero.sheetLit : t.hero.sheetNight}
-              </span>
+            <p className="col-span-12 text-night-muted sm:col-span-6">
+              <span className="text-night-ink">{t.hero.sheetNight}</span>
               <span className="mt-1 block">{t.hero.subject}</span>
             </p>
             <div
               className="col-span-12 w-full max-w-sm sm:col-span-6 sm:justify-self-end"
               aria-live="polite"
             >
-              <p className="flex items-baseline justify-between gap-4 text-(--hall-accent)">
+              <p className="flex items-baseline justify-between gap-4 text-signal-glow">
                 <span>
                   {pad(beatIndex + 1)} / {pad(BEAT_STARTS.length)} · {beat?.title}
                 </span>
-                <span aria-hidden className="text-(--hall-muted) max-sm:hidden">
+                <span aria-hidden className="text-night-muted max-sm:hidden">
                   {!interactive
                     ? t.hero.finalState
                     : shown >= 0.95
@@ -359,21 +365,21 @@ export function HallHero() {
                       : t.hero.scroll}
                 </span>
               </p>
-              <div aria-hidden className="relative mt-2.5 h-px w-full bg-(--hall-line)">
+              <div aria-hidden className="relative mt-2.5 h-px w-full bg-night-line">
                 <div
                   ref={ruler}
-                  className="absolute inset-0 origin-left bg-(--hall-accent)"
+                  className="absolute inset-0 origin-left bg-signal-glow"
                   style={{ transform: `scaleX(${interactive ? 0 : 1})` }}
                 />
                 {BEAT_STARTS.map((start) => (
                   <span
                     key={start}
-                    className="absolute -top-1 h-2 w-px bg-(--hall-muted)"
+                    className="absolute -top-1 h-2 w-px bg-night-muted"
                     style={{ left: `${start * 100}%` }}
                   />
                 ))}
               </div>
-              <p className="mt-3 font-sans text-sm normal-case tracking-normal text-(--hall-fg)">
+              <p className="mt-3 font-sans text-sm normal-case tracking-normal text-night-ink">
                 {interactive ? beat?.caption : finalBeat?.caption}
               </p>
             </div>
@@ -383,37 +389,29 @@ export function HallHero() {
             <h1
               id="hero"
               className="col-span-12 text-hero font-display font-semibold lg:col-span-8"
-              style={{ ['--dimension-color' as string]: 'var(--hall-accent)' }}
             >
               <span className="block">{t.hero.titleLead}</span>
-              <span className="block text-(--hall-muted)">
-                {t.hero.titleBefore} <Dimension>{t.hero.titleKeyword}</Dimension>{' '}
-                {t.hero.titleAfter}
+              <span className="block text-night-muted">
+                {t.hero.titleBefore} <Keyword>{t.hero.titleKeyword}</Keyword> {t.hero.titleAfter}
               </span>
             </h1>
             <div className="col-span-12 grid gap-6 lg:col-span-4 lg:pb-3">
-              <p className="max-w-md text-base text-(--hall-muted) sm:text-lg">{t.hero.lead}</p>
+              <p className="max-w-md text-base text-night-muted sm:text-lg">{t.hero.lead}</p>
               <div className="flex flex-wrap gap-3">
                 <Link
                   href="/lab"
-                  className="inline-flex min-h-11 items-center gap-2 rounded-xs bg-(--hall-fg) px-4 text-sm font-medium text-(--hall-bg) transition-colors hover:bg-(--hall-accent) hover:text-white"
+                  className="inline-flex min-h-12 items-center gap-2 rounded-full bg-night-ink px-6 shadow-[0_8px_32px_-8px_rgb(125_139_255/0.7)] text-sm font-medium text-night transition-colors hover:bg-signal-glow hover:text-white"
                 >
                   {t.hero.primary} <span aria-hidden>→</span>
                 </Link>
                 <a
                   href="#fig-1"
-                  className="inline-flex min-h-11 items-center rounded-xs border border-(--hall-line) px-4 text-sm text-(--hall-fg) transition-colors hover:border-(--hall-fg)"
+                  className="inline-flex min-h-12 items-center rounded-full border border-night-line bg-[rgb(238_241_246/0.04)] px-6 backdrop-blur-md text-sm text-night-ink transition-colors hover:border-night-ink"
                 >
                   {t.hero.secondary}
                 </a>
               </div>
             </div>
-          </div>
-          <div aria-hidden className="mt-6 flex justify-between font-mono text-(--hall-faint)">
-            <span>+</span>
-            <span>+</span>
-            <span className="hidden sm:inline">+</span>
-            <span>+</span>
           </div>
         </div>
       </div>
