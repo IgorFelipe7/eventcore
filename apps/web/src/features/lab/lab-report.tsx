@@ -1,6 +1,5 @@
 import { type LabReplay, type LabVariant } from '@eventcore/contracts'
 import { CodeBlock } from '@/components/code-block'
-import { CropMarks } from '@/components/sheet'
 import { EvidenceLink } from '@/features/landing/evidence-link'
 import { type Dictionary } from '@/i18n/dictionaries'
 import { Link } from '@/i18n/link'
@@ -28,10 +27,15 @@ function VariantCard({
     <Link
       href={`/lab?scenario=${replay.id}&variant=${variant.id}`}
       scroll={false}
+      data-spotlight
       aria-current={active ? 'true' : undefined}
-      className={`block border p-4 transition-colors ${
-        active ? 'border-ink bg-sheet' : 'border-rule hover:border-ink'
-      } ${variant.safe ? '' : 'aria-[current=true]:border-rejected'}`}
+      className={`block rounded-[var(--radius-card)] border p-5 transition-[border-color,background-color,box-shadow] duration-300 ${
+        active
+          ? variant.safe
+            ? 'border-confirmed/50 bg-confirmed-wash/40 shadow-[0_0_48px_-20px_var(--color-confirmed)]'
+            : 'border-rejected/50 bg-rejected-wash/40 shadow-[0_0_48px_-20px_var(--color-rejected)]'
+          : 'border-rule bg-[rgb(238_241_246/0.02)] hover:border-[rgb(238_241_246/0.2)]'
+      }`}
     >
       <div className="flex items-center justify-between gap-3">
         <p className="label text-ink-3">{variant.label}</p>
@@ -39,9 +43,11 @@ function VariantCard({
           {passed ? t.lab.holdsMark : t.lab.brokenMark}
         </span>
       </div>
-      <p className="mt-2 font-display text-4xl font-semibold tabular">
-        {variant.final.confirmedRows}
-        <span className="text-xl text-ink-3"> {t.lab.seats(variant.final.capacity)}</span>
+      <p className="wide mt-3 font-display text-5xl font-bold leading-none tracking-[-0.05em]">
+        {variant.final.confirmedRows}{' '}
+        <span className="ml-1 text-lg font-medium tracking-normal text-ink-3 font-stretch-100%">
+          {t.lab.seats(variant.final.capacity)}
+        </span>
       </p>
       <p className="mt-2 text-sm text-ink-2">{variant.summary}</p>
     </Link>
@@ -60,9 +66,8 @@ export async function LabReport({
   const small = variant.attempts.length <= 12
 
   return (
-    <article aria-labelledby="report-title" className="relative border border-ink bg-paper">
-      <CropMarks />
-      <header className="grid gap-4 border-b border-ink p-5 sm:p-7">
+    <article aria-labelledby="report-title" className="grid grid-cols-[minmax(0,1fr)] gap-4">
+      <header className="surface grid gap-5 p-6 sm:p-8">
         <p className="label text-ink-3">
           {t.lab.test(
             pad(replay.order),
@@ -70,7 +75,10 @@ export async function LabReport({
             environment.commit,
           )}
         </p>
-        <h2 id="report-title" className="text-[clamp(1.75rem,1.3rem+1.8vw,2.75rem)] leading-[1.02]">
+        <h2
+          id="report-title"
+          className="text-[clamp(2rem,1.4rem+2.2vw,3.5rem)] leading-[0.98] tracking-[-0.04em]"
+        >
           {replay.title}
         </h2>
         <dl className="grid gap-4 md:grid-cols-2">
@@ -86,10 +94,7 @@ export async function LabReport({
       </header>
 
       {replay.variants.length > 1 ? (
-        <section
-          aria-label={t.lab.compare}
-          className="grid gap-3 border-b border-ink p-5 sm:grid-cols-2 sm:p-7"
-        >
+        <section aria-label={t.lab.compare} className="grid gap-4 sm:grid-cols-2">
           {replay.variants.map((candidate) => (
             <VariantCard
               key={candidate.id}
@@ -104,7 +109,7 @@ export async function LabReport({
 
       <section
         aria-labelledby="result"
-        className="grid gap-6 border-b border-ink p-5 sm:p-7 lg:grid-cols-[1fr_1fr]"
+        className="surface grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_1fr]"
       >
         <div>
           <h3 id="result" className="label text-ink-3">
@@ -119,16 +124,16 @@ export async function LabReport({
         </div>
         <div>
           <h3 className="label text-ink-3">{t.lab.checks}</h3>
-          <ul className="mt-3 border-t border-rule">
+          <ul className="mt-4 grid gap-2">
             {variant.checks.map((check) => (
               <li
                 key={check.id}
-                className="grid grid-cols-[3.25rem_1.25rem_1fr] gap-x-2 border-b border-rule py-2.5 text-sm"
+                className="grid grid-cols-[3.25rem_1.5rem_1fr] items-start gap-x-2 rounded-2xl border border-rule-soft bg-[rgb(238_241_246/0.02)] px-3 py-3 text-sm"
               >
                 <span className="font-mono text-xs leading-5 text-ink-3">{check.id}</span>
                 <span
                   aria-hidden
-                  className={`font-mono ${check.passed ? 'text-confirmed' : 'text-rejected'}`}
+                  className={`grid size-5 place-items-center rounded-full font-mono text-[0.65rem] ${check.passed ? 'bg-confirmed-wash text-confirmed' : 'bg-rejected-wash text-rejected'}`}
                 >
                   {check.passed ? '✓' : '×'}
                 </span>
@@ -148,13 +153,13 @@ export async function LabReport({
 
       <section
         aria-labelledby="timeline"
-        className="border-b border-ink bg-night p-5 text-night-ink sm:p-7"
+        className="surface relative overflow-clip p-6 text-night-ink sm:p-8"
       >
         <div className="flex flex-wrap items-baseline justify-between gap-3">
           <h3 id="timeline" className="label text-night-ink">
             {t.lab.timeline(replay.order)}
           </h3>
-          <span className="label rounded-xs border border-night-line px-1.5 py-0.5 text-night-muted">
+          <span className="label rounded-full border border-night-line px-2 py-0.5 text-night-muted">
             {t.common.figureKinds.measured}
           </span>
         </div>
@@ -221,13 +226,13 @@ export async function LabReport({
 
       <section
         aria-labelledby="conditions"
-        className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.2fr_1fr]"
+        className="surface grid gap-8 p-6 sm:p-8 lg:grid-cols-[1.2fr_1fr]"
       >
         <div>
           <h3 id="conditions" className="label text-ink-3">
             {t.lab.conditions}
           </h3>
-          <dl className="mt-3 grid grid-cols-[8rem_1fr] gap-x-4 gap-y-1.5 border-t border-rule pt-3 text-sm">
+          <dl className="mt-4 grid grid-cols-[7rem_1fr] gap-x-4 gap-y-2.5 text-sm">
             {[
               [t.lab.environment.database, environment.postgres],
               [t.lab.environment.runtime, `Node.js ${environment.node}`],

@@ -12,9 +12,6 @@ export const en = {
 
   common: {
     skipToContent: 'Skip to content',
-    sheet: 'Sheet',
-    of: 'of',
-    rev: 'Rev',
     figure: 'Fig.',
     figureKinds: { illustrative: 'illustrative', measured: 'measured', schematic: 'schematic' },
     scrollableCode: (name: string) => `${name} code, scrollable`,
@@ -22,21 +19,10 @@ export const en = {
     passes: 'passes',
     fails: 'fails',
     request: 'request',
-    back: 'Back',
-    titleBlock: {
-      label: 'Title block',
-      project: 'Project',
-      sheetTitle: 'Sheet title',
-      sheet: 'Sheet',
-      rev: 'Rev',
-      date: 'Date',
-      drawnBy: 'Drawn by',
-    },
     seats: (value: number) => count(value, 'seat'),
   },
 
   sheets: {
-    landing: 'The last seat',
     board: 'Event board',
     registrations: 'My registrations',
     lab: 'Reliability Lab',
@@ -45,7 +31,6 @@ export const en = {
     newEvent: 'New draft event',
     architecture: 'Architecture',
     api: 'API reference',
-    notFound: 'Not found',
     event: 'Event',
   },
 
@@ -79,7 +64,7 @@ export const en = {
       'demo|organizer-teo': 'Northwind organizer',
       'demo|organizer-lis': 'Harbor Guild admin',
     } as Record<string, string>,
-    required: (kind: 'participant' | 'organizer') => `Act as a demo ${kind} to open this sheet`,
+    required: (kind: 'participant' | 'organizer') => `Act as a demo ${kind} to open this page`,
     requiredBody: (names: string) =>
       `Use “Acting as” in the header and pick ${names}. Demo personas carry no personal data; choosing one signs a short-lived token on the server.`,
     participantNames: 'Rio, Sol or Ivo',
@@ -88,9 +73,8 @@ export const en = {
   },
 
   footer: {
-    endOfSet: 'End of set',
     tagline:
-      'Every number on these sheets comes from the database or from a recorded run, and says which.',
+      'Every number on this site comes from the database or from a recorded run, and says which.',
     navigation: 'Footer',
     links: {
       board: 'Event board',
@@ -106,11 +90,8 @@ export const en = {
   },
 
   hero: {
-    sheetNight: 'Sheet 01 / 06 · Night',
-    sheetLit: 'Sheet 01 / 06 · Lights on',
+    sheetNight: 'Live replay · run 02',
     subject: 'EventCore · reservations under contention',
-    evidence: 'Recorded on PostgreSQL 18',
-    evidenceDetail: 'Every figure links to its test',
     titleLead: 'Two requests. One seat.',
     titleBefore: 'Exactly',
     titleKeyword: 'one',
@@ -145,7 +126,6 @@ export const en = {
       },
     ],
     seat: (row: string, number: number) => `Row ${row} · Seat ${number}`,
-    row: (row: string) => `Row ${row}`,
     seatState: (capacity: number, confirmed: number, holder: string | null) =>
       `capacity ${capacity} · confirmed ${confirmed} · lock: ${holder ?? 'free'}`,
     a: { arriving: 'A · req 7f3c', holding: 'A · holds the lock' },
@@ -155,9 +135,6 @@ export const en = {
       holding: 'B · re-reads 24 / 24',
       queued: 'B · 201 waitlisted #1',
     },
-    drawingDimension: '6 seats · 4 rows · capacity 24',
-    drawingSeat: (seat: string) => `${seat} · A · confirmed`,
-    drawingQueue: 'B · waitlisted #1',
   },
 
   ledger: {
@@ -170,7 +147,7 @@ export const en = {
 
   landing: {
     fig1: {
-      mark: 'Fig. 1 · Lights on',
+      mark: 'Fig. 1 · Step by step',
       title: 'The race you just watched, statement by [statement].',
       lead: 'The same two requests and the same seat, now as the SQL that decides it. Step through it at your own pace: every statement shown is one the code really runs.',
       asText: 'Read Fig. 1 as text',
@@ -184,12 +161,7 @@ export const en = {
       mark: 'Failure modes',
       title: 'Read, then write, is a [race].',
       lead: 'Most booking bugs are not exotic. They are what happens by default when a read and a write are separated by time, and every booking flow separates them.',
-      columns: {
-        failure: 'Failure',
-        naive: 'A naive system',
-        eventcore: 'EventCore',
-        decision: 'Decision',
-      },
+      columns: { naive: 'A naive system', eventcore: 'EventCore' },
       rows: [
         {
           name: 'Overbooking',
@@ -275,7 +247,9 @@ export const en = {
       lockOrderNote:
         'Every command takes its locks in this order, so no two commands can wait on each other in a cycle. Deadlocks are designed out instead of retried.',
       codeTitle: 'Registration, condensed',
-      cta: 'Read the architecture sheet',
+      cta: 'Read the architecture',
+      step: 'Step',
+      noSql: 'Pure TypeScript, no SQL',
       steps: [
         {
           title: 'Verify the caller',
@@ -334,12 +308,16 @@ export const en = {
       scenarios:
         'Eight scenarios, each tied to the test that asserts it, each with the machine, database version and commit it was measured on.',
       cta: 'Open the Reliability Lab',
+      field:
+        'The 100 requests in the order the database decided them. Each square lights up when its caller received the answer.',
+      replay: 'Replay the run',
+      confirmed: 'confirmed',
+      waitlisted: 'waitlisted',
     },
     limits: {
       mark: 'Known limits',
       title: 'What this design does [not] solve.',
       lead: 'Every architecture trades something. These are the trades, named.',
-      notes: 'General notes',
       items: [
         {
           limit: 'One hot event, one lock',
@@ -359,9 +337,11 @@ export const en = {
       ],
     },
     verify: {
-      mark: 'End of sheet',
+      mark: 'Verify it yourself',
       title: 'Don’t take the page’s [word] for it.',
-      lead: 'Four commands start PostgreSQL in Docker and run every test on this sheet, including the naive baseline that overbooks. Nothing is mocked where a database guarantee is claimed.',
+      lead: 'Four commands start PostgreSQL in Docker and run every test on this page, including the naive baseline that overbooks. Nothing is mocked where a database guarantee is claimed.',
+      primary: 'Open the Reliability Lab',
+      secondary: 'Read the architecture',
     },
   },
 
@@ -385,7 +365,7 @@ export const en = {
     steps: 'Steps',
     stepLabel: (tick: string, index: number, caption: string) =>
       `${tick}, step ${index}: ${caption}`,
-    caption: 'The real algorithm, step by step. Recorded measurements live on Sheet 04.',
+    caption: 'The real algorithm, step by step. Recorded measurements live in the Lab.',
     captions: [
       'Both requests arrive within the same millisecond. Each carries its own idempotency key.',
       'A takes the inventory row lock. B reaches the same row and waits for it.',
@@ -399,9 +379,9 @@ export const en = {
   lab: {
     metaDescription:
       'Recorded runs against PostgreSQL 18: the last seat, 100 people on 10 seats next to a naive baseline, retries, cancellations, capacity changes, tenant probes and a notification outage.',
-    mark: 'Sheet 04 · Test report',
+    mark: 'Reliability Lab · Test report',
     title: 'Recorded runs. Every number here came from a real [database].',
-    lead: 'Every number on this sheet was produced by pnpm lab:record against a real PostgreSQL 18 and the real API. The Lab only replays those files and never sends traffic. Each report says exactly where and how it was measured.',
+    lead: 'Every number on this page was produced by pnpm lab:record against a real PostgreSQL 18 and the real API. The Lab only replays those files and never sends traffic. Each report says exactly where and how it was measured.',
     scenarios: 'Scenarios',
     holds: 'invariants hold',
     broken: 'invariants broken',
@@ -583,7 +563,7 @@ export const en = {
   },
 
   panel: {
-    publicSheet: 'Public sheet',
+    publicSheet: 'Public page',
     inventory: 'Inventory',
     inventoryLine: (available: number, waiting: number, time: string) =>
       `${available} available · ${waiting} waiting · read at ${time}`,
@@ -651,7 +631,7 @@ export const en = {
   architecture: {
     metaDescription:
       'Modules, request flow, data model, decision records and threat model of EventCore.',
-    mark: 'Sheet 06 · System',
+    mark: 'Architecture · System',
     title: 'A modular monolith, on [purpose].',
     lead: 'The hard problem is a synchronous decision about one seat. Splitting it across services would turn one transaction into a distributed protocol. So there is one API, one database and one worker, with module boundaries visible in the code.',
     figure: 'Runtime boundaries and what crosses them.',
@@ -688,7 +668,7 @@ export const en = {
     decisionsEmpty: 'Decision records are read from docs/adr at build time.',
     documentsNote: '',
     readingMark: 'Further reading',
-    readingTitle: 'The rest of the drawing set.',
+    readingTitle: 'Everything else is [written down].',
     documents: {
       'docs/00-vision.md': 'Vision and invariants',
       'docs/domain-state-machine.md': 'Domain state machine',
@@ -719,7 +699,7 @@ export const en = {
   apiDocs: {
     metaDescription:
       'Endpoint index generated from the live OpenAPI 3.1 document of the EventCore API.',
-    mark: 'Sheet 06 · Contract',
+    mark: 'API · Contract',
     title: 'Generated from the same schemas that validate requests.',
     lead: 'The API publishes OpenAPI 3.1 built from its Zod contracts, so this index cannot drift from the code. Errors are RFC 9457 problem documents with a stable code and a retryable flag.',
     example: 'One idempotent call',
@@ -730,16 +710,16 @@ export const en = {
   },
 
   notFound: {
-    mark: '404 · No sheet at this address',
-    title: 'This drawing isn’t in the set.',
+    mark: '404 · Nothing at this address',
+    title: 'This seat was [never] on the plan.',
     lead: 'The page may have moved, or the event may still be a draft that only its organizers can see.',
     board: 'Open the event board',
-    home: 'Back to Sheet 01',
+    home: 'Back to the start',
   },
 
   error: {
     mark: 'Unexpected failure',
-    title: 'This sheet failed to render.',
+    title: 'This page failed to [render].',
     lead: 'Nothing you submitted was lost: every command is idempotent, so trying again is safe.',
     reference: 'Reference',
     retry: 'Try again',
@@ -749,7 +729,7 @@ export const en = {
     unavailableTitle: 'The API isn’t reachable from this deployment',
     unavailableAction: 'The Lab still works',
     unavailableBody:
-      'Live pages need the EventCore API. The Reliability Lab and the architecture sheet work without it. Locally, run pnpm db:up and pnpm dev.',
+      'Live pages need the EventCore API. The Reliability Lab and the architecture page work without it. Locally, run pnpm db:up and pnpm dev.',
     problems: {} as Record<string, string>,
   },
 

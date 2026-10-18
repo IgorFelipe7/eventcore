@@ -3,7 +3,7 @@ import { Link } from '@/i18n/link'
 import { getI18n } from '@/i18n/server'
 
 const toneOf = (result: string) =>
-  result.startsWith('CONFIRMED') ? 'text-confirmed-glow' : 'text-waitlisted-glow'
+  result.startsWith('CONFIRMED') ? 'text-confirmed' : 'text-waitlisted'
 
 export async function LedgerTape() {
   const { t } = await getI18n()
@@ -18,19 +18,17 @@ export async function LedgerTape() {
   const tape = (hidden: boolean) => (
     <ul
       aria-hidden={hidden || undefined}
-      className="flex shrink-0 items-center gap-8 pr-8 font-mono text-[0.72rem] uppercase tracking-[0.1em]"
+      className="flex shrink-0 items-center gap-3 pr-3 font-mono text-[0.72rem] tracking-[0.02em]"
     >
       {decisions.map((attempt) => (
         <li
           key={`${hidden ? 'copy' : 'tape'}-${attempt.actor}`}
-          className="flex items-center gap-2 whitespace-nowrap"
+          className="flex items-center gap-2.5 whitespace-nowrap rounded-full border border-rule bg-[rgb(238_241_246/0.025)] px-3.5 py-1.5"
         >
-          <span className="text-night-muted">
-            #{String(attempt.decisionIndex).padStart(3, '0')}
-          </span>
-          <span className="text-night-ink">{attempt.actor}</span>
+          <span className="text-ink-3">#{String(attempt.decisionIndex).padStart(3, '0')}</span>
+          <span className="text-ink">{attempt.actor}</span>
           <span className={toneOf(attempt.result)}>{attempt.result}</span>
-          <span className="text-night-muted tabular">
+          <span className="text-ink-3 tabular">
             {Math.round(attempt.endMs - attempt.startMs)} ms
           </span>
         </li>
@@ -41,17 +39,23 @@ export async function LedgerTape() {
   return (
     <section
       aria-label={t.ledger.label}
-      className="relative border-y border-night-line bg-night text-night-ink"
+      className="relative overflow-x-clip border-y border-rule bg-paper py-4"
     >
-      <div className="flex items-stretch">
+      <div className="flex items-center">
         <Link
           href="/lab?scenario=rush&variant=locked"
-          className="relative z-10 flex shrink-0 flex-col justify-center gap-0.5 border-r border-night-line bg-night px-4 py-3 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-night-muted hover:text-signal-glow sm:px-6"
+          className="relative z-10 ml-3 flex shrink-0 items-center gap-2.5 rounded-full border border-signal/30 bg-signal-wash px-4 py-2 font-mono text-[0.7rem] text-signal transition-colors hover:border-signal sm:ml-6"
         >
-          <span className="text-signal-glow">● {t.ledger.replay}</span>
-          <span>{t.ledger.commit(replay.environment.commit)}</span>
+          <span aria-hidden className="relative flex size-2">
+            <span className="absolute inset-0 animate-pulse-ring rounded-full bg-signal" />
+            <span className="relative size-2 rounded-full bg-signal" />
+          </span>
+          {t.ledger.replay}
+          <span className="hidden text-ink-3 sm:inline">
+            {t.ledger.commit(replay.environment.commit)}
+          </span>
         </Link>
-        <div className="group relative flex overflow-hidden py-3.5 [mask-image:linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
+        <div className="group relative flex min-w-0 flex-1 overflow-clip mask-[linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
           <div className="flex animate-ledger group-hover:[animation-play-state:paused] motion-reduce:animate-none">
             {tape(false)}
             {tape(true)}

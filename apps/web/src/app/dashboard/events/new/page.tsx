@@ -2,7 +2,7 @@ import { hasPermission } from '@eventcore/domain'
 import { type Metadata } from 'next'
 import { ApiFailure } from '@/components/api-state'
 import { PersonaRequired } from '@/components/persona-required'
-import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { SectionHeading } from '@/components/section-heading'
 import { NewEventForm } from '@/features/dashboard/new-event-form'
 import { loadViewer } from '@/features/dashboard/organizer-data'
 import { getI18n } from '@/i18n/server'
@@ -39,7 +39,6 @@ export default async function NewEventPage({
     readSession(),
     getI18n(),
   ])
-  const sheet = { number: 5, title: t.sheets.newEvent }
   const viewer = session?.persona.kind === 'organizer' ? await loadViewer(session.token) : null
   const memberships = viewer?.ok
     ? viewer.data.memberships.filter((membership) => hasPermission(membership.role, 'event:create'))
@@ -47,12 +46,13 @@ export default async function NewEventPage({
 
   return (
     <main id="main">
-      <SheetBar sheet={sheet} />
-      <section className="sheet-frame mt-12 grid grid-cols-12 gap-x-4 gap-y-10 md:gap-x-6">
-        <div className="col-span-12 lg:col-span-4">
-          <SectionHeading mark={t.newEvent.mark} title={t.newEvent.title} />
+      <section className="sheet-frame mt-16 grid grid-cols-12 gap-x-6 gap-y-10">
+        <div className="col-span-12 lg:col-span-5">
+          <div className="lg:sticky lg:top-28">
+            <SectionHeading as="h1" mark={t.newEvent.mark} title={t.newEvent.title} />
+          </div>
         </div>
-        <div className="col-span-12 lg:col-span-8">
+        <div className="surface col-span-12 p-6 sm:p-8 lg:col-span-7">
           {!session || session.persona.kind !== 'organizer' ? (
             <PersonaRequired kind="organizer" />
           ) : !viewer?.ok ? (
@@ -68,7 +68,6 @@ export default async function NewEventPage({
           )}
         </div>
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

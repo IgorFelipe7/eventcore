@@ -105,7 +105,7 @@ export function CapacityControl({
           defaultValue={capacity}
           disabled={!allowed}
           aria-describedby="capacity-hint"
-          className="min-h-11 w-32 rounded-xs border border-ink-3 bg-sheet px-3 font-mono text-sm tabular disabled:text-ink-3"
+          className="field w-32 font-mono text-sm tabular disabled:text-ink-3"
         />
         <button
           type="submit"

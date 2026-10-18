@@ -4,7 +4,7 @@ import { type Metadata } from 'next'
 import { ApiFailure } from '@/components/api-state'
 import { Arrow, ButtonLink } from '@/components/button'
 import { PersonaRequired } from '@/components/persona-required'
-import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { PageIntro } from '@/components/section-heading'
 import { RegistrationStatusTag } from '@/components/status-tag'
 import { CancelForm } from '@/features/registrations/cancel-form'
 import { callApi } from '@/lib/api'
@@ -22,7 +22,6 @@ const personaName = (displayName: string) => displayName.split(' (')[0] ?? displ
 
 export default async function MyRegistrationsPage() {
   const [session, { locale, t }] = await Promise.all([readSession(), getI18n()])
-  const sheet = { number: 3, title: t.sheets.registrations }
   const result =
     session?.persona.kind === 'participant'
       ? await callApi('/v1/me/registrations', {
@@ -33,16 +32,15 @@ export default async function MyRegistrationsPage() {
 
   return (
     <main id="main">
-      <SheetBar sheet={sheet} />
-      <section className="sheet-frame mt-12">
-        <SectionHeading
-          mark={
-            session ? t.persona.actingAsName(personaName(session.persona.displayName)) : t.mine.mark
-          }
-          title={t.mine.title}
-          lead={<p>{t.mine.lead}</p>}
-        />
-        <div className="mt-10">
+      <PageIntro
+        mark={
+          session ? t.persona.actingAsName(personaName(session.persona.displayName)) : t.mine.mark
+        }
+        title={t.mine.title}
+        lead={<p>{t.mine.lead}</p>}
+      />
+      <section className="sheet-frame">
+        <div>
           {!session || session.persona.kind !== 'participant' ? (
             <PersonaRequired kind="participant" />
           ) : !result?.ok ? (
@@ -50,23 +48,24 @@ export default async function MyRegistrationsPage() {
               <ApiFailure result={result} />
             ) : null
           ) : result.data.items.length === 0 ? (
-            <div className="border border-dashed border-ink-3 p-8">
+            <div className="surface-quiet border-dashed p-10 text-center">
               <p className="text-lg">{t.mine.empty}</p>
-              <ButtonLink href="/explore" className="mt-4">
+              <ButtonLink href="/explore" className="mt-6">
                 {t.mine.find} <Arrow />
               </ButtonLink>
             </div>
           ) : (
-            <ol className="border-t border-ink">
+            <ol className="grid gap-4">
               {result.data.items.map((registration) => (
                 <li
                   key={registration.registrationId}
-                  className="grid grid-cols-12 gap-x-4 gap-y-4 border-b border-rule py-6 md:gap-x-6"
+                  data-spotlight
+                  className="surface scale-in grid grid-cols-12 gap-x-6 gap-y-6 p-6 sm:p-8"
                 >
                   <div className="col-span-12 md:col-span-5">
                     <Link
                       href={`/events/${registration.event.organizationSlug}/${registration.event.slug}`}
-                      className="font-display text-2xl font-semibold hover:text-signal"
+                      className="text-2xl font-semibold tracking-[-0.03em] transition-colors font-stretch-108% hover:text-signal"
                     >
                       {registration.event.name}
                     </Link>
@@ -92,7 +91,7 @@ export default async function MyRegistrationsPage() {
                       >
                         <span
                           aria-hidden
-                          className={`mt-1.5 size-2 rounded-full ${index === registration.history.length - 1 ? 'bg-signal' : 'bg-ink-3/60'}`}
+                          className={`mt-1.5 size-2 rounded-full ${index === registration.history.length - 1 ? 'bg-signal shadow-[0_0_10px_var(--color-signal)]' : 'bg-ink-3/60'}`}
                         />
                         <span>
                           <span className="text-ink">
@@ -123,7 +122,6 @@ export default async function MyRegistrationsPage() {
           )}
         </div>
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

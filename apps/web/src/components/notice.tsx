@@ -1,11 +1,11 @@
 import { type ReactNode } from 'react'
 
 const tones = {
-  info: 'border-l-ink',
-  success: 'border-l-confirmed',
-  waiting: 'border-l-waitlisted',
-  danger: 'border-l-rejected',
-  signal: 'border-l-signal',
+  info: 'var(--color-ink-3)',
+  success: 'var(--color-confirmed)',
+  waiting: 'var(--color-waitlisted)',
+  danger: 'var(--color-rejected)',
+  signal: 'var(--color-signal)',
 } as const
 
 export function Notice({
@@ -24,11 +24,16 @@ export function Notice({
   return (
     <div
       role={live ? 'status' : undefined}
-      className={`border border-l-4 border-rule bg-sheet px-4 py-3.5 ${tones[tone]}`}
+      className="surface relative overflow-clip px-5 py-4"
+      style={{ ['--tone' as string]: tones[tone] }}
     >
+      <span
+        aria-hidden
+        className="absolute inset-y-4 left-0 w-0.5 rounded-full bg-(--tone) shadow-[0_0_16px_var(--tone)]"
+      />
       <p className="font-medium text-ink">{title}</p>
       {children ? <div className="mt-1 text-sm text-ink-2">{children}</div> : null}
-      {action ? <div className="mt-3">{action}</div> : null}
+      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   )
 }

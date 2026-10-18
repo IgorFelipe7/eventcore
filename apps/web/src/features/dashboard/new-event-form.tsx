@@ -68,7 +68,7 @@ export function NewEventForm({
             id="organizationId"
             name="organizationId"
             defaultValue={defaultOrganizationId}
-            className="min-h-11 rounded-xs border border-ink-3 bg-sheet px-3 text-sm"
+            className="field text-sm"
           >
             {memberships.map((membership) => (
               <option key={membership.organization.id} value={membership.organization.id}>
@@ -92,12 +92,7 @@ export function NewEventForm({
           <label htmlFor="description" className="text-sm font-medium">
             {t.newEvent.description}
           </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={4}
-            className="rounded-xs border border-ink-3 bg-sheet px-3 py-2 text-sm"
-          />
+          <textarea id="description" name="description" rows={4} className="field py-2.5 text-sm" />
         </div>
       </fieldset>
 

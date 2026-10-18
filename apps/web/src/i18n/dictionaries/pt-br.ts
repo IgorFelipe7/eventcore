@@ -14,9 +14,6 @@ export const ptBR: Dictionary = {
 
   common: {
     skipToContent: 'Pular para o conteúdo',
-    sheet: 'Prancha',
-    of: 'de',
-    rev: 'Rev',
     figure: 'Fig.',
     figureKinds: { illustrative: 'ilustrativa', measured: 'medida', schematic: 'esquemática' },
     scrollableCode: (name: string) => `Código ${name}, rolável`,
@@ -24,21 +21,10 @@ export const ptBR: Dictionary = {
     passes: 'passa',
     fails: 'falha',
     request: 'requisição',
-    back: 'Voltar',
-    titleBlock: {
-      label: 'Carimbo',
-      project: 'Projeto',
-      sheetTitle: 'Título da prancha',
-      sheet: 'Prancha',
-      rev: 'Rev',
-      date: 'Data',
-      drawnBy: 'Desenhado por',
-    },
     seats: (value: number) => count(value, 'vaga'),
   },
 
   sheets: {
-    landing: 'O último lugar',
     board: 'Quadro de eventos',
     registrations: 'Minhas inscrições',
     lab: 'Laboratório de confiabilidade',
@@ -47,7 +33,6 @@ export const ptBR: Dictionary = {
     newEvent: 'Novo evento em rascunho',
     architecture: 'Arquitetura',
     api: 'Referência da API',
-    notFound: 'Não encontrada',
     event: 'Evento',
   },
 
@@ -82,7 +67,7 @@ export const ptBR: Dictionary = {
       'demo|organizer-lis': 'admin da Harbor Guild',
     },
     required: (kind: 'participant' | 'organizer') =>
-      `Atue como ${kind === 'participant' ? 'participante' : 'organizador'} demo para abrir esta prancha`,
+      `Atue como ${kind === 'participant' ? 'participante' : 'organizador'} demo para abrir esta página`,
     requiredBody: (names: string) =>
       `Use “Atuando como” no cabeçalho e escolha ${names}. Personas de demonstração não carregam dados pessoais; escolher uma assina um token de curta duração no servidor.`,
     participantNames: 'Rio, Sol ou Ivo',
@@ -91,9 +76,8 @@ export const ptBR: Dictionary = {
   },
 
   footer: {
-    endOfSet: 'Fim do jogo de pranchas',
     tagline:
-      'Cada número destas pranchas vem do banco de dados ou de uma execução gravada, e diz de qual.',
+      'Cada número deste site vem do banco de dados ou de uma execução gravada, e diz de qual.',
     navigation: 'Rodapé',
     links: {
       board: 'Quadro de eventos',
@@ -109,11 +93,8 @@ export const ptBR: Dictionary = {
   },
 
   hero: {
-    sheetNight: 'Prancha 01 / 06 · Noite',
-    sheetLit: 'Prancha 01 / 06 · Luzes acesas',
+    sheetNight: 'Replay ao vivo · execução 02',
     subject: 'EventCore · reservas sob disputa',
-    evidence: 'Gravado em PostgreSQL 18',
-    evidenceDetail: 'Cada figura aponta para o seu teste',
     titleLead: 'Duas requisições. Um lugar.',
     titleBefore: 'Exatamente',
     titleKeyword: 'uma',
@@ -148,7 +129,6 @@ export const ptBR: Dictionary = {
       },
     ],
     seat: (row: string, number: number) => `Fileira ${row} · Lugar ${number}`,
-    row: (row: string) => `Fileira ${row}`,
     seatState: (capacity: number, confirmed: number, holder: string | null) =>
       `capacidade ${capacity} · confirmados ${confirmed} · lock: ${holder ?? 'livre'}`,
     a: { arriving: 'A · req 7f3c', holding: 'A · segura o lock' },
@@ -158,9 +138,6 @@ export const ptBR: Dictionary = {
       holding: 'B · relê 24 / 24',
       queued: 'B · 201 na fila #1',
     },
-    drawingDimension: '6 lugares · 4 fileiras · capacidade 24',
-    drawingSeat: (seat: string) => `${seat} · A · confirmada`,
-    drawingQueue: 'B · na fila #1',
   },
 
   ledger: {
@@ -173,7 +150,7 @@ export const ptBR: Dictionary = {
 
   landing: {
     fig1: {
-      mark: 'Fig. 1 · Luzes acesas',
+      mark: 'Fig. 1 · Passo a passo',
       title: 'A disputa que você acabou de ver, [instrução] por instrução.',
       lead: 'As mesmas duas requisições e o mesmo lugar, agora como o SQL que decide. Avance no seu ritmo: cada instrução mostrada é uma que o código realmente executa.',
       asText: 'Ler a Fig. 1 como texto',
@@ -187,12 +164,7 @@ export const ptBR: Dictionary = {
       mark: 'Modos de falha',
       title: 'Ler e depois escrever é uma [corrida].',
       lead: 'A maioria dos bugs de reserva não tem nada de exótico. É o que acontece por padrão quando uma leitura e uma escrita ficam separadas no tempo, e todo fluxo de reserva separa as duas.',
-      columns: {
-        failure: 'Falha',
-        naive: 'Um sistema ingênuo',
-        eventcore: 'EventCore',
-        decision: 'Decisão',
-      },
+      columns: { naive: 'Um sistema ingênuo', eventcore: 'EventCore' },
       rows: [
         {
           name: 'Overbooking',
@@ -277,9 +249,11 @@ export const ptBR: Dictionary = {
       lead: 'Um monolito modular e um banco que já sabe serializar. Locks distribuídos, filas e sagas foram avaliados e ficaram de fora de propósito.',
       lockOrder: 'Ordem dos locks · idêntica em todo comando',
       lockOrderNote:
-        'Todo comando pega seus locks nesta ordem, então dois comandos nunca esperam um pelo outro em ciclo. Deadlocks são eliminados no desenho, sem depender de retentativa.',
+        'Todo comando pega seus locks nesta ordem, então dois comandos nunca esperam um pelo outro em ciclo. Deadlocks são eliminados na arquitetura, sem depender de retentativa.',
       codeTitle: 'Inscrição, resumida',
-      cta: 'Ler a prancha de arquitetura',
+      cta: 'Ler a arquitetura',
+      step: 'Passo',
+      noSql: 'TypeScript puro, sem SQL',
       steps: [
         {
           title: 'Verificar quem chama',
@@ -340,17 +314,21 @@ export const ptBR: Dictionary = {
       scenarios:
         'Oito cenários, cada um ligado ao teste que o comprova, cada um com a máquina, a versão do banco e o commit em que foi medido.',
       cta: 'Abrir o Laboratório',
+      field:
+        'As 100 requisições na ordem em que o banco as decidiu. Cada quadrado acende quando quem chamou recebeu a resposta.',
+      replay: 'Reproduzir a execução',
+      confirmed: 'confirmadas',
+      waitlisted: 'na fila',
     },
     limits: {
       mark: 'Limites conhecidos',
-      title: 'O que este desenho [não] resolve.',
+      title: 'O que esta arquitetura [não] resolve.',
       lead: 'Toda arquitetura troca alguma coisa. Estas são as trocas, com nome.',
-      notes: 'Notas gerais',
       items: [
         {
           limit: 'Um evento disputado, um lock',
           detail:
-            'Os comandos de um mesmo evento são serializados por desenho. A vazão desse evento é limitada pela velocidade de uma transação curta. Isso está medido e documentado.',
+            'Os comandos de um mesmo evento são serializados de propósito. A vazão desse evento é limitada pela velocidade de uma transação curta. Isso está medido e documentado.',
         },
         {
           limit: 'Rate limit por processo',
@@ -365,9 +343,11 @@ export const ptBR: Dictionary = {
       ],
     },
     verify: {
-      mark: 'Fim da prancha',
+      mark: 'Confira você mesmo',
       title: 'Não acredite na [palavra] da página.',
-      lead: 'Quatro comandos sobem o PostgreSQL no Docker e rodam todos os testes desta prancha, incluindo o baseline ingênuo que faz overbooking. Nada é mockado onde se afirma uma garantia do banco.',
+      lead: 'Quatro comandos sobem o PostgreSQL no Docker e rodam todos os testes desta página, incluindo o baseline ingênuo que faz overbooking. Nada é mockado onde se afirma uma garantia do banco.',
+      primary: 'Abrir o Laboratório',
+      secondary: 'Ler a arquitetura',
     },
   },
 
@@ -391,7 +371,7 @@ export const ptBR: Dictionary = {
     steps: 'Passos',
     stepLabel: (tick: string, index: number, caption: string) =>
       `${tick}, passo ${index}: ${caption}`,
-    caption: 'O algoritmo real, passo a passo. As medições gravadas ficam na Prancha 04.',
+    caption: 'O algoritmo real, passo a passo. As medições gravadas ficam no Laboratório.',
     captions: [
       'As duas requisições chegam no mesmo milissegundo. Cada uma leva a sua chave de idempotência.',
       'A pega o lock da linha de estoque. B chega na mesma linha e espera por ele.',
@@ -405,9 +385,9 @@ export const ptBR: Dictionary = {
   lab: {
     metaDescription:
       'Execuções gravadas contra o PostgreSQL 18: o último lugar, 100 pessoas para 10 vagas ao lado de um baseline ingênuo, retentativas, cancelamentos, mudanças de capacidade, sondagens entre clientes e uma pane de notificações.',
-    mark: 'Prancha 04 · Relatório de testes',
+    mark: 'Laboratório · Relatório de testes',
     title: 'Execuções gravadas. Cada número aqui saiu de um [banco] real.',
-    lead: 'Cada número desta prancha foi produzido por pnpm lab:record contra um PostgreSQL 18 real e a API real. O Lab apenas reproduz esses arquivos e nunca envia tráfego. Cada relatório diz exatamente onde e como foi medido.',
+    lead: 'Cada número desta página foi produzido por pnpm lab:record contra um PostgreSQL 18 real e a API real. O Lab apenas reproduz esses arquivos e nunca envia tráfego. Cada relatório diz exatamente onde e como foi medido.',
     scenarios: 'Cenários',
     holds: 'invariantes mantidos',
     broken: 'invariantes quebrados',
@@ -591,7 +571,7 @@ export const ptBR: Dictionary = {
   },
 
   panel: {
-    publicSheet: 'Prancha pública',
+    publicSheet: 'Página pública',
     inventory: 'Estoque',
     inventoryLine: (available: number, waiting: number, time: string) =>
       `${available} disponíveis · ${waiting} na fila · lido às ${time}`,
@@ -659,7 +639,7 @@ export const ptBR: Dictionary = {
   architecture: {
     metaDescription:
       'Módulos, fluxo de requisição, modelo de dados, registros de decisão e modelo de ameaças do EventCore.',
-    mark: 'Prancha 06 · Sistema',
+    mark: 'Arquitetura · Sistema',
     title: 'Um monolito modular, de [propósito].',
     lead: 'O problema difícil é uma decisão síncrona sobre um único lugar. Dividir isso em serviços transformaria uma transação em um protocolo distribuído. Por isso há uma API, um banco e um worker, com as fronteiras dos módulos visíveis no código.',
     figure: 'Fronteiras de execução e o que passa por elas.',
@@ -699,7 +679,7 @@ export const ptBR: Dictionary = {
     decisionsEmpty: 'Os registros de decisão são lidos de docs/adr no build.',
     documentsNote: 'Os registros de decisão e os documentos técnicos estão em inglês.',
     readingMark: 'Leitura complementar',
-    readingTitle: 'O resto do jogo de pranchas.',
+    readingTitle: 'Todo o resto está [documentado].',
     documents: {
       'docs/00-vision.md': 'Visão e invariantes',
       'docs/domain-state-machine.md': 'Máquina de estados do domínio',
@@ -730,7 +710,7 @@ export const ptBR: Dictionary = {
   apiDocs: {
     metaDescription:
       'Índice de endpoints gerado a partir do documento OpenAPI 3.1 publicado pela API do EventCore.',
-    mark: 'Prancha 06 · Contrato',
+    mark: 'API · Contrato',
     title: 'Gerado a partir dos mesmos schemas que validam as requisições.',
     lead: 'A API publica OpenAPI 3.1 construído a partir dos contratos Zod, então este índice não tem como divergir do código. Erros são documentos RFC 9457 com código estável e flag de retentativa.',
     example: 'Uma chamada idempotente',
@@ -741,16 +721,16 @@ export const ptBR: Dictionary = {
   },
 
   notFound: {
-    mark: '404 · Nenhuma prancha neste endereço',
-    title: 'Este desenho não faz parte do jogo.',
+    mark: '404 · Nada neste endereço',
+    title: 'Este lugar [nunca] esteve no mapa.',
     lead: 'A página pode ter mudado de lugar, ou o evento ainda é um rascunho que só a organização enxerga.',
     board: 'Abrir o quadro de eventos',
-    home: 'Voltar para a Prancha 01',
+    home: 'Voltar ao início',
   },
 
   error: {
     mark: 'Falha inesperada',
-    title: 'Esta prancha não conseguiu ser renderizada.',
+    title: 'Esta página não conseguiu [renderizar].',
     lead: 'Nada do que você enviou se perdeu: todo comando é idempotente, então tentar de novo é seguro.',
     reference: 'Referência',
     retry: 'Tentar de novo',
@@ -760,7 +740,7 @@ export const ptBR: Dictionary = {
     unavailableTitle: 'A API não está acessível nesta implantação',
     unavailableAction: 'O Lab continua funcionando',
     unavailableBody:
-      'As páginas ao vivo precisam da API do EventCore. O Laboratório e a prancha de arquitetura funcionam sem ela. Localmente, rode pnpm db:up e pnpm dev.',
+      'As páginas ao vivo precisam da API do EventCore. O Laboratório e a página de arquitetura funcionam sem ela. Localmente, rode pnpm db:up e pnpm dev.',
     problems: {
       VALIDATION_FAILED: 'A requisição não é válida.',
       IDEMPOTENCY_KEY_REQUIRED: 'O cabeçalho Idempotency-Key é obrigatório.',

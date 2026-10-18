@@ -5,7 +5,7 @@ import { type Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { ApiFailure } from '@/components/api-state'
 import { SeatMeter } from '@/components/seat-meter'
-import { SheetBar, TitleBlock } from '@/components/sheet'
+import { Marked } from '@/components/headline'
 import { EventStatusTag } from '@/components/status-tag'
 import { RegistrationPanel } from '@/features/registrations/registration-panel'
 import { callApi } from '@/lib/api'
@@ -53,13 +53,10 @@ export default async function EventPage({ params }: { readonly params: Promise<P
 
   if (!result.ok && result.kind === 'problem' && result.problem.status === 404) notFound()
 
-  const sheet = { number: 2, title: result.ok ? result.data.name : t.sheets.event }
-
   if (!result.ok) {
     return (
       <main id="main">
-        <SheetBar sheet={sheet} />
-        <section className="sheet-frame mt-12">
+        <section className="sheet-frame mt-16">
           <ApiFailure result={result} />
         </section>
       </main>
@@ -90,28 +87,31 @@ export default async function EventPage({ params }: { readonly params: Promise<P
   const { inventory } = event
 
   return (
-    <main id="main">
-      <SheetBar sheet={sheet} />
-      <div className="sheet-frame mt-4">
+    <main id="main" className="relative">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 -top-40 h-[34rem] bg-[radial-gradient(60%_60%_at_30%_0%,rgb(125_139_255/0.16),transparent_70%)]"
+      />
+      <div className="sheet-frame relative pt-10">
         <Link
           href="/explore"
-          className="label inline-flex min-h-11 items-center text-ink-3 hover:text-signal"
+          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rule px-4 text-sm text-ink-2 transition-colors hover:border-[rgb(238_241_246/0.24)] hover:text-ink"
         >
-          ← {t.event.back}
+          <span aria-hidden>←</span> {t.event.back}
         </Link>
       </div>
-      <section className="sheet-frame mt-4 grid grid-cols-12 gap-x-4 gap-y-12 md:gap-x-6">
+      <section className="sheet-frame relative mt-10 grid grid-cols-12 gap-x-6 gap-y-12">
         <div className="col-span-12 lg:col-span-7">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="rise-in flex flex-wrap items-center gap-3">
             <EventStatusTag status={event.status} />
-            <span className="label text-ink-3">{event.organization.name}</span>
+            <span className="eyebrow">{event.organization.name}</span>
           </div>
-          <h1 className="mt-5 text-[clamp(2.25rem,1.5rem+3vw,4rem)] leading-[0.98]">
-            {event.name}
+          <h1 className="reveal mt-6 text-[clamp(2.5rem,1.5rem+3.4vw,4.75rem)] leading-[0.95] tracking-[-0.045em]">
+            <Marked text={event.name} />
           </h1>
-          <p className="measure mt-6 text-lg text-ink-2">{event.description}</p>
+          <p className="rise-in measure mt-6 text-lg text-ink-2">{event.description}</p>
 
-          <dl className="mt-10 grid grid-cols-2 border-t border-ink sm:grid-cols-3">
+          <dl className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
               { term: t.event.starts, value: formatDateTime(event.startsAt, locale) },
               { term: t.event.venue, value: event.venue },
@@ -123,22 +123,28 @@ export default async function EventPage({ params }: { readonly params: Promise<P
               { term: t.event.capacity, value: t.common.seats(inventory.capacity) },
               { term: t.event.organizer, value: event.organization.name },
             ].map((entry) => (
-              <div key={entry.term} className="border-b border-rule py-4 pr-4">
+              <div key={entry.term} className="surface-quiet scale-in p-4">
                 <dt className="label text-ink-3">{entry.term}</dt>
-                <dd className="mt-1 text-ink">{entry.value}</dd>
+                <dd className="mt-2 text-ink">{entry.value}</dd>
               </div>
             ))}
           </dl>
         </div>
 
         <aside aria-labelledby="availability" className="col-span-12 lg:col-span-5">
-          <div className="relative border border-ink bg-sheet p-5 sm:p-6">
+          <div className="surface relative overflow-clip p-6 sm:p-8 lg:sticky lg:top-28">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-signal/15 blur-3xl"
+            />
             <p id="availability" className="label text-ink-3">
               {t.event.availability}
             </p>
-            <p className="mt-3 font-display text-6xl font-semibold tabular">
-              {inventory.available}
-              <span className="ml-2 align-middle font-sans text-base font-normal text-ink-2">
+            <p className="relative mt-4 flex items-baseline gap-3">
+              <span className="wide font-display text-7xl font-bold leading-none tracking-[-0.06em] tabular">
+                {inventory.available}
+              </span>
+              <span className="text-base text-ink-2">
                 {t.event.left(t.common.seats(inventory.capacity))}
               </span>
             </p>
@@ -152,7 +158,7 @@ export default async function EventPage({ params }: { readonly params: Promise<P
                 formatSnapshot(event.observedAt, locale),
               )}
             </p>
-            <p className="mt-4 border-t border-rule pt-4 text-sm text-ink-2">
+            <p className="mt-5 border-t border-rule pt-5 text-sm text-ink-2">
               {t.event.disclaimer}
             </p>
             <div className="mt-6">
@@ -175,7 +181,6 @@ export default async function EventPage({ params }: { readonly params: Promise<P
           </div>
         </aside>
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

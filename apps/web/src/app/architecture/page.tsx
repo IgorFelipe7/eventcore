@@ -1,5 +1,6 @@
 import { type Metadata } from 'next'
-import { Figure, Marked, SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { Figure } from '@/components/figure'
+import { PageIntro, SectionHeading } from '@/components/section-heading'
 import { loadDecisions } from '@/features/architecture/documents'
 import { SystemDiagram } from '@/features/architecture/system-diagram'
 import { EvidenceLink } from '@/features/landing/evidence-link'
@@ -31,35 +32,27 @@ const DOCUMENTS = [
 export default async function ArchitecturePage() {
   const [decisions, { t }] = await Promise.all([loadDecisions(), getI18n()])
   const copy = t.architecture
-  const sheet = { number: 6, title: t.sheets.architecture }
 
   return (
     <main id="main">
-      <SheetBar sheet={sheet} />
-      <section className="sheet-frame mt-12">
-        <SectionHeading
-          mark={copy.mark}
-          title={<Marked text={copy.title} />}
-          lead={<p>{copy.lead}</p>}
-        />
-        <Figure number="6.1" kind="schematic" caption={copy.figure} className="mt-10">
+      <PageIntro mark={copy.mark} title={copy.title} lead={<p>{copy.lead}</p>} />
+      <section className="sheet-frame">
+        <Figure number="6.1" kind="schematic" caption={copy.figure} className="scale-in">
           <div className="p-4 sm:p-6">
             <SystemDiagram />
           </div>
         </Figure>
       </section>
 
-      <section aria-labelledby="flow" className="sheet-frame mt-24">
-        <SectionHeading
-          id="flow"
-          index="1"
-          sheet="06"
-          mark={copy.flowMark}
-          title={copy.flowTitle}
-        />
-        <ol className="mt-10 grid gap-px border border-ink bg-ink sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-labelledby="flow" className="sheet-frame mt-32">
+        <SectionHeading id="flow" mark={copy.flowMark} title={copy.flowTitle} />
+        <ol className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {copy.flow.map(([title, detail], index) => (
-            <li key={title} className="bg-sheet p-4">
+            <li
+              key={title}
+              data-spotlight
+              className={`surface scale-in p-5 ${index === copy.lockStep ? 'border-signal/50 shadow-[0_0_48px_-20px_var(--color-signal)]' : ''}`}
+            >
               <p className="font-mono text-xs text-ink-3">{String(index + 1).padStart(2, '0')}</p>
               <p
                 className={`mt-1 font-display text-xl font-semibold ${index === copy.lockStep ? 'text-signal' : ''}`}
@@ -72,18 +65,12 @@ export default async function ArchitecturePage() {
         </ol>
       </section>
 
-      <section aria-labelledby="data" className="sheet-frame mt-24">
-        <SectionHeading
-          id="data"
-          index="2"
-          sheet="06"
-          mark={copy.dataMark}
-          title={copy.dataTitle}
-        />
-        <div className="mt-10 overflow-x-auto border-y border-ink">
+      <section aria-labelledby="data" className="sheet-frame mt-32">
+        <SectionHeading id="data" mark={copy.dataMark} title={copy.dataTitle} />
+        <div className="surface mt-12 overflow-x-auto px-5">
           <table className="w-full min-w-[40rem] text-left text-sm">
             <thead>
-              <tr className="border-b border-ink">
+              <tr className="border-b border-rule">
                 <th scope="col" className="label py-3 pr-4 text-ink-3">
                   {copy.columns.table}
                 </th>
@@ -110,26 +97,24 @@ export default async function ArchitecturePage() {
         </div>
       </section>
 
-      <section aria-labelledby="decisions" className="sheet-frame mt-24">
+      <section aria-labelledby="decisions" className="sheet-frame mt-32">
         <SectionHeading
           id="decisions"
-          index="3"
-          sheet="06"
           mark={copy.decisionsMark}
           title={copy.decisionsTitle}
           lead={copy.documentsNote ? <p>{copy.documentsNote}</p> : undefined}
         />
-        <div className="mt-10 border-t border-ink">
+        <div className="mt-12 grid gap-3">
           {decisions.length === 0 ? (
             <p className="py-6 text-ink-2">{copy.decisionsEmpty}</p>
           ) : (
             decisions.map((decision) => (
-              <details key={decision.number} className="group border-b border-rule">
-                <summary className="grid min-h-16 cursor-pointer list-none grid-cols-12 items-center gap-x-4 py-4 hover:text-signal md:gap-x-6 [&::-webkit-details-marker]:hidden">
+              <details key={decision.number} className="surface group overflow-clip">
+                <summary className="grid min-h-16 cursor-pointer list-none grid-cols-12 items-center gap-x-4 px-5 py-5 transition-colors hover:bg-[rgb(238_241_246/0.03)] md:gap-x-6 [&::-webkit-details-marker]:hidden">
                   <span className="col-span-2 font-mono text-sm text-signal md:col-span-1">
                     {decision.number}
                   </span>
-                  <span className="col-span-8 font-display text-xl font-semibold md:col-span-8">
+                  <span className="col-span-8 text-xl font-semibold tracking-[-0.02em] md:col-span-8">
                     {decision.title}
                   </span>
                   <span className="label col-span-2 hidden text-ink-3 md:block">
@@ -137,14 +122,14 @@ export default async function ArchitecturePage() {
                   </span>
                   <span
                     aria-hidden
-                    className="col-span-2 text-right font-mono transition-transform group-open:rotate-45 md:col-span-1"
+                    className="col-span-2 ml-auto grid size-7 place-items-center rounded-full border border-rule font-mono transition-transform duration-300 group-open:rotate-45 md:col-span-1"
                   >
                     +
                   </span>
                 </summary>
                 <div
                   lang="en"
-                  className="sheet-prose measure pb-8 md:ml-[calc(100%/12)]"
+                  className="sheet-prose measure px-5 pb-8 md:ml-[calc(100%/12)]"
                   dangerouslySetInnerHTML={{ __html: decision.html }}
                 />
               </details>
@@ -153,17 +138,11 @@ export default async function ArchitecturePage() {
         </div>
       </section>
 
-      <section aria-labelledby="documents" className="sheet-frame mt-24">
-        <SectionHeading
-          id="documents"
-          index="4"
-          sheet="06"
-          mark={copy.readingMark}
-          title={copy.readingTitle}
-        />
-        <ul className="mt-8 grid gap-px border border-ink bg-ink sm:grid-cols-2 lg:grid-cols-5">
+      <section aria-labelledby="documents" className="sheet-frame mt-32">
+        <SectionHeading id="documents" mark={copy.readingMark} title={copy.readingTitle} />
+        <ul className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {DOCUMENTS.map((file) => (
-            <li key={file} className="bg-sheet p-4">
+            <li key={file} data-spotlight className="surface p-5">
               <p className="font-medium">{copy.documents[file]}</p>
               <p className="mt-1 text-sm">
                 <EvidenceLink path={file} />
@@ -172,7 +151,6 @@ export default async function ArchitecturePage() {
           ))}
         </ul>
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

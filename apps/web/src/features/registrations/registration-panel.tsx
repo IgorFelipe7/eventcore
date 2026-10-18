@@ -18,12 +18,12 @@ function SubmitButton({ label }: { readonly label: string }) {
       type="submit"
       disabled={pending}
       aria-disabled={pending}
-      className="relative inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xs border border-ink bg-ink px-5 text-[0.95rem] font-medium text-paper transition-colors hover:border-signal hover:bg-signal disabled:cursor-wait disabled:hover:border-ink disabled:hover:bg-ink"
+      className="group/submit relative inline-flex min-h-14 w-full items-center justify-center gap-2 overflow-clip rounded-full bg-ink px-6 text-[0.98rem] font-semibold text-paper shadow-[0_0_0_1px_rgb(238_241_246/0.2),0_12px_40px_-10px_rgb(125_139_255/0.8)] transition-[background-color,box-shadow,transform] duration-300 hover:bg-white hover:shadow-[0_0_0_1px_rgb(255_255_255/0.4),0_16px_56px_-8px_rgb(125_139_255/0.95)] active:scale-[0.985] disabled:cursor-wait"
     >
       <span className={pending ? 'invisible' : undefined}>{label}</span>
       {pending ? (
         <span className="absolute inset-0 flex items-center justify-center gap-2">
-          <span aria-hidden className="size-2 animate-pulse rounded-full bg-signal" />
+          <span aria-hidden className="size-2 animate-ping rounded-full bg-signal" />
           {t.registration.asking}
         </span>
       ) : null}
@@ -53,7 +53,7 @@ function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'reg
   const { label, value, tone } = stub[state.status]
   return (
     <Ticket tone={tone} stubLabel={label} stubValue={value} serial={state.key.slice(0, 8)} live>
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ink px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-rule px-5 py-3.5">
         <RegistrationStatusTag status={state.status} position={state.waitlistPosition} />
         <span className="label text-ink-3">
           {state.replayed
@@ -63,7 +63,7 @@ function Receipt({ state }: { readonly state: Extract<CommandState, { kind: 'reg
               : t.registration.newDecision}
         </span>
       </div>
-      <div className="px-4 py-4">
+      <div className="px-5 py-5">
         <p className="text-ink">{headline[state.status]}</p>
         {state.replayed ? (
           <p className="mt-2 text-sm text-ink-2">{t.registration.replayedNote}</p>

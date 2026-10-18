@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useReducer, useRef, useSyncExternalStore } from 'react'
 import { CodeBlock } from '@/components/code-block'
-import { CropMarks } from '@/components/drawing-marks'
 import { useI18n } from '@/i18n/provider'
 import {
   CAPACITY,
@@ -77,10 +76,7 @@ function Lane({ id, step }: { readonly id: LaneId; readonly step: SequenceStep }
   const outcome = step.outcomes[id]
   return (
     <div className="relative h-14">
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-1/2 border-t border-dashed border-ink-3/50"
-      />
+      <div aria-hidden className="absolute inset-x-0 top-1/2 border-t border-dashed border-rule" />
       <div
         className="absolute top-1/2 transition-[left,transform] duration-700 ease-(--ease-sheet)"
         style={{
@@ -89,14 +85,16 @@ function Lane({ id, step }: { readonly id: LaneId; readonly step: SequenceStep }
         }}
       >
         <div
-          className={`flex items-center gap-2 whitespace-nowrap rounded-xs border px-2.5 py-1.5 font-mono text-xs transition-colors duration-300 ${
+          className={`flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 font-mono text-xs transition-[background-color,border-color,box-shadow,color] duration-300 ${
             holding
-              ? 'border-signal bg-signal text-white'
+              ? 'border-signal bg-signal text-paper shadow-[0_0_24px_var(--color-signal)]'
               : outcome
-                ? 'border-ink bg-ink text-paper'
+                ? outcome.includes('WAITLISTED')
+                  ? 'border-waitlisted/50 bg-waitlisted-wash text-waitlisted'
+                  : 'border-confirmed/50 bg-confirmed-wash text-confirmed'
                 : position === 'waiting'
-                  ? 'border-waitlisted bg-waitlisted-wash text-waitlisted'
-                  : 'border-ink bg-sheet text-ink'
+                  ? 'border-waitlisted/50 bg-waitlisted-wash text-waitlisted'
+                  : 'border-rule bg-sheet text-ink'
           }`}
         >
           {position === 'waiting' ? (
@@ -139,18 +137,16 @@ function SeatPlan({ step }: { readonly step: SequenceStep }) {
           return (
             <span
               key={index}
-              className={`relative aspect-square rounded-[1px] border transition-colors duration-500 ${
+              className={`relative aspect-square rounded-[28%] border transition-[background-color,border-color,box-shadow] duration-500 ${
                 !isLast
-                  ? 'border-ink bg-ink'
+                  ? 'border-transparent bg-[rgb(238_241_246/0.14)]'
                   : lastSeatTaken
-                    ? 'border-ink bg-ink'
-                    : 'border-signal bg-signal'
+                    ? 'border-confirmed bg-confirmed shadow-[0_0_24px_rgb(61_214_140/0.6)]'
+                    : 'border-signal bg-signal shadow-[0_0_24px_var(--color-signal)] motion-safe:animate-pulse'
               }`}
             >
               {isLast ? (
-                <span
-                  className={`absolute inset-0 grid place-items-center font-mono text-[0.625rem] font-medium ${lastSeatTaken ? 'text-paper' : 'text-white'}`}
-                >
+                <span className="absolute inset-0 grid place-items-center font-mono text-[0.625rem] font-semibold text-paper">
                   {lastSeatTaken ? 'A' : '24'}
                 </span>
               ) : null}
@@ -166,7 +162,7 @@ function SeatPlan({ step }: { readonly step: SequenceStep }) {
           step.queue.map((lane, index) => (
             <span
               key={lane}
-              className="rounded-xs border border-waitlisted bg-waitlisted-wash px-1.5 py-0.5 text-waitlisted"
+              className="rounded-full border border-waitlisted/50 bg-waitlisted-wash px-2 py-0.5 text-waitlisted"
             >
               #{index + 1} · {lane}
             </span>
@@ -181,8 +177,10 @@ function LockBox({ step }: { readonly step: SequenceStep }) {
   const { t } = useI18n()
   return (
     <div
-      className={`absolute inset-y-0 left-[46%] w-[26%] -translate-x-1/2 border-x transition-colors duration-300 ${
-        step.lock ? 'border-signal bg-signal-wash/70' : 'border-ink-3/50 bg-transparent'
+      className={`absolute inset-y-0 left-[46%] w-[26%] -translate-x-1/2 rounded-2xl border transition-[background-color,border-color,box-shadow] duration-300 ${
+        step.lock
+          ? 'border-signal/60 bg-signal-wash shadow-[0_0_40px_-8px_var(--color-signal)]'
+          : 'border-rule border-dashed bg-transparent'
       }`}
     >
       <p
@@ -199,6 +197,7 @@ export function LastSeatFigure() {
   const [state, dispatch] = useReducer(playback, { step: 0, playing: false })
   const reducedMotion = usePrefersReducedMotion()
   const timer = useRef<number | null>(null)
+  const figure = useRef<HTMLElement>(null)
   const step = LAST_SEAT_SEQUENCE[state.step] ?? LAST_SEAT_SEQUENCE[0]
   if (!step) throw new Error('The sequence is empty.')
 
@@ -213,6 +212,21 @@ export function LastSeatFigure() {
     }
   }, [state.playing, state.step, reducedMotion])
 
+  useEffect(() => {
+    const element = figure.current
+    if (!element || reducedMotion) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        dispatch({ type: 'play' })
+      },
+      { threshold: 0.55 },
+    )
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [reducedMotion])
+
   const run = useCallback(() => {
     if (reducedMotion) dispatch({ type: 'go', step: LAST_STEP })
     else dispatch({ type: state.playing ? 'pause' : 'play' })
@@ -226,12 +240,12 @@ export function LastSeatFigure() {
 
   return (
     <figure
+      ref={figure}
       id="fig-1"
       aria-labelledby="fig-1-caption"
-      className="relative border border-ink bg-sheet"
+      className="surface relative overflow-clip"
     >
-      <CropMarks />
-      <div className="grid gap-6 p-4 sm:p-6">
+      <div className="grid gap-6 p-5 sm:p-7">
         <SeatPlan step={step} />
 
         <div className="relative pt-9">
@@ -255,20 +269,20 @@ export function LastSeatFigure() {
           <button
             type="button"
             onClick={run}
-            className="inline-flex min-h-11 items-center gap-2 rounded-xs border border-ink bg-ink px-4 text-sm font-medium text-paper transition-colors hover:border-signal hover:bg-signal"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-ink px-5 text-sm font-medium text-paper shadow-[0_8px_32px_-8px_rgb(125_139_255/0.6)] transition-colors hover:bg-white"
           >
             <span aria-hidden className="font-mono">
               {state.playing ? '❚❚' : '▶'}
             </span>
             {runLabel}
           </button>
-          <div className="flex">
+          <div className="flex gap-1.5">
             <button
               type="button"
               onClick={() => dispatch({ type: 'go', step: state.step - 1 })}
               disabled={state.step === 0}
               aria-label={t.fig1.previous}
-              className="grid min-h-11 min-w-11 place-items-center border border-ink font-mono text-sm hover:bg-ink hover:text-paper disabled:border-rule disabled:text-ink-3 disabled:hover:bg-transparent"
+              className="grid min-h-11 min-w-11 place-items-center rounded-full border border-rule font-mono text-sm transition-colors hover:bg-[rgb(238_241_246/0.08)] disabled:text-ink-3 disabled:opacity-50 disabled:hover:bg-transparent"
             >
               ←
             </button>
@@ -277,7 +291,7 @@ export function LastSeatFigure() {
               onClick={() => dispatch({ type: 'go', step: state.step + 1 })}
               disabled={state.step === LAST_STEP}
               aria-label={t.fig1.next}
-              className="-ml-px grid min-h-11 min-w-11 place-items-center border border-ink font-mono text-sm hover:bg-ink hover:text-paper disabled:border-rule disabled:text-ink-3 disabled:hover:bg-transparent"
+              className="grid min-h-11 min-w-11 place-items-center rounded-full border border-rule font-mono text-sm transition-colors hover:bg-[rgb(238_241_246/0.08)] disabled:text-ink-3 disabled:opacity-50 disabled:hover:bg-transparent"
             >
               →
             </button>
@@ -288,7 +302,7 @@ export function LastSeatFigure() {
                 {index > 0 ? (
                   <span
                     aria-hidden
-                    className={`h-px w-3 sm:w-5 ${index <= state.step ? 'bg-signal' : 'bg-ink-3/50'}`}
+                    className={`h-px w-3 transition-colors sm:w-5 ${index <= state.step ? 'bg-signal' : 'bg-rule'}`}
                   />
                 ) : null}
                 <button
@@ -296,12 +310,12 @@ export function LastSeatFigure() {
                   onClick={() => dispatch({ type: 'go', step: index })}
                   aria-label={t.fig1.stepLabel(entry.tick, index, t.fig1.captions[index] ?? '')}
                   aria-current={index === state.step ? 'step' : undefined}
-                  className={`grid size-8 place-items-center rounded-full border font-mono text-[0.7rem] transition-colors ${
+                  className={`grid size-8 place-items-center rounded-full border font-mono text-[0.7rem] transition-[background-color,border-color,box-shadow,color] ${
                     index === state.step
-                      ? 'border-signal bg-signal text-white'
+                      ? 'border-signal bg-signal text-paper shadow-[0_0_18px_var(--color-signal)]'
                       : index < state.step
-                        ? 'border-signal text-signal'
-                        : 'border-ink-3/60 text-ink-3'
+                        ? 'border-signal/60 text-signal'
+                        : 'border-rule text-ink-3'
                   }`}
                 >
                   {entry.tick}
@@ -312,9 +326,9 @@ export function LastSeatFigure() {
         </div>
       </div>
 
-      <figcaption id="fig-1-caption" className="border-t border-ink px-4 py-3 sm:px-6">
+      <figcaption id="fig-1-caption" className="border-t border-rule px-5 py-4 sm:px-7">
         <span className="label mr-3 text-ink">{t.common.figure} 1</span>
-        <span className="label mr-3 rounded-xs border border-ink-3/50 px-1.5 py-0.5 text-ink-3">
+        <span className="label mr-3 rounded-full border border-rule px-2 py-0.5 text-ink-3">
           {t.common.figureKinds.illustrative}
         </span>
         <span className="text-sm text-ink-2">{t.fig1.caption}</span>

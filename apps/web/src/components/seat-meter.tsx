@@ -17,7 +17,7 @@ export function SeatMeter({
   const { t } = useI18n()
   const { capacity, confirmed, available, waitlisted } = inventory
   const summary = t.meter.summary(confirmed, capacity, available, waitlisted)
-  const cell = size === 'lg' ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-2.5 w-2.5'
+  const cell = size === 'lg' ? 'size-4 sm:size-5 rounded-[5px]' : 'size-2.5 rounded-[3px]'
 
   return (
     <div className="min-w-0">
@@ -29,12 +29,12 @@ export function SeatMeter({
             return (
               <span
                 key={index}
-                className={`${cell} rounded-[1px] border ${
+                className={`${cell} border transition-colors duration-500 ${
                   taken
-                    ? 'border-ink bg-ink'
+                    ? 'border-transparent bg-ink/80'
                     : last
-                      ? 'border-signal bg-signal'
-                      : 'border-ink-3/60 bg-transparent'
+                      ? 'border-signal bg-signal shadow-[0_0_14px_var(--color-signal)]'
+                      : 'border-rule bg-transparent'
                 }`}
               />
             )
@@ -44,10 +44,10 @@ export function SeatMeter({
         <div
           role="img"
           aria-label={label ?? summary}
-          className={`relative w-full overflow-hidden rounded-[1px] border border-ink-3/60 ${size === 'lg' ? 'h-5' : 'h-2.5'}`}
+          className={`relative w-full overflow-clip rounded-full border border-rule ${size === 'lg' ? 'h-5' : 'h-2.5'}`}
         >
           <span
-            className="absolute inset-y-0 left-0 bg-ink"
+            className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,var(--color-signal),var(--color-ink))]"
             style={{ width: capacity === 0 ? '0%' : `${(confirmed / capacity) * 100}%` }}
           />
         </div>

@@ -2,7 +2,7 @@ import { EventListResponseSchema, type PublicEvent } from '@eventcore/contracts'
 import { type Metadata } from 'next'
 import { ApiFailure } from '@/components/api-state'
 import { SeatMeter } from '@/components/seat-meter'
-import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { PageIntro } from '@/components/section-heading'
 import { EventStatusTag } from '@/components/status-tag'
 import { callApi } from '@/lib/api'
 import { type Dictionary } from '@/i18n/dictionaries'
@@ -36,7 +36,6 @@ export default async function ExplorePage({
   readonly searchParams: Promise<{ status?: string }>
 }) {
   const [{ status }, { locale, t }] = await Promise.all([searchParams, getI18n()])
-  const sheet = { number: 2, title: t.sheets.board }
   const filter: Filter = status === 'PUBLISHED' || status === 'CLOSED' ? status : undefined
   const result = await callApi(`/v1/events?limit=50${filter ? `&status=${filter}` : ''}`, {
     schema: EventListResponseSchema,
@@ -44,11 +43,11 @@ export default async function ExplorePage({
 
   return (
     <main id="main">
-      <SheetBar sheet={sheet} />
-      <section className="sheet-frame mt-12">
-        <SectionHeading mark={t.board.mark} title={t.board.title} lead={<p>{t.board.lead}</p>} />
-
-        <nav aria-label={t.board.filters.label} className="mt-10 flex gap-1 border-b border-ink">
+      <PageIntro mark={t.board.mark} title={t.board.title} lead={<p>{t.board.lead}</p>}>
+        <nav
+          aria-label={t.board.filters.label}
+          className="mt-10 inline-flex rounded-full border border-rule bg-[rgb(238_241_246/0.03)] p-1"
+        >
           {FILTERS.map((option) => {
             const active = option.value === filter
             return (
@@ -56,67 +55,84 @@ export default async function ExplorePage({
                 key={option.key}
                 href={option.value ? `/explore?status=${option.value}` : '/explore'}
                 aria-current={active ? 'page' : undefined}
-                className="-mb-px flex min-h-11 items-center border border-transparent px-4 text-sm aria-[current=page]:border-ink aria-[current=page]:border-b-paper aria-[current=page]:bg-paper aria-[current=page]:font-medium hover:text-signal"
+                className="flex min-h-10 items-center rounded-full px-5 text-sm text-ink-2 transition-colors hover:text-ink aria-[current=page]:bg-ink aria-[current=page]:font-medium aria-[current=page]:text-paper"
               >
                 {t.board.filters[option.key]}
               </Link>
             )
           })}
         </nav>
+      </PageIntro>
 
+      <section className="sheet-frame">
         {!result.ok ? (
-          <div className="mt-8">
-            <ApiFailure result={result} />
-          </div>
+          <ApiFailure result={result} />
         ) : result.data.items.length === 0 ? (
-          <p className="mt-8 text-ink-2">{t.board.empty}</p>
+          <p className="text-ink-2">{t.board.empty}</p>
         ) : (
           <>
-            <ol className="mt-2">
+            <ol className="grid grid-cols-[minmax(0,1fr)] gap-4 lg:grid-cols-2">
               {result.data.items.map((event) => (
-                <li key={event.id} className="border-b border-rule">
+                <li key={event.id} className="scale-in">
                   <Link
                     href={`/events/${event.organization.slug}/${event.slug}`}
-                    className="group grid grid-cols-12 items-center gap-x-4 gap-y-3 py-5 hover:bg-sheet md:gap-x-6"
+                    data-spotlight
+                    className="surface group flex h-full flex-col gap-6 p-6 transition-transform duration-500 ease-(--ease-out-expo) hover:-translate-y-1 sm:p-7"
                   >
-                    <div className="col-span-3 font-mono md:col-span-1">
-                      <p className="text-sm font-medium text-ink">
-                        {formatDayMonth(event.startsAt, locale)}
-                      </p>
-                      <p className="text-xs text-ink-3 tabular">
-                        {formatClock(event.startsAt, locale)}
-                      </p>
+                    <div className="flex items-start gap-5">
+                      <div className="grid w-16 shrink-0 place-items-center rounded-2xl border border-rule bg-[rgb(238_241_246/0.03)] py-2.5 text-center">
+                        <span className="label text-ink-3">
+                          {formatDayMonth(event.startsAt, locale).split(' ')[1]}
+                        </span>
+                        <span className="wide font-display text-3xl font-bold leading-none tracking-[-0.05em]">
+                          {formatDayMonth(event.startsAt, locale).split(' ')[0]}
+                        </span>
+                        <span className="mt-1 font-mono text-[0.65rem] text-ink-3 tabular">
+                          {formatClock(event.startsAt, locale)}
+                        </span>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <p className="text-2xl font-semibold leading-tight tracking-[-0.03em] font-stretch-108%">
+                            {event.name}
+                          </p>
+                          <EventStatusTag status={event.status} />
+                        </div>
+                        <p className="mt-2 text-sm text-ink-3">
+                          {event.organization.name} · {event.venue}
+                        </p>
+                      </div>
                     </div>
-                    <div className="col-span-9 md:col-span-5">
-                      <p className="font-display text-xl font-semibold group-hover:text-signal">
-                        {event.name}
-                      </p>
-                      <p className="text-sm text-ink-2">
-                        {event.organization.name} · {event.venue}
-                      </p>
-                    </div>
-                    <div className="col-span-8 md:col-span-4">
+                    <div className="mt-auto">
                       <SeatMeter inventory={event.inventory} />
-                      <p className="mt-1.5 font-mono text-xs text-ink-2 tabular">
-                        {event.inventory.confirmed}/{event.inventory.capacity} ·{' '}
-                        {availabilityText(event, t)}
-                      </p>
-                    </div>
-                    <div className="col-span-4 flex justify-end md:col-span-2">
-                      <EventStatusTag status={event.status} />
+                      <div className="mt-3 flex items-center justify-between font-mono text-xs text-ink-2 tabular">
+                        <span>
+                          {event.inventory.confirmed}/{event.inventory.capacity} ·{' '}
+                          {availabilityText(event, t)}
+                        </span>
+                        <span
+                          aria-hidden
+                          className="text-ink-3 transition-transform duration-300 group-hover:translate-x-1 group-hover:text-ink"
+                        >
+                          →
+                        </span>
+                      </div>
                     </div>
                   </Link>
                 </li>
               ))}
             </ol>
-            <p className="label mt-4 text-ink-3">
+            <p className="label mt-6 flex items-center gap-2 text-ink-3">
+              <span aria-hidden className="relative flex size-2">
+                <span className="absolute inset-0 animate-pulse-ring rounded-full bg-confirmed" />
+                <span className="relative size-2 rounded-full bg-confirmed" />
+              </span>
               {t.board.snapshot}{' '}
               {formatSnapshot(result.data.items[0]?.observedAt ?? new Date().toISOString(), locale)}
             </p>
           </>
         )}
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

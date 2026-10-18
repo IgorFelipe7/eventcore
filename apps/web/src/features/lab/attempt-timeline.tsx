@@ -77,7 +77,7 @@ export function AttemptTimeline({
             setPlayhead(0)
             setPlaying(true)
           }}
-          className="inline-flex min-h-11 items-center gap-2 rounded-xs border border-night-ink bg-night-ink px-4 text-sm font-medium text-night hover:border-signal-glow hover:bg-signal-glow hover:text-white"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full bg-night-ink px-5 text-sm font-medium text-night shadow-[0_8px_32px_-8px_rgb(125_139_255/0.6)] transition-colors hover:bg-white"
         >
           <span aria-hidden className="font-mono">
             ▶

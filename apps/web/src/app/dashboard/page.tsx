@@ -3,7 +3,7 @@ import { ApiFailure } from '@/components/api-state'
 import { ButtonLink } from '@/components/button'
 import { PersonaRequired } from '@/components/persona-required'
 import { SeatMeter } from '@/components/seat-meter'
-import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { PageIntro } from '@/components/section-heading'
 import { EventStatusTag } from '@/components/status-tag'
 import { loadOrganizationEvents, loadViewer } from '@/features/dashboard/organizer-data'
 import { Link } from '@/i18n/link'
@@ -20,7 +20,6 @@ const personaName = (displayName: string) => displayName.split(' (')[0] ?? displ
 
 export default async function DashboardPage() {
   const [session, { locale, t }] = await Promise.all([readSession(), getI18n()])
-  const sheet = { number: 5, title: t.sheets.dashboard }
   const viewer = session?.persona.kind === 'organizer' ? await loadViewer(session.token) : null
   const organizations =
     session && viewer?.ok
@@ -34,19 +33,17 @@ export default async function DashboardPage() {
 
   return (
     <main id="main">
-      <SheetBar sheet={sheet} />
-      <section className="sheet-frame mt-12">
-        <SectionHeading
-          mark={
-            session
-              ? t.persona.actingAsName(personaName(session.persona.displayName))
-              : t.dashboard.mark
-          }
-          title={t.dashboard.title}
-          lead={<p>{t.dashboard.lead}</p>}
-        />
-
-        <div className="mt-10 grid gap-14">
+      <PageIntro
+        mark={
+          session
+            ? t.persona.actingAsName(personaName(session.persona.displayName))
+            : t.dashboard.mark
+        }
+        title={t.dashboard.title}
+        lead={<p>{t.dashboard.lead}</p>}
+      />
+      <section className="sheet-frame">
+        <div className="grid gap-16">
           {!session || session.persona.kind !== 'organizer' ? (
             <PersonaRequired kind="organizer" />
           ) : !viewer?.ok ? (
@@ -59,14 +56,14 @@ export default async function DashboardPage() {
                 key={membership.organization.id}
                 aria-labelledby={membership.organization.id}
               >
-                <header className="flex flex-wrap items-end justify-between gap-4 border-b border-ink pb-3">
+                <header className="flex flex-wrap items-end justify-between gap-4 pb-5">
                   <div>
                     <p className="label text-ink-3">
                       {t.dashboard.role(t.dashboard.roles[membership.role] ?? membership.role)}
                     </p>
                     <h2
                       id={membership.organization.id}
-                      className="mt-1 font-display text-3xl font-semibold"
+                      className="mt-2 text-4xl tracking-[-0.04em]"
                     >
                       {membership.organization.name}
                     </h2>
@@ -83,15 +80,16 @@ export default async function DashboardPage() {
                     <ApiFailure result={events} />
                   </div>
                 ) : (
-                  <ol>
+                  <ol className="grid gap-3">
                     {events.data.items.map((event) => (
-                      <li key={event.id} className="border-b border-rule">
+                      <li key={event.id}>
                         <Link
                           href={`/dashboard/events/${event.id}`}
-                          className="group grid grid-cols-12 items-center gap-x-4 gap-y-3 py-4 hover:bg-sheet md:gap-x-6"
+                          data-spotlight
+                          className="surface group grid grid-cols-12 items-center gap-x-6 gap-y-3 px-6 py-5 transition-transform duration-300 hover:-translate-y-0.5"
                         >
                           <div className="col-span-12 md:col-span-5">
-                            <p className="font-display text-lg font-semibold group-hover:text-signal">
+                            <p className="text-lg font-semibold tracking-[-0.02em] transition-colors group-hover:text-signal">
                               {event.name}
                             </p>
                             <p className="text-sm text-ink-2">
@@ -121,7 +119,6 @@ export default async function DashboardPage() {
           )}
         </div>
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

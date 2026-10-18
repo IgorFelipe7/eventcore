@@ -14,13 +14,15 @@ function Node({
 }) {
   const border =
     tone === 'signal'
-      ? 'border-signal'
+      ? 'border-signal/60 shadow-[0_0_48px_-16px_var(--color-signal)]'
       : tone === 'muted'
-        ? 'border-ink-3/60 border-dashed'
-        : 'border-ink'
+        ? 'border-rule border-dashed'
+        : 'border-rule'
   return (
-    <div className={`border ${border} bg-sheet p-3`}>
-      <p className={`font-display text-lg font-semibold ${tone === 'signal' ? 'text-signal' : ''}`}>
+    <div className={`rounded-2xl border ${border} bg-[rgb(238_241_246/0.025)] p-4`}>
+      <p
+        className={`text-lg font-semibold tracking-[-0.02em] ${tone === 'signal' ? 'text-signal' : ''}`}
+      >
         {title}
       </p>
       <p className="font-mono text-[0.7rem] text-ink-3">{detail}</p>
@@ -41,7 +43,9 @@ function Link({
       aria-hidden
       className={`flex items-center justify-center gap-2 font-mono text-[0.65rem] text-ink-3 ${vertical ? 'py-2' : 'lg:flex-col lg:px-1'}`}
     >
-      <span className={`${vertical ? 'h-5 w-px' : 'h-5 w-px lg:h-px lg:w-8'} bg-ink`} />
+      <span
+        className={`${vertical ? 'h-5 w-px' : 'h-5 w-px lg:h-px lg:w-8'} bg-[linear-gradient(90deg,var(--color-rule),var(--color-signal),var(--color-rule))]`}
+      />
       <span className="whitespace-nowrap">{label}</span>
     </div>
   )
@@ -78,7 +82,7 @@ export async function SystemDiagram() {
           {MODULES.map((module) => (
             <li
               key={module}
-              className="border border-rule px-1.5 py-1 font-mono text-[0.68rem] text-ink-2"
+              className="rounded-lg border border-rule px-2 py-1 font-mono text-[0.68rem] text-ink-2"
             >
               {module}
             </li>

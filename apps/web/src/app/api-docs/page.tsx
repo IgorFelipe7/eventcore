@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { ApiFailure } from '@/components/api-state'
 import { Arrow } from '@/components/button'
 import { CodeBlock } from '@/components/code-block'
-import { SectionHeading, SheetBar, TitleBlock } from '@/components/sheet'
+import { PageIntro } from '@/components/section-heading'
 import { getI18n } from '@/i18n/server'
 import { callApi } from '@/lib/api'
 import { publicConfig } from '@/lib/public-config'
@@ -29,7 +29,7 @@ const OpenApiSchema = z.object({
 const METHODS = ['get', 'post', 'patch', 'put', 'delete'] as const
 
 const METHOD_TONE: Record<string, string> = {
-  GET: 'text-ink-2 border-ink-3/60',
+  GET: 'text-ink-2 border-rule',
   POST: 'text-signal border-signal',
   PATCH: 'text-waitlisted border-waitlisted',
 }
@@ -51,7 +51,6 @@ export default async function ApiDocsPage() {
     callApi('/openapi.json', { schema: OpenApiSchema }),
     getI18n(),
   ])
-  const sheet = { number: 6, title: t.sheets.api }
 
   const operations = result.ok
     ? Object.entries(result.data.paths).flatMap(([path, item]) =>
@@ -74,20 +73,13 @@ export default async function ApiDocsPage() {
 
   return (
     <main id="main">
-      <SheetBar sheet={sheet} />
-      <section className="sheet-frame mt-12 grid grid-cols-12 gap-x-4 gap-y-10 md:gap-x-6">
-        <div className="col-span-12 lg:col-span-7">
-          <SectionHeading
-            mark={t.apiDocs.mark}
-            title={t.apiDocs.title}
-            lead={<p>{t.apiDocs.lead}</p>}
-          />
-        </div>
-        <div className="col-span-12 grid content-start gap-3 lg:col-span-5">
+      <PageIntro mark={t.apiDocs.mark} title={t.apiDocs.title} lead={<p>{t.apiDocs.lead}</p>} />
+      <section className="sheet-frame">
+        <div className="grid max-w-3xl gap-3">
           <CodeBlock code={EXAMPLE} language="http" title={t.apiDocs.example} wrap />
           <a
             href={`${publicConfig.apiOrigin}/docs`}
-            className="min-h-11 text-sm underline hover:text-signal"
+            className="inline-flex min-h-11 w-fit items-center gap-2 rounded-full border border-rule px-5 text-sm transition-colors hover:border-signal hover:text-signal"
           >
             {t.apiDocs.swagger} <Arrow />
           </a>
@@ -101,7 +93,7 @@ export default async function ApiDocsPage() {
           <div className="grid gap-12">
             {tags.map((tag) => (
               <div key={tag}>
-                <h2 className="label border-b border-ink pb-2 text-ink">{tag}</h2>
+                <h2 className="eyebrow">{tag}</h2>
                 <ul>
                   {operations
                     .filter((operation) => operation.tag === tag)
@@ -111,7 +103,7 @@ export default async function ApiDocsPage() {
                         className="grid grid-cols-12 items-center gap-x-4 gap-y-1 border-b border-rule py-3 md:gap-x-6"
                       >
                         <span
-                          className={`col-span-3 w-fit rounded-xs border px-2 py-0.5 font-mono text-xs font-medium md:col-span-1 ${METHOD_TONE[operation.method] ?? ''}`}
+                          className={`col-span-3 w-fit rounded-full border px-2.5 py-0.5 font-mono text-xs font-medium md:col-span-1 ${METHOD_TONE[operation.method] ?? ''}`}
                         >
                           {operation.method}
                         </span>
@@ -137,7 +129,6 @@ export default async function ApiDocsPage() {
           </div>
         )}
       </section>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

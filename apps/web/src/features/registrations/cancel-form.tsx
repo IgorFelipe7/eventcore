@@ -13,7 +13,7 @@ function CancelButton() {
     <button
       type="submit"
       disabled={pending}
-      className="min-h-11 rounded-xs border border-ink px-3 text-sm hover:bg-ink hover:text-paper disabled:cursor-wait disabled:border-rule disabled:text-ink-3"
+      className="min-h-10 rounded-full border border-rule px-4 text-sm text-ink-2 transition-colors hover:border-rejected/60 hover:bg-rejected-wash hover:text-rejected disabled:cursor-wait disabled:opacity-50"
     >
       {pending ? t.registration.cancelling : t.registration.cancel}
     </button>

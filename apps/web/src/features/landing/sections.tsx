@@ -1,71 +1,70 @@
 import { type ReactNode } from 'react'
 import { Arrow, ButtonLink } from '@/components/button'
-import { CodeBlock } from '@/components/code-block'
-import { Marked, SectionHeading } from '@/components/sheet'
+import { SectionHeading } from '@/components/section-heading'
 import { getI18n } from '@/i18n/server'
+import { AnatomyScroller } from './anatomy-scroller'
 import { EvidenceLink } from './evidence-link'
 import { INVARIANT_EVIDENCE } from './evidence'
+import { Terminal } from './terminal'
 
 export async function FailureSection({ baseline }: { readonly baseline?: ReactNode }) {
   const { t } = await getI18n()
   const copy = t.landing.failures
   return (
-    <section aria-labelledby="failures" className="sheet-frame mt-32">
+    <section aria-labelledby="failures" className="sheet-frame mt-40">
       <SectionHeading
         id="failures"
-        index="1"
         mark={copy.mark}
-        title={<Marked text={copy.title} />}
+        title={copy.title}
         lead={<p>{copy.lead}</p>}
+        dot="var(--color-rejected)"
       />
       {baseline}
-      <div className="mt-10 overflow-x-auto border-y border-ink">
-        <table className="w-full min-w-[44rem] border-collapse text-left">
-          <thead>
-            <tr className="border-b border-ink">
-              <th scope="col" className="label w-[16%] py-3 pr-4 text-ink-3">
-                {copy.columns.failure}
-              </th>
-              <th scope="col" className="label w-[34%] py-3 pr-4 text-ink-3">
-                {copy.columns.naive}
-              </th>
-              <th scope="col" className="label w-[36%] py-3 pr-4 text-ink-3">
-                {copy.columns.eventcore}
-              </th>
-              <th scope="col" className="label py-3 text-ink-3">
-                {copy.columns.decision}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {copy.rows.map((failure) => (
-              <tr
-                key={failure.reference}
-                className="group border-b border-rule align-top transition-colors last:border-b-0 hover:bg-sheet"
-              >
-                <th scope="row" className="py-5 pr-4 font-display text-lg font-semibold">
-                  {failure.name}
-                </th>
-                <td className="py-5 pr-4 text-ink-2">
-                  <span aria-hidden className="mr-2 font-mono text-rejected">
-                    ×
-                  </span>
+      <ul className="mt-6 grid gap-4 md:grid-cols-2">
+        {copy.rows.map((failure, index) => (
+          <li
+            key={failure.reference}
+            data-spotlight
+            className="surface rise-in flex flex-col p-6 sm:p-8"
+            style={{ animationRangeStart: `entry ${index * 4}%` }}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <h3 className="text-2xl tracking-[-0.03em]">{failure.name}</h3>
+              <span className="label shrink-0 rounded-full border border-rule px-2.5 py-1 text-ink-3">
+                {failure.reference}
+              </span>
+            </div>
+            <div className="mt-6 grid flex-1 gap-3">
+              <p className="flex gap-3 rounded-2xl bg-rejected-wash/60 p-4 text-ink-2">
+                <span
+                  aria-hidden
+                  className="grid size-6 shrink-0 place-items-center rounded-full bg-rejected/15 font-mono text-xs text-rejected"
+                >
+                  ×
+                </span>
+                <span>
+                  <span className="label mb-1 block text-rejected/80">{copy.columns.naive}</span>
                   {failure.naive}
-                </td>
-                <td className="py-5 pr-4 text-ink">
-                  <span aria-hidden className="mr-2 font-mono text-confirmed">
-                    ✓
+                </span>
+              </p>
+              <p className="flex gap-3 rounded-2xl bg-confirmed-wash/60 p-4 text-ink">
+                <span
+                  aria-hidden
+                  className="grid size-6 shrink-0 place-items-center rounded-full bg-confirmed/15 font-mono text-xs text-confirmed"
+                >
+                  ✓
+                </span>
+                <span>
+                  <span className="label mb-1 block text-confirmed/80">
+                    {copy.columns.eventcore}
                   </span>
                   {failure.eventcore}
-                </td>
-                <td className="py-5 font-mono text-sm text-ink-3 group-hover:text-signal">
-                  {failure.reference}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+                </span>
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
@@ -74,38 +73,50 @@ export async function InvariantSection() {
   const { t } = await getI18n()
   const copy = t.landing.invariants
   return (
-    <section aria-labelledby="invariants" className="sheet-frame mt-32">
-      <SectionHeading
-        id="invariants"
-        index="2"
-        mark={copy.mark}
-        title={<Marked text={copy.title} />}
-        lead={<p>{copy.lead}</p>}
+    <section aria-labelledby="invariants" className="relative mt-40">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-20 h-[40rem] bg-[radial-gradient(50%_50%_at_50%_50%,rgb(125_139_255/0.08),transparent_70%)]"
       />
-      <ol className="mt-10 border-t border-ink">
-        {INVARIANT_EVIDENCE.map((invariant) => {
-          const text = copy.rules[invariant.id]
-          return (
-            <li
-              key={invariant.id}
-              className="group grid grid-cols-12 gap-x-4 gap-y-2 border-b border-rule py-5 transition-colors hover:bg-sheet md:gap-x-6"
-            >
-              <p className="col-span-2 font-display text-3xl font-semibold leading-none text-ink-3 transition-colors group-hover:text-signal md:col-span-1">
-                {invariant.id}
-              </p>
-              <p className="col-span-10 text-lg text-ink md:col-span-5">{text?.rule}</p>
-              <p className="col-span-12 text-sm text-ink-2 md:col-span-3 md:pt-1.5">
-                <span className="label mb-1 block text-ink-3">{copy.enforcedBy}</span>
-                {text?.enforcedBy}
-              </p>
-              <p className="col-span-12 text-sm md:col-span-3 md:pt-1.5">
-                <span className="label mb-1 block text-ink-3">{copy.verifiedBy}</span>
-                <EvidenceLink path={invariant.verifiedBy} />
-              </p>
-            </li>
-          )
-        })}
-      </ol>
+      <div className="sheet-frame relative">
+        <SectionHeading
+          id="invariants"
+          mark={copy.mark}
+          title={copy.title}
+          lead={<p>{copy.lead}</p>}
+          align="center"
+        />
+        <ol className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {INVARIANT_EVIDENCE.map((invariant, index) => {
+            const text = copy.rules[invariant.id]
+            return (
+              <li
+                key={invariant.id}
+                data-spotlight
+                className="surface scale-in group flex flex-col p-6"
+                style={{ animationRangeStart: `entry ${(index % 4) * 5}%` }}
+              >
+                <p className="wide font-display text-5xl font-bold leading-none tracking-[-0.06em] text-transparent bg-[linear-gradient(180deg,var(--color-ink),rgb(238_241_246/0.25))] bg-clip-text transition-[filter] duration-500 group-hover:drop-shadow-[0_0_18px_rgb(125_139_255/0.6)]">
+                  {invariant.id}
+                </p>
+                <p className="mt-6 flex-1 text-[0.98rem] leading-relaxed text-ink">{text?.rule}</p>
+                <dl className="mt-6 grid gap-3 border-t border-rule pt-4 text-sm">
+                  <div>
+                    <dt className="label text-ink-3">{copy.enforcedBy}</dt>
+                    <dd className="mt-1 text-ink-2">{text?.enforcedBy}</dd>
+                  </div>
+                  <div>
+                    <dt className="label text-ink-3">{copy.verifiedBy}</dt>
+                    <dd className="mt-1">
+                      <EvidenceLink path={invariant.verifiedBy} />
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            )
+          })}
+        </ol>
+      </div>
     </section>
   )
 }
@@ -117,73 +128,73 @@ const LOCK_ORDER = [
 ]
 
 const CORE_SQL = `BEGIN;
-INSERT INTO idempotency_requests (...) ON CONFLICT ON CONSTRAINT idempotency_requests_scope_key DO NOTHING;
+INSERT INTO idempotency_requests (actor_id, action, scope_id, key, request_hash, expires_at) VALUES (...);
 SELECT capacity, confirmed_count FROM event_inventory WHERE event_id = $1 FOR UPDATE;
-SELECT status FROM registrations WHERE event_id = $1 AND user_id = $2 FOR UPDATE;
+SELECT status FROM registrations r WHERE event_id = $1 AND user_id = $2 FOR UPDATE OF r;
 SELECT count(*) FROM registrations WHERE event_id = $1 AND status = 'WAITLISTED';
-UPDATE event_inventory SET confirmed_count = confirmed_count + 1 WHERE event_id = $1;
+INSERT INTO registrations (event_id, user_id, status, queued_at) VALUES (...);
+UPDATE event_inventory SET confirmed_count = confirmed_count + 1, version = version + 1 WHERE event_id = $1;
+INSERT INTO registration_events (registration_id, from_status, to_status, correlation_id) VALUES (...);
+INSERT INTO audit_log (organization_id, actor_id, action, resource_id, request_id) VALUES (...);
+INSERT INTO outbox_events (aggregate_type, aggregate_id, event_type, payload) VALUES (...);
+UPDATE idempotency_requests SET http_status = 201, response_body = $3 WHERE id = $4;
 COMMIT;`
+
+const STEP_LINES: readonly (readonly number[])[] = [
+  [1],
+  [2],
+  [3],
+  [4, 5],
+  [],
+  [6, 7, 8],
+  [9, 10],
+  [11],
+  [12],
+]
 
 export async function AnatomySection() {
   const { t } = await getI18n()
   const copy = t.landing.anatomy
   return (
-    <section aria-labelledby="anatomy" className="sheet-frame mt-32">
-      <SectionHeading
-        id="anatomy"
-        index="3"
-        mark={copy.mark}
-        title={<Marked text={copy.title} />}
-        lead={<p>{copy.lead}</p>}
-      />
-      <div className="mt-10 grid grid-cols-12 gap-x-4 gap-y-10 md:gap-x-6">
-        <ol className="col-span-12 md:col-span-6">
-          {copy.steps.map((step, index) => (
-            <li
-              key={step.title}
-              className={`grid grid-cols-[2.5rem_1fr] border-t py-3.5 ${index === 2 ? 'border-signal' : 'border-rule'}`}
-            >
-              <span
-                className={`font-mono text-sm tabular ${index === 2 ? 'text-signal' : 'text-ink-3'}`}
-              >
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <div>
-                <p className={`font-medium ${index === 2 ? 'text-signal' : 'text-ink'}`}>
-                  {step.title}
-                </p>
-                <p className="text-sm text-ink-2">{step.detail}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-        <div className="col-span-12 grid content-start gap-6 md:col-span-6">
-          <div className="border border-ink bg-sheet p-4">
-            <p className="label text-ink-3">{copy.lockOrder}</p>
-            <ol className="mt-4 grid gap-2 sm:grid-cols-3">
-              {LOCK_ORDER.map((entry, index) => (
-                <li key={entry.table} className="relative">
-                  <div
-                    className={`h-full border px-3 py-2.5 ${index === 1 ? 'border-signal bg-signal-wash' : 'border-ink'}`}
+    <section aria-labelledby="anatomy" className="sheet-frame mt-40">
+      <SectionHeading id="anatomy" mark={copy.mark} title={copy.title} lead={<p>{copy.lead}</p>} />
+      <div className="mt-12">
+        <AnatomyScroller
+          steps={copy.steps.map((step, index) => ({ ...step, lines: STEP_LINES[index] ?? [] }))}
+          code={CORE_SQL}
+          codeTitle={copy.codeTitle}
+          stepLabel={copy.step}
+          noSql={copy.noSql}
+          lockOrder={
+            <div className="surface p-5">
+              <p className="label text-ink-3">{copy.lockOrder}</p>
+              <ol className="mt-4 grid gap-2 sm:grid-cols-3">
+                {LOCK_ORDER.map((entry, index) => (
+                  <li
+                    key={entry.table}
+                    className={`rounded-2xl border px-4 py-3 ${index === 1 ? 'border-signal/50 bg-signal-wash shadow-[0_0_32px_-12px_var(--color-signal)]' : 'border-rule bg-[rgb(238_241_246/0.02)]'}`}
                   >
                     <p className="font-mono text-xs text-ink-3">{entry.order}</p>
                     <p className="mt-1 break-all font-mono text-[0.8125rem] text-ink">
                       {entry.table}
                     </p>
-                    <p className="mt-0.5 font-mono text-xs text-ink-2">{entry.how}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-4 text-sm text-ink-2">{copy.lockOrderNote}</p>
-          </div>
-          <CodeBlock code={CORE_SQL} language="sql" title={copy.codeTitle} highlight={[3]} />
-          <div className="flex flex-wrap gap-3">
-            <ButtonLink href="/architecture" variant="secondary">
-              {copy.cta} <Arrow />
-            </ButtonLink>
-          </div>
-        </div>
+                    <p
+                      className={`mt-0.5 font-mono text-xs ${index === 1 ? 'text-signal' : 'text-ink-3'}`}
+                    >
+                      {entry.how}
+                    </p>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-4 text-sm text-ink-2">{copy.lockOrderNote}</p>
+            </div>
+          }
+        />
+      </div>
+      <div className="mt-10 flex justify-center">
+        <ButtonLink href="/architecture" variant="secondary">
+          {copy.cta} <Arrow />
+        </ButtonLink>
       </div>
     </section>
   )
@@ -193,29 +204,33 @@ export async function LimitsSection() {
   const { t } = await getI18n()
   const copy = t.landing.limits
   return (
-    <section aria-labelledby="limits" className="sheet-frame mt-32">
-      <SectionHeading
-        id="limits"
-        index="5"
-        mark={copy.mark}
-        title={<Marked text={copy.title} />}
-        lead={<p>{copy.lead}</p>}
-      />
-      <div className="mt-10 grid grid-cols-12 gap-x-4 md:gap-x-6">
-        <p className="label col-span-12 border-b border-ink pb-2 text-ink md:col-span-3 md:border-b-0 md:pb-0 md:pt-5">
-          {copy.notes}
-        </p>
-        <ol className="col-span-12 md:col-span-9">
+    <section aria-labelledby="limits" className="sheet-frame mt-40">
+      <div className="grid gap-12 lg:grid-cols-12">
+        <div className="lg:col-span-5">
+          <div className="lg:sticky lg:top-28">
+            <SectionHeading
+              id="limits"
+              mark={copy.mark}
+              title={copy.title}
+              lead={<p>{copy.lead}</p>}
+              dot="var(--color-waitlisted)"
+            />
+          </div>
+        </div>
+        <ol className="grid gap-4 lg:col-span-7">
           {copy.items.map((entry, index) => (
             <li
               key={entry.limit}
-              className="grid grid-cols-[3rem_1fr] gap-x-4 border-b border-rule py-5 md:grid-cols-[3rem_16rem_1fr] md:border-t md:border-b-0 md:last:border-b md:first:border-t-ink"
+              data-spotlight
+              className="surface rise-in grid gap-4 p-6 sm:grid-cols-[4rem_1fr] sm:p-8"
             >
-              <span className="font-mono text-sm tabular text-ink-3">
-                {String(index + 1).padStart(2, '0')}.
+              <span className="wide font-display text-4xl font-bold leading-none tracking-[-0.06em] text-ink-3/60">
+                {String(index + 1).padStart(2, '0')}
               </span>
-              <p className="font-display text-xl font-semibold leading-tight">{entry.limit}</p>
-              <p className="col-start-2 mt-2 text-ink-2 md:col-start-3 md:mt-0">{entry.detail}</p>
+              <div>
+                <h3 className="text-2xl tracking-[-0.03em]">{entry.limit}</h3>
+                <p className="mt-3 text-ink-2">{entry.detail}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -224,26 +239,42 @@ export async function LimitsSection() {
   )
 }
 
-const VERIFY_COMMANDS = `git clone <repository> eventcore && cd eventcore
-pnpm install
-pnpm db:up && pnpm db:migrate && pnpm db:seed
-pnpm test`
+const VERIFY_COMMANDS = [
+  'git clone <repository> eventcore && cd eventcore',
+  'pnpm install',
+  'pnpm db:up && pnpm db:migrate && pnpm db:seed',
+  'pnpm test',
+]
 
 export async function VerifySection() {
   const { t } = await getI18n()
   const copy = t.landing.verify
   return (
-    <section aria-labelledby="verify" className="sheet-frame mt-32">
-      <div className="grid grid-cols-12 gap-x-4 gap-y-8 border-t-4 border-ink pt-10 md:gap-x-6">
-        <div className="col-span-12 md:col-span-6">
-          <p className="label text-ink-3">{copy.mark}</p>
-          <h2 id="verify" className="mt-3 text-display">
-            <Marked text={copy.title} />
-          </h2>
+    <section aria-labelledby="verify" className="relative mt-40 overflow-clip">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_60%_at_50%_40%,rgb(125_139_255/0.14),transparent_70%)]"
+      />
+      <div className="sheet-frame relative py-10">
+        <SectionHeading
+          id="verify"
+          mark={copy.mark}
+          title={copy.title}
+          lead={<p>{copy.lead}</p>}
+          align="center"
+          size="display"
+          dot="var(--color-confirmed)"
+        />
+        <div className="scale-in mx-auto mt-12 max-w-2xl">
+          <Terminal lines={VERIFY_COMMANDS} title={t.common.terminal} />
         </div>
-        <div className="col-span-12 grid content-start gap-5 md:col-span-6">
-          <p className="measure text-lg text-ink-2">{copy.lead}</p>
-          <CodeBlock code={VERIFY_COMMANDS} language="shell" title={t.common.terminal} />
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <ButtonLink href="/lab">
+            {copy.primary} <Arrow />
+          </ButtonLink>
+          <ButtonLink href="/architecture" variant="secondary">
+            {copy.secondary}
+          </ButtonLink>
         </div>
       </div>
     </section>

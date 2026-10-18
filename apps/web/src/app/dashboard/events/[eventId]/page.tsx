@@ -11,7 +11,6 @@ import { notFound } from 'next/navigation'
 import { ApiFailure } from '@/components/api-state'
 import { PersonaRequired } from '@/components/persona-required'
 import { SeatMeter } from '@/components/seat-meter'
-import { SheetBar, TitleBlock } from '@/components/sheet'
 import { EventStatusTag, RegistrationStatusTag } from '@/components/status-tag'
 import { CapacityControl, LifecycleControls } from '@/features/dashboard/event-controls'
 import { loadViewer, locateEvent } from '@/features/dashboard/organizer-data'
@@ -36,11 +35,11 @@ function Panel({
   readonly className?: string
 }) {
   return (
-    <section aria-label={title} className={`border border-ink bg-sheet ${className}`}>
-      <h2 className="label border-b border-ink px-4 py-2.5 font-mono font-medium text-ink-3">
+    <section aria-label={title} className={`surface overflow-clip ${className}`}>
+      <h2 className="label border-b border-rule px-5 py-3.5 font-mono font-medium text-ink-3">
         {title}
       </h2>
-      <div className="p-4">{children}</div>
+      <div className="p-5">{children}</div>
     </section>
   )
 }
@@ -54,13 +53,11 @@ export default async function EventPanelPage({
   if (!IdSchema.safeParse(eventId).success) notFound()
 
   const [session, { locale, t }] = await Promise.all([readSession(), getI18n()])
-  const sheet = { number: 5, title: t.sheets.eventPanel }
 
   if (!session || session.persona.kind !== 'organizer') {
     return (
       <main id="main">
-        <SheetBar sheet={sheet} />
-        <section className="sheet-frame mt-12">
+        <section className="sheet-frame mt-16">
           <PersonaRequired kind="organizer" />
         </section>
       </main>
@@ -75,8 +72,7 @@ export default async function EventPanelPage({
   if ('ok' in located) {
     return (
       <main id="main">
-        <SheetBar sheet={sheet} />
-        <section className="sheet-frame mt-12">
+        <section className="sheet-frame mt-16">
           {!located.ok ? <ApiFailure result={located} /> : null}
         </section>
       </main>
@@ -108,16 +104,15 @@ export default async function EventPanelPage({
 
   return (
     <main id="main">
-      <SheetBar sheet={{ number: 5, title: event.name }} />
-      <div className="sheet-frame mt-4">
+      <div className="sheet-frame pt-10">
         <Link
           href="/dashboard"
-          className="label inline-flex min-h-11 items-center text-ink-3 hover:text-signal"
+          className="inline-flex min-h-10 items-center gap-2 rounded-full border border-rule px-4 text-sm text-ink-2 transition-colors hover:border-[rgb(238_241_246/0.24)] hover:text-ink"
         >
-          ← {membership.organization.name}
+          <span aria-hidden>←</span> {membership.organization.name}
         </Link>
       </div>
-      <header className="sheet-frame mt-2 flex flex-wrap items-end justify-between gap-6">
+      <header className="sheet-frame mt-8 flex flex-wrap items-end justify-between gap-6">
         <div>
           <div className="flex items-center gap-3">
             <EventStatusTag status={event.status} />
@@ -142,7 +137,7 @@ export default async function EventPanelPage({
 
       <div className="sheet-frame mt-10 grid grid-cols-12 gap-4 md:gap-6">
         <Panel title={t.panel.inventory} className="col-span-12 lg:col-span-5">
-          <p className="font-display text-5xl font-semibold tabular">
+          <p className="wide font-display text-6xl font-bold leading-none tracking-[-0.06em] tabular">
             {event.inventory.confirmed}
             <span className="text-2xl text-ink-3"> / {event.inventory.capacity}</span>
           </p>
@@ -220,7 +215,7 @@ export default async function EventPanelPage({
             <div className="overflow-x-auto">
               <table className="w-full min-w-[30rem] text-left text-sm">
                 <thead>
-                  <tr className="border-b border-ink">
+                  <tr className="border-b border-rule">
                     <th scope="col" className="label py-2 pr-3 text-ink-3">
                       {t.panel.columns.participant}
                     </th>
@@ -285,7 +280,6 @@ export default async function EventPanelPage({
           )}
         </Panel>
       </div>
-      <TitleBlock sheet={sheet} />
     </main>
   )
 }

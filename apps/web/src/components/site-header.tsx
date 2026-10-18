@@ -6,6 +6,8 @@ import { demoSigningAvailable, readSession } from '@/lib/session'
 import { BrandMark } from './brand-mark'
 import { PersonaSwitcher } from './persona-switcher'
 
+const isActive = (path: string, href: string) => path === href || path.startsWith(`${href}/`)
+
 export async function SiteHeader() {
   const [{ locale, t }, session, requestHeaders] = await Promise.all([
     getI18n(),
@@ -15,99 +17,84 @@ export async function SiteHeader() {
   const returnTo = requestHeaders.get('x-eventcore-path') ?? '/'
   const { path } = splitLocale(returnTo.split('?')[0] ?? '/')
   const query = returnTo.includes('?') ? returnTo.slice(returnTo.indexOf('?')) : ''
-  const navigation = [
-    { href: '/explore', label: t.nav.board, sheet: '02' },
-    { href: '/lab', label: t.nav.lab, sheet: '04' },
-    { href: '/architecture', label: t.nav.architecture, sheet: '06' },
-    { href: '/api-docs', label: t.nav.api, sheet: '06' },
-  ]
   const personal =
     session?.persona.kind === 'organizer'
-      ? { href: '/dashboard', label: t.nav.dashboard, sheet: '05' }
+      ? { href: '/dashboard', label: t.nav.dashboard }
       : session
-        ? { href: '/me/registrations', label: t.nav.myRegistrations, sheet: '03' }
+        ? { href: '/me/registrations', label: t.nav.myRegistrations }
         : null
+  const navigation = [
+    { href: '/explore', label: t.nav.board },
+    { href: '/lab', label: t.nav.lab },
+    { href: '/architecture', label: t.nav.architecture },
+    { href: '/api-docs', label: t.nav.api },
+    ...(personal ? [personal] : []),
+  ]
+  const linkClass =
+    'flex min-h-9 shrink-0 items-center rounded-full px-3.5 text-sm text-ink-2 transition-colors duration-200 hover:bg-[rgb(238_241_246/0.06)] hover:text-ink aria-[current=page]:bg-[rgb(238_241_246/0.1)] aria-[current=page]:text-ink'
 
   return (
-    <header
-      data-site-header
-      className="sticky top-0 z-20 border-b border-ink bg-paper/95 backdrop-blur-md"
-    >
+    <header data-site-header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
       <a
         href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:text-paper"
+        className="sr-only rounded-full focus:not-sr-only focus:absolute focus:left-6 focus:top-6 focus:z-50 focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
       >
         {t.common.skipToContent}
       </a>
-      <div className="sheet-frame flex min-h-16 items-center gap-4">
-        <Link href="/" className="flex items-center gap-2.5 font-display text-xl font-semibold">
+      <div className="glass mx-auto flex h-14 max-w-[82.5rem] items-center gap-2 rounded-full pl-4 pr-2 sm:pl-5">
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2.5 font-display text-[1.05rem] font-semibold tracking-[-0.02em] font-stretch-115%"
+        >
           <BrandMark />
           <span>EventCore</span>
         </Link>
-        <nav aria-label={t.nav.primary} className="ml-auto hidden items-center gap-1 md:flex">
+        <nav aria-label={t.nav.primary} className="ml-auto hidden items-center gap-0.5 md:flex">
           {navigation.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="group flex min-h-11 items-center gap-2 rounded-xs px-3 text-sm hover:bg-ink hover:text-paper"
+              aria-current={isActive(path, item.href) ? 'page' : undefined}
+              className={linkClass}
             >
-              <span className="label text-ink-3 group-hover:text-paper/60">{item.sheet}</span>
               {item.label}
             </Link>
           ))}
-          {personal ? (
-            <Link
-              href={personal.href}
-              className="flex min-h-11 items-center rounded-xs px-3 text-sm font-medium underline hover:bg-ink hover:text-paper"
-            >
-              {personal.label}
-            </Link>
-          ) : null}
         </nav>
         <nav
           aria-label={t.nav.language}
-          className="ml-auto flex items-center font-mono text-xs md:ml-2"
+          className="ml-auto flex items-center rounded-full border border-rule p-0.5 font-mono text-[0.7rem] md:ml-2"
         >
-          {LOCALES.map((candidate, index) => (
-            <span key={candidate} className="flex items-center">
-              {index > 0 ? (
-                <span aria-hidden className="px-0.5 text-ink-3">
-                  /
-                </span>
-              ) : null}
-              <a
-                href={`${localePath(candidate, path)}${query}`}
-                hrefLang={candidate}
-                lang={candidate}
-                aria-label={LOCALE_NAMES[candidate].long}
-                aria-current={candidate === locale ? 'true' : undefined}
-                className="flex min-h-11 min-w-8 items-center justify-center rounded-xs text-ink-3 hover:text-ink aria-[current=true]:font-medium aria-[current=true]:text-ink"
-              >
-                {LOCALE_NAMES[candidate].short}
-              </a>
-            </span>
+          {LOCALES.map((candidate) => (
+            <a
+              key={candidate}
+              href={`${localePath(candidate, path)}${query}`}
+              hrefLang={candidate}
+              lang={candidate}
+              aria-current={candidate === locale ? 'true' : undefined}
+              className="flex min-h-8 min-w-9 items-center justify-center rounded-full text-ink-3 transition-colors hover:text-ink aria-current:bg-ink aria-current:text-paper"
+            >
+              {LOCALE_NAMES[candidate].short}
+              <span className="sr-only"> · {LOCALE_NAMES[candidate].long}</span>
+            </a>
           ))}
         </nav>
-        <div>
-          <PersonaSwitcher
-            session={session}
-            available={demoSigningAvailable()}
-            returnTo={returnTo}
-          />
-        </div>
+        <PersonaSwitcher session={session} available={demoSigningAvailable()} returnTo={returnTo} />
       </div>
-      <nav aria-label={t.nav.compact} className="border-t border-rule md:hidden">
-        <div className="sheet-frame flex gap-1 overflow-x-auto py-1 [scrollbar-width:none]">
-          {[...navigation, ...(personal ? [personal] : [])].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex min-h-11 shrink-0 items-center rounded-xs px-3 text-sm hover:bg-ink hover:text-paper"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </div>
+      <nav
+        aria-label={t.nav.compact}
+        className="glass mx-auto mt-2 flex max-w-[82.5rem] gap-0.5 overflow-x-auto rounded-full p-1 [scrollbar-width:none] md:hidden"
+      >
+        {navigation.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={isActive(path, item.href) ? 'page' : undefined}
+            className={linkClass}
+          >
+            {item.label}
+          </Link>
+        ))}
       </nav>
     </header>
   )

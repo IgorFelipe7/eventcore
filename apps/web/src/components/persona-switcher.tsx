@@ -31,10 +31,8 @@ export async function PersonaSwitcher({
 
   return (
     <details className="group relative">
-      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-xs border border-ink px-3 text-sm marker:hidden hover:bg-ink hover:text-paper [&::-webkit-details-marker]:hidden">
-        <span className="label text-ink-3 group-hover:text-paper/70 max-sm:sr-only">
-          {t.persona.actingAs}
-        </span>
+      <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 rounded-full bg-[rgb(238_241_246/0.06)] px-3.5 text-sm transition-colors marker:hidden hover:bg-[rgb(238_241_246/0.12)] group-open:bg-[rgb(238_241_246/0.12)] [&::-webkit-details-marker]:hidden">
+        <span className="label text-ink-3 max-sm:sr-only">{t.persona.actingAs}</span>
         <span className="max-w-36 truncate font-medium">
           {session ? name(session.persona.displayName) : t.persona.nobody}
         </span>
@@ -42,11 +40,11 @@ export async function PersonaSwitcher({
           ▾
         </span>
       </summary>
-      <div className="absolute right-0 z-30 mt-2 w-[min(20rem,calc(100vw-2rem))] border border-ink bg-sheet p-2 shadow-[6px_6px_0_0_var(--color-ink)]">
-        <p className="px-2 pb-2 pt-1 text-xs text-ink-2">{t.persona.intro}</p>
+      <div className="glass absolute right-0 z-30 mt-3 w-[min(21rem,calc(100vw-2rem))] origin-top-right animate-rise rounded-3xl p-2">
+        <p className="px-3 pb-3 pt-2 text-xs leading-relaxed text-ink-3">{t.persona.intro}</p>
         {groups.map((group) => (
-          <div key={group.title} className="border-t border-rule pt-1">
-            <p className="label px-2 py-1.5 text-ink-3">{group.title}</p>
+          <div key={group.title} className="border-t border-rule pt-1.5">
+            <p className="label px-3 py-1.5 text-ink-3">{group.title}</p>
             {group.personas.map((persona) => {
               const active = session?.persona.externalAuthId === persona.externalAuthId
               return (
@@ -56,7 +54,7 @@ export async function PersonaSwitcher({
                   <button
                     type="submit"
                     aria-current={active ? 'true' : undefined}
-                    className="flex min-h-10 w-full items-center justify-between gap-3 rounded-xs px-2 text-left text-sm hover:bg-ink hover:text-paper aria-[current=true]:bg-signal-wash"
+                    className="flex min-h-10 w-full items-center justify-between gap-3 rounded-2xl px-3 text-left text-sm transition-colors hover:bg-[rgb(238_241_246/0.08)] aria-current:bg-signal-wash"
                   >
                     <span>
                       {name(persona.displayName)}{' '}
@@ -64,7 +62,7 @@ export async function PersonaSwitcher({
                         ({t.persona.roles[persona.externalAuthId] ?? persona.kind})
                       </span>
                     </span>
-                    {active ? <span className="label">{t.persona.active}</span> : null}
+                    {active ? <span className="label text-signal">{t.persona.active}</span> : null}
                   </button>
                 </form>
               )
@@ -72,11 +70,11 @@ export async function PersonaSwitcher({
           </div>
         ))}
         {session ? (
-          <form action={stopActing} className="mt-1 border-t border-rule pt-1">
+          <form action={stopActing} className="mt-1.5 border-t border-rule pt-1.5">
             <input type="hidden" name="returnTo" value={returnTo} />
             <button
               type="submit"
-              className="min-h-10 w-full rounded-xs px-2 text-left text-sm text-ink-2 hover:bg-ink hover:text-paper"
+              className="min-h-10 w-full rounded-2xl px-3 text-left text-sm text-ink-2 transition-colors hover:bg-[rgb(238_241_246/0.08)] hover:text-ink"
             >
               {t.persona.stop}
             </button>

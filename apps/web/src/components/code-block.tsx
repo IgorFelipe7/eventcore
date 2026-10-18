@@ -16,7 +16,10 @@ const highlightSql = (line: string, prefix = 's'): ReactNode[] => {
     const [before = '', after = ''] = line.split(lock)
     return [
       ...highlightSql(before, `${prefix}b`),
-      <mark key={`${prefix}-lock`} className="bg-signal px-0.5 text-white">
+      <mark
+        key={`${prefix}-lock`}
+        className="rounded-md bg-signal-wash px-1 text-signal shadow-[0_0_0_1px_rgb(125_139_255/0.35)]"
+      >
         {lock}
       </mark>,
       ...highlightSql(after, `${prefix}a`),
@@ -57,23 +60,26 @@ export function CodeBlock({
   const { t } = useI18n()
   const lines = code.replace(/\n$/, '').split('\n')
   return (
-    <div className="min-w-0 border border-ink bg-sheet">
+    <div className="surface min-w-0 overflow-clip">
       {title ? (
-        <div className="flex items-center justify-between border-b border-rule px-3 py-2">
-          <span className="label text-ink-3">{title}</span>
-          <span className="label text-ink-3">{language}</span>
+        <div className="flex items-center justify-between gap-3 border-b border-rule px-4 py-2.5">
+          <span className="label text-ink-2">{title}</span>
+          <span className="label rounded-full border border-rule px-2 py-0.5 text-ink-3">
+            {language}
+          </span>
         </div>
       ) : null}
       <pre
         tabIndex={wrap ? undefined : 0}
         aria-label={wrap ? undefined : t.common.scrollableCode(title ?? language)}
-        className={`py-3 font-mono text-[0.8125rem] leading-6 text-ink-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'}`}
+        className={`py-3.5 font-mono text-[0.8125rem] leading-6 text-ink-2 ${wrap ? 'whitespace-pre-wrap break-words' : 'overflow-x-auto'}`}
       >
         <code>
           {lines.map((line, index) => (
             <span
               key={index}
-              className={`grid grid-cols-[2.5rem_1fr] pr-4 ${highlight.includes(index + 1) ? 'bg-signal-wash' : ''}`}
+              data-line={index + 1}
+              className={`relative grid grid-cols-[2.75rem_1fr] pr-4 transition-colors duration-500 ${highlight.includes(index + 1) ? 'bg-signal-wash before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:bg-signal before:shadow-[0_0_12px_var(--color-signal)]' : ''}`}
             >
               <span aria-hidden className="select-none pr-3 text-right text-ink-3 tabular">
                 {index + 1}

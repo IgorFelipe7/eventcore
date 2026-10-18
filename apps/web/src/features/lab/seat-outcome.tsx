@@ -23,12 +23,12 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
           return (
             <span
               key={index}
-              className={`${size} rounded-[1px] border ${
+              className={`${size} rounded-[30%] border ${
                 !withinCapacity
                   ? 'border-rejected bg-rejected-wash [background-image:repeating-linear-gradient(135deg,var(--color-rejected)_0_1px,transparent_1px_4px)]'
                   : taken
-                    ? 'border-ink bg-ink'
-                    : 'border-ink-3/60'
+                    ? 'border-transparent bg-ink/80'
+                    : 'border-rule'
               }`}
             />
           )
@@ -36,7 +36,7 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
       </div>
       <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs tabular">
         <div className="flex items-center gap-2">
-          <span aria-hidden className="size-3 rounded-[1px] bg-ink" />
+          <span aria-hidden className="size-3 rounded-[30%] bg-ink/80" />
           <dt className="text-ink-3">{t.lab.outcome.confirmed}</dt>
           <dd className="text-ink">{Math.min(confirmedRows, capacity)}</dd>
         </div>
@@ -44,7 +44,7 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
           <div className="flex items-center gap-2">
             <span
               aria-hidden
-              className="size-3 rounded-[1px] border border-rejected bg-rejected-wash"
+              className="size-3 rounded-[30%] border border-rejected bg-rejected-wash"
             />
             <dt className="text-rejected">{t.lab.outcome.overbooked}</dt>
             <dd className="font-medium text-rejected">{overbooked}</dd>
@@ -53,7 +53,7 @@ export function SeatOutcome({ variant }: { readonly variant: LabVariant }) {
         <div className="flex items-center gap-2">
           <span
             aria-hidden
-            className="size-3 rounded-[1px] border border-waitlisted bg-waitlisted-wash"
+            className="size-3 rounded-[30%] border border-waitlisted bg-waitlisted-wash"
           />
           <dt className="text-ink-3">{t.lab.outcome.waitlisted}</dt>
           <dd className="text-ink">{waitlistedRows}</dd>

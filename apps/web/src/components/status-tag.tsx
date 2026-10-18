@@ -18,7 +18,7 @@ const eventStyles: Record<EventStatus, { glyph: string; tone: string }> = {
 }
 
 const base =
-  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-xs px-2 py-0.5 font-mono text-xs font-medium tabular'
+  'inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-current/20 px-2.5 py-0.5 font-mono text-xs font-medium tabular'
 
 export function RegistrationStatusTag({
   status,

@@ -1,65 +1,61 @@
 @theme {
-  --color-paper: #eceeea;
-  --color-sheet: #f7f8f5;
-  --color-ink: #0f1412;
-  --color-ink-2: #444c47;
-  --color-ink-3: #5f6762;
-  --color-rule: #c9cec7;
-  --color-rule-soft: #dde1dc;
-  --color-signal: #2536e0;
-  --color-signal-wash: #e4e7fb;
-  --color-confirmed: #0b6a47;
-  --color-confirmed-wash: #dcefe5;
-  --color-waitlisted: #8a5800;
-  --color-waitlisted-wash: #f6ead4;
-  --color-rejected: #a42a1d;
-  --color-rejected-wash: #f6dedb;
-  --color-cancelled: #5a615c;
+  --color-paper: #07090c;
+  --color-sheet: #0d1117;
+  --color-ink: #eef1f6;
+  --color-ink-2: #b4bcc8;
+  --color-ink-3: #8a93a1;
+  --color-rule: rgb(238 241 246 / 0.09);
+  --color-rule-soft: rgb(238 241 246 / 0.05);
+  --color-signal: #7d8bff;
+  --color-signal-wash: rgb(125 139 255 / 0.12);
+  --color-confirmed: #3dd68c;
+  --color-confirmed-wash: rgb(61 214 140 / 0.12);
+  --color-waitlisted: #f2b84b;
+  --color-waitlisted-wash: rgb(242 184 75 / 0.12);
+  --color-rejected: #ff6b5e;
+  --color-rejected-wash: rgb(255 107 94 / 0.12);
+  --color-cancelled: #7d8696;
 
   --color-night: #07090c;
-  --color-night-2: #0e1218;
+  --color-night-2: #0d1117;
   --color-night-3: #161b23;
-  --color-night-ink: #e9edf3;
-  --color-night-muted: #8c95a3;
+  --color-night-ink: #eef1f6;
+  --color-night-muted: #8a93a1;
   --color-night-faint: #5d6573;
-  --color-night-line: rgb(233 237 243 / 0.1);
-  --color-signal-glow: #6b7bff;
+  --color-night-line: rgb(238 241 246 / 0.09);
+  --color-signal-glow: #7d8bff;
   --color-confirmed-glow: #3dd68c;
   --color-waitlisted-glow: #f2b84b;
   --color-rejected-glow: #ff6b5e;
 
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-plex-condensed), var(--font-plex-sans), ui-sans-serif, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --font-sans: var(--font-mona), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-mona), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
 
   --text-label: 0.6875rem;
-  --text-label--letter-spacing: 0.08em;
-  --text-display: clamp(2.5rem, 1.6rem + 4.6vw, 5.5rem);
-  --text-display--line-height: 0.95;
-  --text-display--letter-spacing: -0.03em;
-  --text-heading: clamp(1.75rem, 1.2rem + 2.2vw, 3.25rem);
-  --text-heading--line-height: 0.98;
-  --text-heading--letter-spacing: -0.025em;
-  --text-hero: clamp(2.75rem, 1.4rem + 5.2vw, 7.25rem);
-  --text-hero--line-height: 0.88;
-  --text-hero--letter-spacing: -0.035em;
+  --text-label--letter-spacing: 0.06em;
+  --text-display: clamp(2.75rem, 1.5rem + 5vw, 6.25rem);
+  --text-display--line-height: 0.92;
+  --text-display--letter-spacing: -0.045em;
+  --text-heading: clamp(2.25rem, 1.35rem + 3.4vw, 4.75rem);
+  --text-heading--line-height: 0.95;
+  --text-heading--letter-spacing: -0.042em;
+  --text-hero: clamp(3rem, 1.2rem + 6.2vw, 7.75rem);
+  --text-hero--line-height: 0.9;
+  --text-hero--letter-spacing: -0.05em;
 
   --breakpoint-xs: 26rem;
 
   --ease-sheet: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --animate-draw: draw 500ms var(--ease-sheet) both;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --animate-flash: flash 900ms ease-out;
   --animate-ledger: ledger 70s linear infinite;
-  --animate-rise: rise 700ms var(--ease-sheet) both;
-
-  @keyframes draw {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
-  }
+  --animate-rise: rise 800ms var(--ease-out-expo) both;
+  --animate-caret: caret 1s steps(1) infinite;
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-expo) infinite;
 
   @keyframes ledger {
     from {
@@ -74,16 +70,44 @@
     from {
       opacity: 0;
       transform: translateY(0.6em);
+      filter: blur(8px);
     }
     to {
       opacity: 1;
       transform: none;
+      filter: none;
     }
   }
 
   @keyframes flash {
     from {
       background-color: var(--color-signal-wash);
+    }
+  }
+
+  @keyframes sheen {
+    from {
+      background-position: 120% 0;
+    }
+    to {
+      background-position: -120% 0;
+    }
+  }
+
+  @keyframes caret {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes pulse-ring {
+    from {
+      transform: scale(0.6);
+      opacity: 0.9;
+    }
+    to {
+      transform: scale(2.4);
+      opacity: 0;
     }
   }
 }
