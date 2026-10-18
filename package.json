@@ -1,6 +1,6 @@
 {
   "name": "eventcore",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Capacity-limited event reservations that stay correct under concurrent pressure.",
   "license": "MIT",

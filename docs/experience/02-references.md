@@ -1,8 +1,54 @@
 # 02 · References
 
-Revision B is benchmarked against three groups: Awwwards Sites of the Year, the strongest product sites in developer infrastructure, and the best-designed event platforms. Every site was opened in Chromium at 1440 × 900 on 2026-10-13; type, colour and runtime facts below were read from computed styles, loaded font faces and the DOM, not guessed from screenshots.
+## Revision D · component by component
 
-## Extracted design systems
+Revision B's hero survived review; everything around it did not. Reviewers called the reading pages boxy, generic and dated: square ruled tables, IBM Plex everywhere, mono labels with `//` prefixes, a serif italic accent that reads as a template. Revision D keeps the hall and rebuilds every other component against the strongest dark product sites, measured the same way as before: each site opened in Chromium at 1440 × 900 on 2026-10-18 and read from computed styles, not screenshots.
+
+### What the best dark product sites actually do
+
+| Site | Ground | Display type (computed) | Surfaces (computed) | Radii in use | Signature |
+|---|---|---|---|---|---|
+| **Linear** | `#08090A` | Inter Variable 510, 64/64 px, −1.408 px; second heading in muted `#8A8F98` | `#101112` cards, 1 px `rgba(255,255,255,.08)`, radial glow `rgba(255,255,255,.04)` behind sections | 12 px (×25), 8, 16, 22 | Two-tone headings: a bright clause and a muted continuation |
+| **Raycast** | `#07080A` | Inter 600, 64/70 px | Glass: `rgba(0,0,0,.44)`, `blur(2px)`, 1 px `rgba(255,255,255,.08)`, **inset `0 .5px 0 rgba(255,255,255,.3)`** top highlight; menus at `blur(36px)` | 20 px (×35), 12, 11 | The lit top edge on every surface; a coloured radial bloom at the top of cards |
+| **Resend** | `#000` | Domaine serif 96 px for the hero, ABC Favorit 56 px at **−5 %** for sections | Transparent cards, 1 px `rgba(214,235,253,.19)`, radial highlight at the top edge | 24 px (×10), 16 (×33) | Large radii and a single soft highlight per card |
+| **Basement** | `#000` | Geist 600, 87/78 px at **−4 %** (leading 0.9) | None: type and media only | — | Display type tight enough to read as an image |
+| **Clerk** | `#F7F7F8` | Geist 700, 56/64 px at −3.5 % | White cards with layered hairline shadows | 8, 12, 16 | Product UI shown as components, not screenshots |
+| **Lusion** (SOTY 2023) | `#FFF` | Aeonik 400 | Rounded viewport window around WebGL | 15 px | Pill buttons with 74 px radius |
+| **Lando Norris** (SOTY 2025, from revision B) | Off-white → olive | **Mona Sans** 700 | — | — | A variable grotesque used at extreme width |
+
+Common ground across all of them: a near-black between `#000` and `#08090A`; 1 px borders at 8–19 % white; radii of 12–24 px on cards and full capsules on buttons; display tracking between −2 % and −5 %; a muted second tone in headings; light that comes from one edge of a surface, never a full gradient fill.
+
+### Decisions per component
+
+| Component | Reference | Taken | Left behind |
+|---|---|---|---|
+| Ground and grain | Linear `#08090A`, Raycast `#07080A` | `#07090C`, the same night as the hall, plus a 4.5 % grain so large dark areas do not band | Their exact palettes |
+| Display type | Basement −4 %, Resend −5 %, Lando's Mona Sans | **Mona Sans** at 112–125 % width, weight 650–700, −4.2 to −5 % tracking, leading 0.9 | Geist, Favorit, Domaine (licences or ubiquity) |
+| Keyword | Linear's two-tone heading | One bracketed word per headline in the signal colour with a soft glow; the rest in ink | Serif italic accents (template tell) |
+| Cards | Raycast inset highlight, Resend radius, Linear hairline | `surface`: 20 px radius, 9 % border, inset 1 px top light, faint vertical gradient, long shadow | Their colours and shadow stacks |
+| Hover | Linear's cursor spotlight (studied through its imitators) | `[data-spotlight]`: one delegated pointer listener sets `--spot-x/y`; a 420 px inner glow and a masked 260 px border glow | Per-card listeners, neighbour glow |
+| Header | Raycast and Linear floating navigation | Glass capsule detached from the edges, active page as a filled pill, language as a segmented control | Mega-menus |
+| Buttons | Lusion and Linear capsules | Ink capsule with a signal halo; glass secondary; arrow nudge on hover | — |
+| Section marks | Linear and Resend eyebrows | Pill with a glowing dot whose colour states the section's tone (red for failures, amber for limits, green for proof) | Numbered drafting markers from revision C |
+| Code | Resend's code panels | Surface with a title bar and a language chip, lock clauses as signal chips, a glowing rule on highlighted lines | Window-chrome dots |
+| Scrollytelling | Apple-style sticky storytelling and code walkthroughs | Nine transaction steps scroll past a sticky SQL panel that highlights the lines of the active step | Scroll hijacking |
+| Proof | Stripe's live counter (revision B) | Counters that count to recorded values, and a field of the 100 recorded requests that lights in recorded order | Anything that looks live |
+| Closing | Basement and Resend oversized type | A centred display heading, a typed terminal, and a 12.4 vw wordmark fading into the floor glow | — |
+
+### Rejected in revision D
+
+| Seen | Why not here |
+|---|---|
+| Lenis smooth scroll | Same reason as revision B; the hall eases its own progress. |
+| Bento grids | The most repeated layout of 2024–2026 landing pages; the content here is sequential, not a catalogue. |
+| Gradient text on headings | Kept only for the footer wordmark, where it is a texture rather than a message. |
+| Custom cursors | Interfere with text selection and assistive technology. |
+
+## Revision B benchmark, kept for the record
+
+Revision B was benchmarked against three groups: Awwwards Sites of the Year, the strongest product sites in developer infrastructure, and the best-designed event platforms. Every site was opened in Chromium at 1440 × 900 on 2026-10-13; type, colour and runtime facts below were read from computed styles, loaded font faces and the DOM, not guessed from screenshots.
+
+### Extracted design systems
 
 | Site | Recognition | Display type (computed) | Body / labels | Ground and ink | Signature device | Runtime |
 |---|---|---|---|---|---|---|
@@ -18,7 +64,7 @@ Revision B is benchmarked against three groups: Awwwards Sites of the Year, the 
 | **DICE** | Event-platform reference | **Foggy**, ultra-condensed, 106 px on an 88 px line (0.83), all caps | Favorit 18 px 350 | Black and white only; one yellow "Book now" | The ticket and the phone as the product | Next.js |
 | **Opal** | Product storytelling reference | Die Grotesk C, centred editorial column | Die Grotesk 21 px | Black over a top-down photograph of real objects | "The table": the whole archive of products as a scene | One canvas |
 
-## Principles extracted
+### Principles extracted
 
 Each principle is stated without the reference's colours, fonts or layout, then translated for EventCore.
 
@@ -33,7 +79,7 @@ Each principle is stated without the reference's colours, fonts or layout, then 
 | P7 | **Frame the page with visible structure.** | Stripe's column guides, Lusion's `+` marks | Faint column guides and registration crosses on the sheets, continuing the drawing-set language. | — |
 | P8 | **Restraint is a credibility device.** | PlanetScale, Linear | Effects stay in the hero and the Lab; reading sections remain quiet, mono-led and fast. | — |
 
-## Deliberately rejected
+### Deliberately rejected
 
 | Seen | Why not here |
 |---|---|

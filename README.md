@@ -2,9 +2,11 @@
 
 **Two requests. One seat. Exactly one confirmation.**
 
-EventCore is a reservation engine for events with limited seats. Every decision for an event is serialized on a single PostgreSQL row, so capacity holds under concurrent load, retries never book twice, the waitlist keeps its order, and one organization can never see another's data. Every one of those claims has a test that runs against a real database — and a recorded run you can open in the browser.
+[Português (Brasil)](README.pt-BR.md)
 
-![Sheet 01: the last-seat figure, with request A holding the inventory row lock while B waits](docs/media/sheet-01-last-seat.png)
+EventCore is a reservation engine for events with limited seats. Every decision for an event is serialized on a single PostgreSQL row, so capacity holds under concurrent load, retries never book twice, the waitlist keeps its order, and one organization can never see another's data. Each of those claims has a test that runs against a real database and a recorded run you can replay in the browser, in English or Portuguese.
+
+![The hall: request A holds the lock on the last seat while B waits](docs/media/hero.png)
 
 ## The result, recorded
 
@@ -15,11 +17,13 @@ Same load, same database, two implementations. 100 concurrent registrations for 
 | Naive check-then-insert, no lock | **90 for 10 seats** | 0 | capacity ✗ · counter ✗ |
 | EventCore | **10** | 90, positions 1–90 without gaps | all pass |
 
+![The proof section: counters and the 100 recorded requests lighting up in decision order](docs/media/proof.png)
+
 The other recorded scenarios, all passing every invariant check:
 
 | # | Scenario | Outcome |
 |---|---|---|
-| 01 | Two people, one seat — then 30 more rounds | One confirmed, one first in line, in all 31 races |
+| 01 | Two people, one seat, then 30 more rounds | One confirmed, one first in line, in all 31 races |
 | 03 | Ten identical clicks with one idempotency key | One decision, nine replays, one distinct answer |
 | 04 | The server commits, the client never hears back, then retries | The retry gets the original confirmation, byte for byte |
 | 05 | Ten cancellations race twenty newcomers | The first ten in line were promoted; no newcomer overtook the queue |
@@ -40,11 +44,11 @@ pnpm db:up && pnpm db:migrate && pnpm db:seed
 pnpm dev                    # web on :3000, API on :4000, worker
 ```
 
-Then open <http://localhost:3000>, choose a demo persona under **Acting as**, and race for *The Last Seat*. Swagger UI is at <http://localhost:4000/docs>.
+Open <http://localhost:3000> (or <http://localhost:3000/pt-br>), choose a demo persona under **Acting as**, and race for *The Last Seat*. Swagger UI is at <http://localhost:4000/docs>.
 
 ```bash
-pnpm test                   # 101 tests in 18 files, against a disposable PostgreSQL 18
-pnpm test:e2e               # 11 Playwright tests: the participant journey, axe WCAG 2.2 AA, 360 px
+pnpm test                   # 115 tests in 20 files, against a disposable PostgreSQL 18
+pnpm test:e2e               # 11 Playwright tests: journeys, axe WCAG 2.2 AA, 360 px, keyboard
 pnpm lab:record             # re-record the Lab; fails if a safe scenario breaks an invariant
 ```
 
@@ -62,14 +66,32 @@ request ─ verify token ─ resolve membership ─ validate
         └─ worker relays the outbox, at least once, deduplicated
 ```
 
+![The mechanism walkthrough: the step in focus highlights its SQL lines](docs/media/mechanism.png)
+
 | Decision | Why | Record |
 |---|---|---|
 | Modular monolith | The hard rule is one synchronous decision; splitting it would turn a transaction into a protocol. | [ADR 0001](docs/adr/0001-modular-monolith.md) |
-| Row lock on `event_inventory` under `READ COMMITTED` | Expresses "queue exists, so a newcomer waits" atomically; no retry storms; FIFO kept. `SKIP LOCKED` is used only for the outbox. | [ADR 0002](docs/adr/0002-postgres-capacity-lock.md) |
+| Row lock on `event_inventory` under `READ COMMITTED` | Expresses "a queue exists, so a newcomer waits" atomically; no retry storms; FIFO kept. `SKIP LOCKED` is used only for the outbox. | [ADR 0002](docs/adr/0002-postgres-capacity-lock.md) |
 | Idempotency key committed with the effect | A concurrent duplicate waits on the unique index and reads the committed answer; nothing to poll. | [ADR 0003](docs/adr/0003-idempotency-contract.md) |
 | Transactional outbox | The notification exists only if the change does; delivery is retried and deduplicated. | [ADR 0004](docs/adr/0004-transactional-outbox.md) |
 
-The eight invariants (I1–I8), each with the layer that enforces it and the test that tries to break it, are in [`docs/00-vision.md`](docs/00-vision.md) and on Sheet 01 of the web app.
+The eight invariants (I1–I8), each with the layer that enforces it and the test that tries to break it, are in [`docs/00-vision.md`](docs/00-vision.md) and on the landing page.
+
+## The web experience
+
+The site opens inside a small hall rendered with three.js: 24 seats drawn as a hidden-line model, one glowing seat left, and two requests racing for it as you scroll. The lock closes around the seat like a CAD selection box, one request is confirmed, the other drops into the queue. Everything after the hall stays in that same light: glass surfaces, Mona Sans at expanded widths, one glowing keyword per headline, and motion only where a recorded fact can be replayed. A sticky walkthrough highlights the SQL of each transaction step, the 100 recorded requests light up in the order the database decided them, and the Lab replays every run with its timings.
+
+| | |
+|---|---|
+| ![Fig. 1 autoplays the algorithm step by step](docs/media/last-seat.png) | ![The Reliability Lab in Portuguese, naive baseline next to EventCore](docs/media/lab-pt-br.png) |
+
+The research behind the design (measured CSS of Linear, Raycast, Resend, Basement, Clerk, Lusion and earlier Awwwards winners), the concept and the design system are in [`docs/experience`](docs/experience) and [`DESIGN.md`](DESIGN.md). On the production build the full landing scrolls at 142.6 fps on a 144 Hz display with no frame over 33 ms, and with 4× CPU throttling keeps p99 under 28 ms; Lighthouse reports 100 for accessibility, best practices and SEO. Every measurement and every defect found along the way is in [`docs/experience/09-validation.md`](docs/experience/09-validation.md).
+
+<img src="docs/media/mobile-pt-br.png" alt="The hall on a phone, in Portuguese" width="300" />
+
+## Two languages
+
+English is served at the root and Brazilian Portuguese under `/pt-br`, from the same routes. The Portuguese dictionary is typed against the English one, recorded Lab sentences are translated by pattern so measured numbers survive a re-recording, and tests keep both in step. See [`docs/localization.md`](docs/localization.md).
 
 ## Repository
 
@@ -77,24 +99,16 @@ The eight invariants (I1–I8), each with the layer that enforces it and the tes
 apps/
   api/        Fastify 5 · application services, HTTP adapters, problem details, metrics
   worker/     Outbox relay, backoff, dead letters, integrity sweep
-  web/        Next.js 16 · React 19 · Tailwind 4 · the Proof Sheet experience
+  web/        Next.js 16 · React 19 · Tailwind 4 · three.js · the hall, the Lab, en and pt-BR
 packages/
-  domain/     Rules and transition tables — no framework, ORM or driver imports
+  domain/     Rules and transition tables, with no framework, ORM or driver imports
   contracts/  Zod schemas shared by API, web and the Lab recorder
   db/         Drizzle schema, reviewed SQL migrations, explicit-SQL repositories
   auth/       JWT verification and demo-token signing
 tests/        Integration, concurrency, security, resilience, e2e, Lab recorder, k6 script
-docs/         Vision, ADRs, state machine, data model, threat model, runbooks, experience docs
+docs/         Vision, ADRs, state machine, data model, threat model, runbooks, localization, experience
 infra/        Docker Compose and the API and worker images
 ```
-
-## The web experience
-
-The interface treats the product as an engineering drawing set: every page is a sheet with a title block, every claim has a figure number and points at the test that proves it, and one signal colour marks only the contested seat, the lock and focus. The concept, the alternatives that were discarded, the copy and the design system were decided before any page was built — see [`docs/experience`](docs/experience) and [`DESIGN.md`](DESIGN.md). Lighthouse on the production build scored 100 for accessibility, best practices and SEO on `/`, `/explore` and `/lab`; the measurements and every finding fixed along the way are in [`docs/experience/09-validation.md`](docs/experience/09-validation.md).
-
-| | |
-|---|---|
-| ![Sheet 04: the Reliability Lab comparing 90 naive confirmations with 10](docs/media/sheet-04-lab.png) | ![Sheet 02: the event board with live seat meters](docs/media/sheet-02-board.png) |
 
 ## Known limits
 
@@ -105,7 +119,7 @@ The interface treats the product as an engineering drawing set: every page is a 
 
 ## Documentation
 
-[Vision](docs/00-vision.md) · [State machine](docs/domain-state-machine.md) · [Data model](docs/data-model.md) · [API contract](docs/api-contract.md) · [Threat model](docs/threat-model.md) · [Testing methodology](docs/testing-methodology.md) · [Runbooks](docs/runbooks.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
+[Vision](docs/00-vision.md) · [State machine](docs/domain-state-machine.md) · [Data model](docs/data-model.md) · [API contract](docs/api-contract.md) · [Threat model](docs/threat-model.md) · [Testing methodology](docs/testing-methodology.md) · [Runbooks](docs/runbooks.md) · [Localization](docs/localization.md) · [Design system](DESIGN.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
 
 ## License
 

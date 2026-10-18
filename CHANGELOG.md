@@ -2,6 +2,24 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [0.2.0] · 2026-10-18
+
+### Added
+
+- Brazilian Portuguese for every page under `/pt-br`, with typed dictionaries, translated API problems and pattern-based translation of recorded Lab runs.
+- The landing opens inside a three.js hall where two requests race for the last seat; a server-rendered poster covers no-WebGL and reduced motion.
+- Mechanism walkthrough that highlights the SQL of each transaction step, a field of the 100 recorded requests, recorded counters and a typed terminal.
+- Registration receipts issued as tickets.
+
+### Changed
+
+- One dark design system for every page: Mona Sans and Geist Mono, glass surfaces with a cursor spotlight, scroll-driven reveals.
+- The drafting-sheet furniture (sheet bars, title blocks, registration marks) is gone.
+
+### Fixed
+
+- Reveals frozen by `overflow: hidden` ancestors, horizontal overflow at 360 px, contrast of inactive steps, relative `hreflang` alternates.
+
 ## [0.1.0] · 2026-10-11
 
 ### Added
