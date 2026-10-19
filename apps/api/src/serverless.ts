@@ -7,6 +7,8 @@ const config = loadConfig()
 const database = createDatabase(config.databaseUrl, {
   maxConnections: config.databasePoolSize,
   applicationName: 'eventcore-api',
+  onIdleError: (error) =>
+    app.log.warn({ err: error, operation: 'database.idle' }, 'idle database connection closed'),
 })
 const app = await buildApp({ db: database.db, config })
 await app.ready()
