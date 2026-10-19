@@ -2,6 +2,12 @@
 
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [SemVer](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Serverless entry for the API and a Vercel configuration for the public demo, with the deployment guide and ADR 0005.
+
 ## [0.2.0] · 2026-10-18
 
 ### Added

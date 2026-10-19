@@ -115,11 +115,12 @@ infra/        Docker Compose and the API and worker images
 - One very hot event serializes on one row lock. That bound is deliberate, measurable and documented.
 - Rate limits are per process until a shared store is configured.
 - The Lab replays recorded runs from one machine; it never sends traffic.
+- The public demo runs the API as Vercel Functions, so rate limits and `/metrics` are per instance and the worker does not run there ([ADR 0005](docs/adr/0005-public-demo-on-serverless.md)).
 - The k6 load script in [`tests/load`](tests/load) has not been run against a deployed environment, so there are no load results to report.
 
 ## Documentation
 
-[Vision](docs/00-vision.md) · [State machine](docs/domain-state-machine.md) · [Data model](docs/data-model.md) · [API contract](docs/api-contract.md) · [Threat model](docs/threat-model.md) · [Testing methodology](docs/testing-methodology.md) · [Runbooks](docs/runbooks.md) · [Localization](docs/localization.md) · [Design system](DESIGN.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
+[Vision](docs/00-vision.md) · [State machine](docs/domain-state-machine.md) · [Data model](docs/data-model.md) · [API contract](docs/api-contract.md) · [Threat model](docs/threat-model.md) · [Testing methodology](docs/testing-methodology.md) · [Runbooks](docs/runbooks.md) · [Deployment](docs/deployment.md) · [Localization](docs/localization.md) · [Design system](DESIGN.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md)
 
 ## License
 
