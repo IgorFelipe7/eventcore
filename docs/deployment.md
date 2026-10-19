@@ -61,6 +61,10 @@ Import the repository with **Root Directory** `apps/web`. The Next.js preset is 
 
 `ENABLE_EXPERIMENTAL_COREPACK` makes Vercel install with the pnpm version pinned in `packageManager`.
 
+## Outbox worker
+
+The scheduled workflow `.github/workflows/outbox.yml` drains the outbox four times an hour. Add the Neon direct connection string as the repository secret `DEMO_DATABASE_URL` (Settings → Secrets and variables → Actions). Run it by hand from the Actions tab with **Run workflow**.
+
 ## Checks after a deploy
 
 - `https://<api project>.vercel.app/health/ready` answers `200`.
