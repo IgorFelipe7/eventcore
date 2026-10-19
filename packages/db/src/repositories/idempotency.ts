@@ -29,7 +29,13 @@ export const claimIdempotencyKey = async (
       ${requestHash},
       now() + make_interval(secs => ${ttlSeconds})
     )
-    ON CONFLICT ON CONSTRAINT idempotency_requests_scope_key DO NOTHING
+    ON CONFLICT ON CONSTRAINT idempotency_requests_scope_key DO UPDATE
+    SET request_hash = EXCLUDED.request_hash,
+        http_status = NULL,
+        response_body = NULL,
+        created_at = now(),
+        expires_at = EXCLUDED.expires_at
+    WHERE idempotency_requests.expires_at <= now()
     RETURNING id
   `)
   const [claimed] = inserted.rows

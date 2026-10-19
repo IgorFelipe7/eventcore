@@ -142,4 +142,63 @@ describe('idempotent registration (I3)', () => {
     expect(retry.body).toEqual(first.body)
     expect(retry.headers['content-type']).toContain('application/problem+json')
   })
+
+  const expireKey = (key: string) =>
+    database.db.execute(
+      sql`UPDATE idempotency_requests SET expires_at = now() - interval '1 second' WHERE key = ${key}`,
+    )
+
+  it('treats an expired key as unused and runs the request again', async () => {
+    const fixture = await createEventFixture(database, { capacity: 0, waitlistEnabled: false })
+    const [participant] = await createUsers(database, 1)
+    const key = randomUUID()
+
+    const first = await register(api, participant, fixture.eventId, { key })
+    await database.db.execute(
+      sql`UPDATE event_inventory SET capacity = 5 WHERE event_id = ${fixture.eventId}`,
+    )
+    await expireKey(key)
+    const afterExpiry = await register(api, participant, fixture.eventId, { key })
+
+    expect(first.status).toBe(409)
+    expect(afterExpiry.status).toBe(201)
+    expect(afterExpiry.headers['idempotent-replayed']).toBeUndefined()
+    expect(afterExpiry.body.status).toBe('CONFIRMED')
+    expect(await registrationRows(fixture.eventId)).toBe(1)
+  })
+
+  it('accepts a different payload once the key has expired', async () => {
+    const fixture = await createEventFixture(database, { capacity: 3 })
+    const [first, second] = await createUsers(database, 2)
+    const key = randomUUID()
+
+    await register(api, first, fixture.eventId, { key, body: { source: 'web' } })
+    await expireKey(key)
+    const reused = await register(api, first, fixture.eventId, { key, body: { source: 'api' } })
+
+    expect(reused.status).not.toBe(422)
+    expect(reused.body.code).not.toBe('IDEMPOTENCY_KEY_REUSED')
+    expect((await register(api, second, fixture.eventId, { key })).status).toBe(201)
+  })
+
+  it('lets only one of a burst of retries take over an expired key', async () => {
+    const fixture = await createEventFixture(database, { capacity: 0, waitlistEnabled: false })
+    const [participant] = await createUsers(database, 1)
+    const key = randomUUID()
+
+    await register(api, participant, fixture.eventId, { key })
+    await database.db.execute(
+      sql`UPDATE event_inventory SET capacity = 5 WHERE event_id = ${fixture.eventId}`,
+    )
+    await expireKey(key)
+    const results = await Promise.all(
+      Array.from({ length: 10 }, () => register(api, participant, fixture.eventId, { key })),
+    )
+
+    expect(results.every((result) => result.status === 201)).toBe(true)
+    expect(
+      results.filter((result) => result.headers['idempotent-replayed'] === 'true'),
+    ).toHaveLength(9)
+    expect(await registrationRows(fixture.eventId)).toBe(1)
+  })
 })
