@@ -38,7 +38,7 @@ A replay returns the **original snapshot**, including the original `requestId` i
 
 ## Expiry
 
-Keys expire after `IDEMPOTENCY_TTL_SECONDS` (24 h by default). The worker purges expired rows in small batches with `FOR UPDATE SKIP LOCKED`.
+Keys expire after `IDEMPOTENCY_TTL_SECONDS` (24 h by default). An expired key counts as unused: the claim's `INSERT … ON CONFLICT DO UPDATE … WHERE expires_at <= now()` takes it over in the same statement, so concurrent requests still claim it once, and the request runs again. The worker purges expired rows in small batches with `FOR UPDATE SKIP LOCKED`; the purge only reclaims space.
 
 ## Consequences
 
