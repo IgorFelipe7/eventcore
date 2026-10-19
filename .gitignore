@@ -4,6 +4,7 @@ node_modules/
 dist/
 build/
 .next/
+.vercel/
 out/
 coverage/
 *.tsbuildinfo
