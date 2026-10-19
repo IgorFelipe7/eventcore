@@ -47,7 +47,7 @@ pnpm dev                    # web em :3000, API em :4000, worker
 Abra <http://localhost:3000/pt-br>, escolha uma persona demo em **Atuando como** e dispute *The Last Seat*. O Swagger UI fica em <http://localhost:4000/docs>.
 
 ```bash
-pnpm test                   # 115 testes em 20 arquivos, contra um PostgreSQL 18 descartável
+pnpm test                   # 116 testes em 21 arquivos, contra um PostgreSQL 18 descartável
 pnpm test:e2e               # 11 testes Playwright: jornadas, axe WCAG 2.2 AA, 360 px, teclado
 pnpm lab:record             # regrava o Lab; falha se um cenário seguro quebrar um invariante
 ```
