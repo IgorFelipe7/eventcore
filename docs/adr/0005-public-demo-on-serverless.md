@@ -21,7 +21,8 @@ The project needs a public URL that a reviewer can open at any time. The product
 - `/metrics` reflects one instance at a time and is not a reliable view of the service. It stays protected by `METRICS_TOKEN`.
 - Without the worker, outbox rows stay pending and the integrity sweep does not run. No page reads delivered notifications, so the demo behaves the same for a visitor. Capacity, idempotency and waitlist order are enforced inside the request transaction and do not depend on the worker.
 - Migrations and the demo seed are run by hand against the Neon database (`docs/deployment.md`).
+- Vercel's function loader does not support `require()` of ES modules, which plain Node 24 allows. `@fastify/static` 10.1.4+ requires the ESM-only `content-disposition` 3, so `pnpm-workspace.yaml` overrides it to 2.0.1, the CommonJS release with the same API. The override can go once `@fastify/static` imports it in a way the loader accepts.
 
 ## Verification
 
-`vercel build` of `apps/api` produces one Node 24 function. Run from its own output, with the package links restored, it answers `/health/ready` with the database, `/v1/events` and the Swagger UI assets.
+`vercel build` of `apps/api` produces one Node 24 function. Run from its own output, with the package links restored, it answers `/health/ready` with the database, `/v1/events` and the Swagger UI assets. Starting it with `node --no-experimental-require-module` reproduces the loader's limit and catches any dependency that needs `require(esm)`.

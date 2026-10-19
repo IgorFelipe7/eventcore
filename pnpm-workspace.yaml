@@ -9,3 +9,6 @@ allowBuilds:
   protobufjs: false
   ssh2: false
   unrs-resolver: true
+
+overrides:
+  '@fastify/static>content-disposition': 2.0.1
