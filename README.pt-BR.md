@@ -4,6 +4,8 @@
 
 [English](README.md)
 
+**Demo ao vivo:** <https://eventcore-igor.vercel.app/pt-br> · **Referência da API:** <https://eventcore-api.vercel.app/docs>
+
 O EventCore é um motor de reservas para eventos com vagas limitadas. Cada decisão de um evento é serializada em uma única linha do PostgreSQL, então a capacidade se mantém sob carga concorrente, retentativas nunca reservam duas vezes, a lista de espera preserva a ordem e uma organização nunca enxerga os dados de outra. Cada uma dessas afirmações tem um teste que roda contra um banco de dados real e uma execução gravada que você pode reproduzir no navegador, em português ou em inglês.
 
 ![A sala: a requisição A segura o lock do último lugar enquanto B espera](docs/media/hero.png)
