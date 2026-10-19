@@ -16,6 +16,7 @@ export interface DatabaseOptions {
   readonly maxConnections?: number
   readonly applicationName?: string
   readonly statementTimeoutMs?: number
+  readonly onIdleError?: (error: Error) => void
 }
 
 export const createDatabase = (
@@ -29,6 +30,7 @@ export const createDatabase = (
     statement_timeout: options.statementTimeoutMs ?? 5_000,
     idleTimeoutMillis: 30_000,
   })
+  pool.on('error', (error) => options.onIdleError?.(error))
   const db = drizzle(pool, { schema })
   return { db, pool, close: () => pool.end() }
 }

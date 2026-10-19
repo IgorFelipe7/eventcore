@@ -8,6 +8,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 - Serverless entry for the API and a Vercel configuration for the public demo, with the deployment guide and ADR 0005.
 
+### Fixed
+
+- The API loads `content-disposition` as CommonJS, which Vercel's function loader requires.
+- A connection closed by the server while idle in the pool, as on shutdown or when Neon suspends its compute, is logged instead of crashing the process.
+
 ## [0.2.0] · 2026-10-18
 
 ### Added

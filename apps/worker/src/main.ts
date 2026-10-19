@@ -11,6 +11,8 @@ const logger = pino({ level: config.logLevel, base: { service: 'eventcore-worker
 const database = createDatabase(config.databaseUrl, {
   maxConnections: 4,
   applicationName: 'eventcore-worker',
+  onIdleError: (error) =>
+    logger.warn({ err: error, operation: 'database.idle' }, 'idle database connection closed'),
 })
 const stopping = new AbortController()
 
