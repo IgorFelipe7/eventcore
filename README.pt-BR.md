@@ -115,11 +115,12 @@ infra/        Docker Compose e as imagens da API e do worker
 - Um evento muito disputado é serializado em um único lock de linha. Esse limite é proposital, mensurável e documentado.
 - O rate limit é por processo até que um armazenamento compartilhado seja configurado.
 - O Lab reproduz execuções gravadas em uma máquina; ele nunca envia tráfego.
+- A demo pública roda a API como Vercel Functions, então o rate limit e o `/metrics` são por instância e o worker não roda lá ([ADR 0005](docs/adr/0005-public-demo-on-serverless.md)).
 - O script de carga k6 em [`tests/load`](tests/load) não foi executado contra um ambiente implantado, então não há resultados de carga para relatar.
 
 ## Documentação
 
-A documentação técnica está em inglês: [Visão](docs/00-vision.md) · [Máquina de estados](docs/domain-state-machine.md) · [Modelo de dados](docs/data-model.md) · [Contrato da API](docs/api-contract.md) · [Modelo de ameaças](docs/threat-model.md) · [Metodologia de testes](docs/testing-methodology.md) · [Runbooks](docs/runbooks.md) · [Localização](docs/localization.md) · [Design system](DESIGN.md) · [Contribuição](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Changelog](CHANGELOG.md)
+A documentação técnica está em inglês: [Visão](docs/00-vision.md) · [Máquina de estados](docs/domain-state-machine.md) · [Modelo de dados](docs/data-model.md) · [Contrato da API](docs/api-contract.md) · [Modelo de ameaças](docs/threat-model.md) · [Metodologia de testes](docs/testing-methodology.md) · [Runbooks](docs/runbooks.md) · [Deploy](docs/deployment.md) · [Localização](docs/localization.md) · [Design system](DESIGN.md) · [Contribuição](CONTRIBUTING.md) · [Segurança](SECURITY.md) · [Changelog](CHANGELOG.md)
 
 ## Licença
 
