@@ -10,6 +10,7 @@
     "dev": "tsx watch --env-file-if-exists=../../.env src/main.ts",
     "build": "tsup",
     "start": "node --env-file-if-exists=../../.env dist/main.js",
+    "once": "tsx --env-file-if-exists=../../.env src/once.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },

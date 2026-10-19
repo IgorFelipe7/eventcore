@@ -1,6 +1,11 @@
 import { type App } from '@eventcore/api'
 import { outboxStats } from '@eventcore/db'
-import { type NotificationSink, demoMailbox, relayOutboxBatch } from '@eventcore/worker'
+import {
+  type NotificationSink,
+  demoMailbox,
+  drainOutbox,
+  relayOutboxBatch,
+} from '@eventcore/worker'
 import { sql } from 'drizzle-orm'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createTestApi } from '../support/api'
@@ -124,5 +129,33 @@ describe('outbox relay (I7)', () => {
     expect(claimedInParallel).toBeLessThanOrEqual(60)
     expect(await deliveries()).toBe(60)
     expect(remaining).toEqual({ pending: 0, deadLettered: 0, published: 60 })
+  })
+
+  it('drains every due row across batches in a single scheduled run', async () => {
+    const fixture = await createEventFixture(database, { capacity: 10 })
+    for (const user of await createUsers(database, 7)) await register(api, user, fixture.eventId)
+
+    const report = await drainOutbox(database.db, demoMailbox, {
+      ...relayOptions,
+      batchSize: 3,
+      maxBatches: 10,
+    })
+
+    expect(report).toEqual({ claimed: 7, delivered: 7, retried: 0, deadLettered: 0, batches: 3 })
+    expect(await outboxStats(database.db)).toEqual({ pending: 0, deadLettered: 0, published: 7 })
+  })
+
+  it('stops a scheduled run at its batch limit and leaves the rest pending', async () => {
+    const fixture = await createEventFixture(database, { capacity: 10 })
+    for (const user of await createUsers(database, 5)) await register(api, user, fixture.eventId)
+
+    const report = await drainOutbox(database.db, demoMailbox, {
+      ...relayOptions,
+      batchSize: 2,
+      maxBatches: 2,
+    })
+
+    expect(report).toMatchObject({ claimed: 4, delivered: 4, batches: 2 })
+    expect(await outboxStats(database.db)).toEqual({ pending: 1, deadLettered: 0, published: 4 })
   })
 })

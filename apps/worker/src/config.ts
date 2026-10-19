@@ -7,6 +7,7 @@ const EnvironmentSchema = z.object({
   WORKER_BATCH_SIZE: z.coerce.number().int().min(1).max(500).default(25),
   WORKER_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(50).default(8),
   WORKER_MAINTENANCE_INTERVAL_MS: z.coerce.number().int().min(1_000).default(60_000),
+  WORKER_DRAIN_MAX_BATCHES: z.coerce.number().int().min(1).max(10_000).default(200),
 })
 
 export interface WorkerConfig {
@@ -16,6 +17,7 @@ export interface WorkerConfig {
   readonly batchSize: number
   readonly maxAttempts: number
   readonly maintenanceIntervalMs: number
+  readonly drainMaxBatches: number
 }
 
 export const loadWorkerConfig = (environment: NodeJS.ProcessEnv = process.env): WorkerConfig => {
@@ -31,5 +33,6 @@ export const loadWorkerConfig = (environment: NodeJS.ProcessEnv = process.env): 
     batchSize: parsed.data.WORKER_BATCH_SIZE,
     maxAttempts: parsed.data.WORKER_MAX_ATTEMPTS,
     maintenanceIntervalMs: parsed.data.WORKER_MAINTENANCE_INTERVAL_MS,
+    drainMaxBatches: parsed.data.WORKER_DRAIN_MAX_BATCHES,
   }
 }

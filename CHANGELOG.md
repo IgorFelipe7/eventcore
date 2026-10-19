@@ -7,6 +7,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 ### Added
 
 - Serverless entry for the API and a Vercel configuration for the public demo, with the deployment guide and ADR 0005.
+- One-shot worker run (`pnpm --filter @eventcore/worker once`) and a scheduled workflow that drains the demo outbox and sweeps invariants.
 
 ### Fixed
 

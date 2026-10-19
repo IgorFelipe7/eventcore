@@ -49,7 +49,7 @@ pnpm dev                    # web em :3000, API em :4000, worker
 Abra <http://localhost:3000/pt-br>, escolha uma persona demo em **Atuando como** e dispute *The Last Seat*. O Swagger UI fica em <http://localhost:4000/docs>.
 
 ```bash
-pnpm test                   # 116 testes em 21 arquivos, contra um PostgreSQL 18 descartável
+pnpm test                   # 118 testes em 21 arquivos, contra um PostgreSQL 18 descartável
 pnpm test:e2e               # 11 testes Playwright: jornadas, axe WCAG 2.2 AA, 360 px, teclado
 pnpm lab:record             # regrava o Lab; falha se um cenário seguro quebrar um invariante
 ```
@@ -117,7 +117,7 @@ infra/        Docker Compose e as imagens da API e do worker
 - Um evento muito disputado é serializado em um único lock de linha. Esse limite é proposital, mensurável e documentado.
 - O rate limit é por processo até que um armazenamento compartilhado seja configurado.
 - O Lab reproduz execuções gravadas em uma máquina; ele nunca envia tráfego.
-- A demo pública roda a API como Vercel Functions, então o rate limit e o `/metrics` são por instância e o worker não roda lá ([ADR 0005](docs/adr/0005-public-demo-on-serverless.md)).
+- A demo pública roda a API como Vercel Functions, então o rate limit e o `/metrics` são por instância, e o worker esvazia o outbox quatro vezes por hora por um workflow agendado, em vez de continuamente ([ADR 0005](docs/adr/0005-public-demo-on-serverless.md)).
 - O script de carga k6 em [`tests/load`](tests/load) não foi executado contra um ambiente implantado, então não há resultados de carga para relatar.
 
 ## Documentação

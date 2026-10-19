@@ -49,7 +49,7 @@ pnpm dev                    # web on :3000, API on :4000, worker
 Open <http://localhost:3000> (or <http://localhost:3000/pt-br>), choose a demo persona under **Acting as**, and race for *The Last Seat*. Swagger UI is at <http://localhost:4000/docs>.
 
 ```bash
-pnpm test                   # 116 tests in 21 files, against a disposable PostgreSQL 18
+pnpm test                   # 118 tests in 21 files, against a disposable PostgreSQL 18
 pnpm test:e2e               # 11 Playwright tests: journeys, axe WCAG 2.2 AA, 360 px, keyboard
 pnpm lab:record             # re-record the Lab; fails if a safe scenario breaks an invariant
 ```
@@ -117,7 +117,7 @@ infra/        Docker Compose and the API and worker images
 - One very hot event serializes on one row lock. That bound is deliberate, measurable and documented.
 - Rate limits are per process until a shared store is configured.
 - The Lab replays recorded runs from one machine; it never sends traffic.
-- The public demo runs the API as Vercel Functions, so rate limits and `/metrics` are per instance and the worker does not run there ([ADR 0005](docs/adr/0005-public-demo-on-serverless.md)).
+- The public demo runs the API as Vercel Functions, so rate limits and `/metrics` are per instance, and the worker drains the outbox four times an hour from a scheduled workflow instead of continuously ([ADR 0005](docs/adr/0005-public-demo-on-serverless.md)).
 - The k6 load script in [`tests/load`](tests/load) has not been run against a deployed environment, so there are no load results to report.
 
 ## Documentation
