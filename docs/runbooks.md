@@ -61,6 +61,20 @@ Expected: commands for one event are serialized on its inventory row (ADR 0002).
 3. For changes to live columns use expand and contract: add, backfill, switch reads, then remove in a later release.
 4. Migrations run as a separate step (`pnpm db:migrate`), never automatically on API start.
 
+## Least-privilege database role
+
+The API and the worker need data access only. Create their role once per cluster and grant it on each database, connected as the owner:
+
+```sql
+CREATE ROLE eventcore_app LOGIN PASSWORD '<a long random password>';
+```
+
+```bash
+psql "$OWNER_DATABASE_URL" -f infra/postgres/app-role.sql
+```
+
+The script grants `SELECT`, `INSERT`, `UPDATE` and `DELETE` on the existing tables and sets default privileges, so tables created by later migrations run as the same owner are covered too. Give the services the `eventcore_app` connection string and keep the owner's for `pnpm db:migrate` and `pnpm db:seed`.
+
 ## Demo seed safety
 
 `pnpm db:seed` truncates every table. It refuses to run with `NODE_ENV=production` unless `ALLOW_DEMO_SEED=true` is set explicitly for a demo database.
