@@ -7,9 +7,10 @@ import {
   type TestDatabase,
   createEventFixture,
   createTestDatabase,
+  createUser,
   createUsers,
 } from '../support/database'
-import { cancel, register } from '../support/requests'
+import { cancel, changeCapacity, register } from '../support/requests'
 
 describe('audit trail and transactional outbox (I6, I7)', () => {
   let database: TestDatabase
@@ -119,5 +120,30 @@ describe('audit trail and transactional outbox (I6, I7)', () => {
     })
     expect(asParticipant.statusCode).toBe(403)
     expect(asParticipant.json().code).toBe('FORBIDDEN_TENANT')
+  })
+
+  it('keeps participant names and login subjects out of audit and outbox payloads', async () => {
+    const fixture = await createEventFixture(database, { capacity: 1 })
+    const first = await createUser(database, `Ana Privada ${randomUUID()}`)
+    const second = await createUser(database, `Bruno Privado ${randomUUID()}`)
+
+    const confirmed = await register(api, first, fixture.eventId)
+    await register(api, second, fixture.eventId)
+    await cancel(api, first, confirmed.body.registrationId)
+    await changeCapacity(api, fixture.admin, fixture.organizationId, fixture.eventId, 3)
+
+    const { rows } = await database.db.execute<{ payload: string }>(sql`
+      SELECT coalesce(safe_before::text, '') || coalesce(safe_after::text, '') AS payload
+      FROM audit_log WHERE organization_id = ${fixture.organizationId}
+      UNION ALL
+      SELECT payload::text FROM outbox_events WHERE payload->>'eventId' = ${fixture.eventId}
+    `)
+
+    expect(rows.length).toBeGreaterThan(4)
+    for (const person of [first, second]) {
+      for (const secret of [person.displayName, person.subject]) {
+        expect(rows.some((row) => row.payload.includes(secret))).toBe(false)
+      }
+    }
   })
 })
