@@ -8,8 +8,8 @@ Scope: the API, the worker, the PostgreSQL database and the public demo. Method:
 flowchart LR
   B[Browser] -- HTTPS, bearer token --> W[Next.js server]
   W -- bearer token --> A[Fastify API]
-  A -- TLS, least-privilege role --> D[(PostgreSQL)]
-  J[Worker] -- TLS --> D
+  A -- TLS, eventcore_app role --> D[(PostgreSQL)]
+  J[Worker] -- TLS, eventcore_app role --> D
   J -- outbox event id as dedupe key --> P[Notification provider / demo mailbox]
 ```
 
@@ -30,12 +30,14 @@ Everything to the left of the API is untrusted input. The API trusts only the ve
 | T9 | PII leaking into logs, audit or outbox. | ASVS V14 | Logs redact `authorization`, cookies and idempotency keys. Audit and outbox rows carry ids and states only; display names are resolved at read time. | `tests/http/audit-trail.test.ts` |
 | T10 | Abuse of the public demo (load, real data). | API4 | The Lab replays recorded runs and never sends traffic. Seeds contain fictional personas only. Demo signing exists only where `AUTH_DEMO_SECRET` is configured. | `docs/runbooks.md` |
 | T11 | Lost notifications or notifications for rolled-back changes. | — | Transactional outbox; at-least-once delivery with deduplication by event id; dead letters kept. | `tests/resilience/outbox.test.ts` |
+| T12 | A compromised API or worker, or an injected statement, changes the schema or wipes tables. | ASVS V14 | Deployed services connect as `eventcore_app` (`infra/postgres/app-role.sql`): `SELECT`, `INSERT`, `UPDATE` and `DELETE` on application tables, no DDL, no `TRUNCATE`, no ownership. Migrations and the seed run as the owner. | `tests/security/least-privilege.test.ts` |
 
 ## Residual risks
 
 - **Single-event hot spot.** A malicious burst against one event serializes on one row lock. Rate limiting reduces it; it does not remove it.
 - **Rate limiting is per process.** Multiple API replicas each keep their own counters until a shared store is configured.
 - **Metrics endpoint.** `/metrics` is open unless `METRICS_TOKEN` is set. Production deployments must set it or keep the endpoint on a private network.
+- **Owner connections outside deployments.** Docker Compose and the test suite connect as the database owner. The least-privilege role protects the deployed API and worker; local tooling keeps full rights to run migrations.
 - **Demo signing key.** Anyone holding `AUTH_DEMO_SECRET` can act as any demo persona. It must never be configured in an environment that holds real data.
 
 ## Data protection (LGPD)

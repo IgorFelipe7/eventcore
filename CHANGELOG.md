@@ -16,6 +16,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - An expired idempotency key counts as unused: the next request with it runs again instead of replaying the stored answer until the purge.
 - A capacity increase promotes every freed seat the queue can fill, in batches of 500, instead of stopping at 500 and leaving seats empty while people wait.
 
+### Security
+
+- `infra/postgres/app-role.sql` creates the grants for `eventcore_app`, a data-only role for the API and the worker, with a test that it serves a registration and cannot change the schema or wipe tables. The threat model, runbook and deployment guide describe it.
+
 ## [0.2.0] · 2026-10-18
 
 ### Added
@@ -29,6 +33,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 - One dark design system for every page: Mona Sans and Geist Mono, glass surfaces with a cursor spotlight, scroll-driven reveals.
 - The drafting-sheet furniture (sheet bars, title blocks, registration marks) is gone.
+
+### Security
+
+- `infra/postgres/app-role.sql` creates the grants for `eventcore_app`, a data-only role for the API and the worker, with a test that it serves a registration and cannot change the schema or wipe tables. The threat model, runbook and deployment guide describe it.
 
 ### Fixed
 
