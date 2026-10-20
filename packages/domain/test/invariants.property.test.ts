@@ -88,7 +88,6 @@ const apply = (model: Model, command: Command): void => {
       inventory,
       requestedCapacity: command.capacity,
       queueLength,
-      promotionBatchLimit: 1_000,
     })
     model.capacity = plan.capacity
     promote(model, plan.promotions)

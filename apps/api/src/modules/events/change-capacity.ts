@@ -10,11 +10,11 @@ import { planCapacityChange } from '@eventcore/domain'
 import { type CommandContext, type CommandResponse, ok } from '../../application/command'
 import { recordEventChange } from '../../application/trail'
 import { ProblemError } from '../../http/problem'
-import { promoteFromWaitlist } from '../registrations/promote-waitlist'
+import { type Promotion, promoteFromWaitlist } from '../registrations/promote-waitlist'
 import { presentInventory } from './presenters'
 
 export const CHANGE_CAPACITY_ACTION = 'event.change-capacity'
-export const PROMOTION_BATCH_LIMIT = 500
+export const PROMOTION_BATCH_SIZE = 500
 
 export const changeCapacity = async (
   tx: Transaction,
@@ -29,20 +29,22 @@ export const changeCapacity = async (
   }
 
   const queueLength = await countWaitlisted(tx, eventId)
-  const plan = planCapacityChange({
-    inventory,
-    requestedCapacity,
-    queueLength,
-    promotionBatchLimit: PROMOTION_BATCH_LIMIT,
-  })
+  const plan = planCapacityChange({ inventory, requestedCapacity, queueLength })
 
   const updated = await setCapacity(tx, eventId, plan.capacity)
-  const { promotions, confirmedCount } = await promoteFromWaitlist(
-    tx,
-    { organizationId: context.organizationId, eventId },
-    plan.promotions,
-    context.requestId,
-  )
+  const promotions: Promotion[] = []
+  let confirmedCount: number | null = null
+  while (promotions.length < plan.promotions) {
+    const batch = await promoteFromWaitlist(
+      tx,
+      { organizationId: context.organizationId, eventId },
+      Math.min(PROMOTION_BATCH_SIZE, plan.promotions - promotions.length),
+      context.requestId,
+    )
+    if (batch.promotions.length === 0) break
+    promotions.push(...batch.promotions)
+    confirmedCount = batch.confirmedCount
+  }
   await recordEventChange(tx, {
     organizationId: context.organizationId,
     eventId,

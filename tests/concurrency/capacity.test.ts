@@ -100,4 +100,38 @@ describe('capacity changes', () => {
     expect(integrity.confirmedRows + integrity.waitlistedRows).toBe(60)
     if (integrity.waitlistedRows > 0) expect(integrity.confirmedCount).toBe(integrity.capacity)
   })
+
+  it('fills every freed seat when more than one promotion batch is waiting', async () => {
+    const fixture = await createEventFixture(database, { capacity: 10 })
+    const participants = await createUsers(database, 620 as number)
+    for (let start = 0; start < participants.length; start += 40) {
+      await Promise.all(
+        participants
+          .slice(start, start + 40)
+          .map((participant) => register(api, participant, fixture.eventId)),
+      )
+    }
+
+    const result = await changeCapacity(
+      api,
+      fixture.admin,
+      fixture.organizationId,
+      fixture.eventId,
+      1_000,
+    )
+
+    expect(result.status).toBe(200)
+    expect(result.body.promotedRegistrationIds).toHaveLength(610)
+    expect(result.body.inventory).toEqual({
+      capacity: 1_000,
+      confirmed: 620,
+      available: 380,
+      waitlisted: 0,
+    })
+    expect(await integrityOf(database, fixture.eventId)).toMatchObject({
+      confirmedCount: 620,
+      confirmedRows: 620,
+      waitlistedRows: 0,
+    })
+  })
 })
