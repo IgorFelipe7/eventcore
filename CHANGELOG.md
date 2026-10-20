@@ -35,10 +35,6 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - One dark design system for every page: Mona Sans and Geist Mono, glass surfaces with a cursor spotlight, scroll-driven reveals.
 - The drafting-sheet furniture (sheet bars, title blocks, registration marks) is gone.
 
-### Security
-
-- `infra/postgres/app-role.sql` creates the grants for `eventcore_app`, a data-only role for the API and the worker, with a test that it serves a registration and cannot change the schema or wipe tables. The threat model, runbook and deployment guide describe it.
-
 ### Fixed
 
 - Reveals frozen by `overflow: hidden` ancestors, horizontal overflow at 360 px, contrast of inactive steps, relative `hreflang` alternates.
