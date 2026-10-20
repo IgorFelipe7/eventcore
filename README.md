@@ -4,6 +4,8 @@
 
 [Português (Brasil)](README.pt-BR.md)
 
+[![CI](https://github.com/IgorFelipe7/eventcore/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/IgorFelipe7/eventcore/actions/workflows/ci.yml)
+
 **Live demo:** <https://eventcore-igor.vercel.app> · **API reference:** <https://eventcore-api.vercel.app/docs>
 
 EventCore is a reservation engine for events with limited seats. Every decision for an event is serialized on a single PostgreSQL row, so capacity holds under concurrent load, retries never book twice, the waitlist keeps its order, and one organization can never see another's data. Each of those claims has a test that runs against a real database and a recorded run you can replay in the browser, in English or Portuguese.
