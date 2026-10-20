@@ -28,7 +28,7 @@ erDiagram
 | `registrations` | `UNIQUE(event_id, user_id)`; `CHECK (status = 'WAITLISTED') = (queued_at IS NOT NULL)` | One logical registration per participant. A queue position cannot exist without the waitlisted status and vice versa. |
 | `registration_events` | append-only | Every transition with the request id that caused it. |
 | `idempotency_requests` | `UNIQUE(actor_id, action, scope_id, key)` | The scoped key; stores status and body for replays. |
-| `audit_log` | index `(organization_id, created_at DESC, id DESC)` | Ids and states only. |
+| `audit_log` | index `(organization_id, created_at DESC, id DESC)` | Registration entries hold ids and states. Event entries also hold the event's own fields: slug, capacity and schedule on creation, and on edits the changed name, description, venue and dates. Those are organization content; no entry holds participant data. |
 | `outbox_events` | partial index on `(next_attempt_at, created_at)` where pending | Cheap polling of due events. |
 | `notification_deliveries` | `UNIQUE(outbox_event_id)` | Deduplicated delivery. |
 

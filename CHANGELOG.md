@@ -18,6 +18,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 
 ### Security
 
+- The data model and threat model T9 now describe what audit rows really hold: ids and states for registrations, the event's own fields for events, and never participant data, which a new test asserts.
 - `infra/postgres/app-role.sql` creates the grants for `eventcore_app`, a data-only role for the API and the worker, with a test that it serves a registration and cannot change the schema or wipe tables. The threat model, runbook and deployment guide describe it.
 
 ## [0.2.0] · 2026-10-18
