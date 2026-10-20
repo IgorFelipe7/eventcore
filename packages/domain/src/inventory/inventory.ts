@@ -36,7 +36,6 @@ export interface CapacityChangeInput {
   readonly inventory: InventorySnapshot
   readonly requestedCapacity: number
   readonly queueLength: number
-  readonly promotionBatchLimit: number
 }
 
 export interface CapacityChangePlan {
@@ -45,7 +44,7 @@ export interface CapacityChangePlan {
 }
 
 export const planCapacityChange = (input: CapacityChangeInput): CapacityChangePlan => {
-  const { inventory, requestedCapacity, queueLength, promotionBatchLimit } = input
+  const { inventory, requestedCapacity, queueLength } = input
   assertValidCapacity(requestedCapacity)
   if (requestedCapacity < inventory.confirmedCount) {
     throw new DomainError(
@@ -57,6 +56,6 @@ export const planCapacityChange = (input: CapacityChangeInput): CapacityChangePl
   const freedSeats = requestedCapacity - inventory.confirmedCount
   return {
     capacity: requestedCapacity,
-    promotions: Math.max(0, Math.min(freedSeats, queueLength, promotionBatchLimit)),
+    promotions: Math.max(0, Math.min(freedSeats, queueLength)),
   }
 }

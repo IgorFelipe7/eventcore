@@ -26,7 +26,6 @@ describe('planCapacityChange', () => {
         inventory,
         requestedCapacity: 7,
         queueLength: 0,
-        promotionBatchLimit: 50,
       }),
     ).toThrowError(expect.objectContaining({ code: 'CAPACITY_BELOW_CONFIRMED' }))
   })
@@ -37,17 +36,16 @@ describe('planCapacityChange', () => {
         inventory,
         requestedCapacity: 8,
         queueLength: 4,
-        promotionBatchLimit: 50,
       }),
     ).toEqual({ capacity: 8, promotions: 0 })
   })
 
-  it('promotes no more than the freed seats, the queue length or the batch limit', () => {
-    const plan = (queueLength: number, promotionBatchLimit: number) =>
-      planCapacityChange({ inventory, requestedCapacity: 20, queueLength, promotionBatchLimit })
-    expect(plan(3, 50).promotions).toBe(3)
-    expect(plan(30, 50).promotions).toBe(12)
-    expect(plan(30, 5).promotions).toBe(5)
+  it('promotes every freed seat the queue can fill', () => {
+    const plan = (queueLength: number, requestedCapacity = 20) =>
+      planCapacityChange({ inventory, requestedCapacity, queueLength })
+    expect(plan(3).promotions).toBe(3)
+    expect(plan(30).promotions).toBe(12)
+    expect(plan(5_000, 10_000).promotions).toBe(5_000)
   })
 
   it.each([-1, 2.5, MAX_CAPACITY + 1, Number.NaN])(
@@ -58,7 +56,6 @@ describe('planCapacityChange', () => {
           inventory,
           requestedCapacity,
           queueLength: 0,
-          promotionBatchLimit: 1,
         }),
       ).toThrowError(expect.objectContaining({ code: 'INVALID_CAPACITY' }))
     },

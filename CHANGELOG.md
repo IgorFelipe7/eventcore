@@ -14,6 +14,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versioning: [S
 - The API loads `content-disposition` as CommonJS, which Vercel's function loader requires.
 - A connection closed by the server while idle in the pool, as on shutdown or when Neon suspends its compute, is logged instead of crashing the process.
 - An expired idempotency key counts as unused: the next request with it runs again instead of replaying the stored answer until the purge.
+- A capacity increase promotes every freed seat the queue can fill, in batches of 500, instead of stopping at 500 and leaving seats empty while people wait.
 
 ## [0.2.0] · 2026-10-18
 
