@@ -72,6 +72,6 @@ stateDiagram-v2
 2. Capacity can never be set below `confirmed_count`.
 3. A new registration never overtakes an existing queue.
 4. Cancelling a confirmed seat releases it and promotes the head of the queue **in the same transaction**.
-5. Increasing capacity promotes from the head of the queue in the same transaction, in a bounded batch.
+5. Increasing capacity promotes from the head of the queue in the same transaction until the freed seats or the queue run out, in batches of 500 rows per statement.
 6. History rows are never physically deleted by normal flows.
 7. Every command that touches capacity or the queue acquires the inventory row lock **first**, in the same order, so all commands for one event are serialized and lock ordering cannot deadlock.

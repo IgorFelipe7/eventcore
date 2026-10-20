@@ -26,7 +26,7 @@ The generated OpenAPI 3.1 document is served at `GET /openapi.json` and rendered
 | POST | `/v1/organizations/{id}/events` | admin, organizer | Create a draft with capacity. |
 | GET, PATCH | `/v1/organizations/{id}/events/{eventId}` | member / admin, organizer | Read or update metadata under the inventory lock. |
 | POST | `/v1/organizations/{id}/events/{eventId}/status` | per transition table | Publish, close, reopen, cancel. |
-| POST | `/v1/organizations/{id}/events/{eventId}/capacity` | admin | Change capacity with batched promotion; idempotent. |
+| POST | `/v1/organizations/{id}/events/{eventId}/capacity` | admin | Change capacity and promote every freed seat from the queue; idempotent. |
 | GET | `/v1/organizations/{id}/events/{eventId}/registrations` | admin, organizer | Registrations, oldest first. |
 | GET | `/v1/organizations/{id}/audit` | admin | Audit trail, newest first. |
 | GET | `/v1/organizations/{id}/integrity` | admin, organizer | Counter versus rows, per event. |
